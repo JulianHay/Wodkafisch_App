@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wodkafisch - Home{% endblock%}
+
+{% block content %}
+
+        <section  class="bg-dark">
+            <div class="container">
+
+                <div class="row">
+                    <div class="col-md-4 text-center"></div>
+                    <div class="col-md-4 text-center">
+                        {% if messages %}
+                            <h3 class="section-subheading text-muted">
+                                {% for message in messages %}
+                                
+                                <!--{% if message.tags %} 
+                                    {{ message.tags }}
+                                {% endif %}-->
+
+                                {{ message }} 
+                                </br>
+                                {% endfor %}
+                            </h3>
+                            
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 text-center">
+                        <a>
+                            <img src="{% static "images/fisch.svg" %}" style="width:60%;margin-bottom: 50px">
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        
+
+
+                        <h2 class="section-heading"> Wodkafisch</h2>
+                        <div class="col-md-2 text-center"> </div>
+                        <div class="col-md-8 text-center"><h3 class="section-subheading text-muted"> Welcome to the new website of the Wodkafisch! </h3> </div>
+                        
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section  class="bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2 text-center"> </div>
+                    <div class="col-md-8 text-center">
+                        
+                        <h2 class="section-heading"> Wodkafisch Game</h2>
+
+                        <div class="row">
+                            
+                            <canvas id="canvas1"></canvas> 
+                            <button id="startGame" onclick="start_game()" style="position: relative; top: -190px">Start Game</button>
+
+                            <div class="modal" id="submitForm">
+                                <div class="modal-content">
+                                    <span class="close">&times;</span>
+                                    <form action='.' method='POST'>
+                                        {% csrf_token %}
+                                        <h2 style="color:white" >submit your score</h2>
+                                        <input type="text" placeholder="Enter Name" name="name" style="margin-bottom: 10px;" required>
+                                        <input type="hidden" name='score' value="" id='score'>
+                                        <button type="submit" class="btn" value='submit'>Submit</button>
+                                    </form>
+                                </div>
+                            </div> 
+                        </div>
+                        
+                        <div class="row">
+                            <h2 class="section-subheading text-muted">Highscores</h2>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4"> </div>
+                            <div class="col-md-3 text-muted" style="text-align: left">1. {{highscore1.name}}</div>
+                            <div class="col-md-1 text-muted" style="text-align: right">{{highscore1.score}}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4"> </div>
+                            <div class="col-md-3 text-muted" style="text-align: left">2. {{highscore2.name}}</div>
+                            <div class="col-md-1 text-muted" style="text-align: right;">{{highscore2.score}}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4"> </div>
+                            <div class="col-md-3 text-muted" style="text-align: left">3. {{highscore3.name}}</div>
+                            <div class="col-md-1 text-muted" style="text-align: right">{{highscore3.score}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+{% endblock%}
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'js/browser_game.js' %}"></script> 
+    <script type="text/javascript">
+        var modal = document.getElementById("submitForm");
+        var close_btn = document.getElementsByClassName("close")[0];
+        close_btn.onclick = function() {
+            modal.style.display = "none";
+            start_btn = document.getElementById("startGame");
+            start_btn.style.display = "inline";
+        }
+    </script>
+{% endblock %}

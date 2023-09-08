@@ -1,0 +1,9 @@
+{% autoescape off %}
+Hi Admins,
+
+{{ user.first_name }} {{user.last_name}} with the username {{ user.username }} and mail adress {{ user.email }} wants to register as user to wodkafis.ch.
+
+To approve the registration click the following link.
+
+http://{{ domain }}{% url 'approve_user' uidb64=uid token=token %}
+{% endautoescape %}

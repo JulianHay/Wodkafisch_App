@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wodkafisch - Sponsors{% endblock%}
+
+{% block extra_header%}
+{% endblock%}
+
+{% block content %}
+
+        <section  class="bg-dark wrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2 text-center">
+                    </div>
+                    <div class="col-md-8 text-center">
+                        {% if messages %}
+                            <h3 class="section-subheading text-center">
+                                {% for message in messages %}
+                                {{ message }} 
+                                </br>
+                                {% endfor %}
+                            </h3>
+                        {% endif %}
+
+
+                        <h2 class="section-heading"> Wodkafisch Sponsors</h2>
+                        <h3 class="section-subheading text-center">Thanks to everyone who supports the Wodkafisch! </br>To honor all who have contributed and make it possible to hold fish events, we list all sponsors below:</h3>
+                        
+                        <div class="col-md-3 text-center"></div>  
+                        <div class="col-md-6 text-center">
+
+                            <table style="width:100%">
+                              
+                                {% for user_data in users_data %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}.</td>
+                                        
+                                        <td>{{ user_data.first_name }} {{ user_data.last_name }}</td>
+                                        
+                                            <td>
+                                                {% if user_data.diamond_sponsor > 0 %}
+                                                {{user_data.diamond_sponsor}} x <img src="{% static "images/diamond_badge.svg" %}" style="width: 10mm"></img>
+                                                {% endif%}
+                                            </td>
+                                            
+                                            <td>
+                                                {% if user_data.black_sponsor > 0 %}
+                                                {{user_data.black_sponsor}} x <img src="{% static "images/black_badge.svg" %}" style="width: 10mm"></img>
+                                                {% endif%}
+                                            </td>
+                                            <td>
+                                                {% if user_data.gold_sponsor > 0 %}
+                                                {{user_data.gold_sponsor}} x <img src="{% static "images/gold_badge.svg" %}" style="width: 10mm"></img>
+                                                {% endif%}
+                                            </td>
+                                            
+                                            <td>
+                                                {% if user_data.silver_sponsor > 0 %}
+                                                {{user_data.silver_sponsor}} x <img src="{% static "images/silver_badge.svg" %}" style="width: 10mm"></img>
+                                                {% endif%}
+                                            </td>
+                                            
+                                            <td>
+                                                {% if user_data.bronze_sponsor > 0 %}
+                                                {{user_data.bronze_sponsor}} x <img src="{% static "images/bronze_badge.svg" %}" style="width: 10mm"></img>
+                                                {% endif%}
+                                            </td>
+
+                                            <!--{% if user.is_staff %}
+                                                <td ><a href="/update_sponsor/?first_name={{ user_data.first_name }}&last_name={{user_data.last_name}}">update sponsor data</a></td>
+                                            {% endif %}-->
+                                        
+                                    </tr>
+                                {% endfor %}
+                              
+                            </table>
+                        </div> 
+                        
+                        {% if user.is_staff %}
+                            
+                        <div class="row">
+                            <div class="col-md-10 text-center"></div>
+                            <div class="col-md-2 text-center">
+                                    <button id=addSponsorButton type="submit" class="btn btn-xl" style="margin-bottom: 20px">Add Donation</button>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 text-center"></div>
+                            <div class="col-md-4 text-center">
+                                <div id="addSponsorModal" class="modal">
+
+                                  <div class="modal-content">
+                                    <span class="close">&times;</span>
+                                    
+                                    <form method="post" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        {% for field in form %}
+                                          <p>
+                                            {{ field.label_tag }}<br>
+                                            {{ field }}
+                                            {% if field.help_text %}
+                                              <i class="info fa-solid fa-circle-info"></i>
+                                              <small id="help"">{{ field.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in field.errors %}
+                                              <p style="color: red">{{ error }}</p>
+                                            {% endfor %}
+                                          </p>
+                                        {% endfor %}
+                                        <button type="submit">Save</button>
+                                    </form>
+
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                       {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+{% endblock%}
+
+{% block scripts %}
+<script type="text/javascript">
+    {% if user.is_staff %}
+    // Get the modal
+    var sponsor_modal = document.getElementById("addSponsorModal");
+
+    // Get the button that opens the modal
+    var add_btn = document.getElementById("addSponsorButton");
+
+    // Get the <span> element that closes the modal
+    var close_btn = document.getElementsByClassName("close")[0];
+
+    // When the user clicks the button, open the modal 
+    add_btn.onclick = function() {
+      sponsor_modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    close_btn.onclick = function() {
+      sponsor_modal.style.display = "none";
+    }
+    {% endif %}
+
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+Etappe {{ n }}: {{ title }}
+
+{{ hello }}
+
+{{ message }}
+
+{{ time }}
+{{ location }}
+
+{{ additional_text }}
+
+{{ bye }}

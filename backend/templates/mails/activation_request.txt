@@ -1,0 +1,13 @@
+{{ title }}
+
+Hi {{ user.username }},
+
+{% for m in message %}
+	{{ m }}
+{% endfor %}
+
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+{{ additional_text }}
+
+{{ bye }}

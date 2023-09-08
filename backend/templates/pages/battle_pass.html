@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load index %}
+
+{% block title %}Wodkafisch - Battlepass{% endblock%}
+
+{% block extra_header%}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
+
+    <script src=  "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>  
+    
+    <script src=  "https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>  
+    
+    <link href=  "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css" /> 
+    <!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>-->
+{% endblock%}
+
+{% block content %}
+        
+        <section  class="bg-dark">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2 text-center"></div>
+                    <div class="col-md-8 text-center">
+                        <h2 class="section-heading"> Wodkafisch Battlepass</h2>
+                        <div id='battlepass'>
+                            <div class="row">
+                                <div id="season">            
+                                    <div id="seasonTitle">
+                                        <p ><span>Season {{ season.id}}</span> {{ season.title }}</p>
+                                        
+                                    </div>
+                                    <div id="seasonImage">
+                                        <a><img src="/media/{{ season.image }}"></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="progressBar">
+                                    <div id="progress">
+                                        
+                                        <span>0</span>
+                                        {% if sponsor.season_score >= 1700 %}
+                                        <a><img src="{% static "images/fisch.svg" %}" style="height: 18px; padding-bottom: 3px"></a>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        {% for item in items %}
+
+                                            <div class="item" id="{{ forloop.counter }}" style="left: {{ item.percent }}%;">
+                                                <div id="itemPrice">{{ item.price }} <img src="{% static "images/fish_flakes.svg" %}" style="width:3mm; margin-left: 5px"></div>
+                                                <div id="itemProgress"></div>
+                                                {% if forloop.counter > unlocked_items %} 
+                                                <img id="itemLocked" src="{% static "images/ChestClosed.png" %}">
+                                                {% elif unlock_items|index:forloop.counter0 %}
+                                                <img id="itemLocked" src="{% static "images/ChestClosed.png" %}">
+                                                {% else %}
+                                                <img id="itemUnlocked" src="{% static "images/chest_open.png" %}">
+                                                {% endif %}
+                                                <div id="itemImage"><img src="/media/{{ item.image }}"></div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% if promo_is_active %}
+                            <div class="row">
+                                <div class="col-md-1 text-center"></div>
+                                <div class="col-md-10 text-center">
+                                    <p>Until {{ promo_date }} you donations will have {{ promo_value }}% more Fisch Flocken value!</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="row">
+                                <button class="btn btn-xl" style="margin-bottom: 20px; left: 50%; position: relative; -ms-transform: translateX(-50%); transform: translateX(-50%);" onclick="window.open('http://paypal.me/wodkafisch','_blank');" type="button">Donate Now!</button>
+                                <div style="position: absolute; left: 50%; transform: translateX(-50%); padding-right: 195px; padding-top: 6px; height: 0"><a href="http://paypal.me/wodkafisch" target="_blank"><img src="{% static "images/fish_flakes.svg" %}" style="width:1.3cm;"></a></div>
+                            </div>
+                        </div>
+                    </div> 
+
+                    </div>
+                </div>
+                {% if user.is_staff %}
+                
+                <div class="row">
+                    <div class="col-md-2 text-center"></div>
+                    <div class="col-md-8 text-center">
+                            <button id=newPromoButton type="submit" class="btn btn-xl" style="margin-top: 20px">Change Fisch Coin Multiplier</button>
+                            <button id=newSeasonButton type="submit" class="btn btn-xl" style="margin-top: 20px">Start New Season</button>
+                    </div>
+                </div>
+                <div class="row">
+                        <div id="newSeasonModal" class="modal">
+
+                          <div class="modal-content" style="width: 600px;">
+                            <span class="close">&times;</span>
+                            
+                            <form method="post" enctype="multipart/form-data">
+
+                                <h3>New Season</h3>
+                                {% csrf_token %}
+                                {{ newSeason_form.as_p }}
+
+
+                                {{ seasonItem_formset.management_form }}
+                                {% for seasonItem_form in seasonItem_formset %}
+                                    <div class="link-formset">
+
+                                        {{ seasonItem_form.as_p }}
+                                    </div>
+                                {% endfor %}
+                                </br>
+                                </br>
+                                <button type="submit" name="new_season">Save</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                        <div id="promoModal" class="modal">
+
+                          <div class="modal-content" style="width: 600px;">
+                            <span class="close">&times;</span>
+                            
+                            <form method="post" enctype="multipart/form-data">
+
+                                <h3>Fisch Coin Rate</h3>
+                                {% csrf_token %}
+                                {{ promo_form.as_p }}
+
+                                </br>
+                                </br>
+                                <button type="submit" name="promo">Save</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section  class="bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2 text-center">
+                    </div>
+                    <div class="col-md-8 text-center">
+                        <div class="row">
+                            {% if messages %}
+                                <h3 class="section-subheading text-center">
+                                    {% for message in messages %}
+                                    {{ message }} 
+                                    </br>
+                                    {% endfor %}
+                                </h3>
+                            {% endif %}
+
+
+                            <h2 class="section-heading"> Wodkafisch Sponsors</h2>
+                            <h3 class="section-subheading text-center">Thanks to everyone who supports the Wodkafisch! </br>To honor all who have contributed and make it possible to hold fish events, we list all sponsors below:</h3>
+                            
+                            <div class="col-md-1 text-center"></div>  
+                            <div class="col-md-7 text-center">
+
+                                <table style="width:100%">
+                                  
+                                    {% for user_data in users_data %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}.</td>
+                                            
+                                            <td>{{ user_data.username }}</td>
+                                            
+                                                <td>
+                                                    {% if user_data.diamond_sponsor > 0 %}
+                                                    {{user_data.diamond_sponsor}} x <img src="{% static "images/diamond_badge.svg" %}" style="width: 10mm"></img>
+                                                    {% endif%}
+                                                </td>
+                                                
+                                                <td>
+                                                    {% if user_data.black_sponsor > 0 %}
+                                                    {{user_data.black_sponsor}} x <img src="{% static "images/black_badge.svg" %}" style="width: 10mm"></img>
+                                                    {% endif%}
+                                                </td>
+                                                <td>
+                                                    {% if user_data.gold_sponsor > 0 %}
+                                                    {{user_data.gold_sponsor}} x <img src="{% static "images/gold_badge.svg" %}" style="width: 10mm"></img>
+                                                    {% endif%}
+                                                </td>
+                                                
+                                                <td>
+                                                    {% if user_data.silver_sponsor > 0 %}
+                                                    {{user_data.silver_sponsor}} x <img src="{% static "images/silver_badge.svg" %}" style="width: 10mm"></img>
+                                                    {% endif%}
+                                                </td>
+                                                
+                                                <td>
+                                                    {% if user_data.bronze_sponsor > 0 %}
+                                                    {{user_data.bronze_sponsor}} x <img src="{% static "images/bronze_badge.svg" %}" style="width: 10mm"></img>
+                                                    {% endif%}
+                                                </td>
+
+                                                <!--{% if user.is_staff %}
+                                                    <td ><a href="/update_sponsor/?first_name={{ user_data.first_name }}&last_name={{user_data.last_name}}">update sponsor data</a></td>
+                                                {% endif %}-->
+                                            
+                                        </tr>
+                                    {% endfor %}
+                                  
+                                </table>
+                            </div> 
+                            <div class="col-md-1 text-center"></div>
+                            <div class="col-md-3 text-center">
+                                <h3 class="text-center">Recent Donations</h3>
+                                <table style="margin-left: auto; margin-right: auto;">
+                                    {% for donation in donations %}
+                                    <tr>
+                                        <td>
+                                            {{ donation.date }}
+                                        </td>
+                                        <td style="display: block ruby; width: 20mm; text-align: right;">
+                                            {{ donation.value }} <img src="{% static "images/fish_flakes.svg" %}" style="width:3mm">
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+
+                                </table>     
+                            </div>
+                        </div>
+                        {% if user.is_staff %}
+                            
+                        <div class="row">
+                            <div class="col-md-10 text-center"></div>
+                            <div class="col-md-2 text-center">
+                                    <button id=addSponsorButton type="submit" class="btn btn-xl" style="margin-bottom: 20px">Add Donation</button>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 text-center"></div>
+                            <div class="col-md-4 text-center">
+                                <div id="addSponsorModal" class="modal">
+
+                                  <div class="modal-content">
+                                    <span class="close">&times;</span>
+                                    
+                                    <form method="post" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <!--<p> {{ newDonation_form.first_name.label_tag }}<br>
+                                            {{ newDonation_form.first_name }}
+                                            <i class="info fa-solid fa-circle-info"></i>
+                                            <small id="help"">{{ newDonation_form.first_name.help_text }}</small>
+                                        </p>
+                                        <p> {{ newDonation_form.last_name.label_tag }}<br>
+                                            {{ newDonation_form.last_name }}
+                                            <i class="info fa-solid fa-circle-info"></i>
+                                            <small id="help"">{{ newDonation_form.last_name.help_text }}</small>
+                                        </p>
+                                        <p> {{ newDonation_form.donation.label_tag }}<br>
+                                            {{ newDonation_form.donation }}
+                                        </p>-->
+
+                                        
+                                        {% for field in newDonation_form %}
+                                          <p>
+                                            {{ field.label_tag }}<br>
+                                            {{ field }}
+                                            {% if field.help_text %}
+                                              <i class="info fa-solid fa-circle-info"></i>
+                                              <small id="help"">{{ field.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in field.errors %}
+                                              <p style="color: red">{{ error }}</p>
+                                            {% endfor %}
+                                          </p>
+                                        {% endfor %}
+                                        <button type="submit" name="new_donation">Save</button>
+                                    </form>
+
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+{% endblock%}
+
+{% block scripts %}
+<script>
+
+    {% for unlock_item in unlock_items %}
+    var unlockItem{{ forloop.counter }} = {{ unlock_item|yesno:"true,false" }};
+    {% endfor %}
+
+    {% for item in items %}
+    var animateItem{{ forloop.counter }} = true; 
+    {% endfor %}
+
+    var progress_audio = new Audio("{% static "sound/bubbles.mp3" %}");
+    var unlock_audio = new Audio("{% static "sound/hölkynkölkyn.mp3" %}");
+
+    function progress(percent, $element) {
+        var totalWidth = $element.width()
+        var progressBarWidth = percent * totalWidth / 100;
+        $element.find('#progress').animate({ width: progressBarWidth }, {
+            duration: 5000,
+            step: function(currentWidth,fx) {
+
+                var percent = currentWidth/totalWidth*100;
+                var score = currentWidth/totalWidth * {{ season.max_donation }}
+                $element.find('span').text(Math.round(score));
+                if (score>1400) {
+                    $element.find('span').css('position','absolute')
+                    $element.find('span').css('left','5px')
+                }
+
+                {% for item in items %}
+                    if (percent >= {{ item.percent }} && animateItem{{ forloop.counter }}) {
+                        animateItem{{ forloop.counter }} = false;
+                        if (unlockItem{{ forloop.counter }}) {
+                            unlockItem{{ forloop.counter }} = false;
+                            document.getElementById("{{ forloop.counter }}").style.transform = "scale(1.5)";
+                            document.getElementById("progressBar").style.marginBottom = "75px";
+                            document.getElementById('itemLocked').src="{% static "images/chest_open.png" %}"
+                            unlock_audio.play()
+                        };
+                        
+                        $('#{{ forloop.counter }}.item').find('#itemProgress').animate({ width: 30 }, {
+                            duration: 5000/progressBarWidth*30,
+                            });
+                        };
+                {% endfor %}
+                    
+            },
+            complete: function() {
+                progress_audio.pause()
+            },
+            
+        });
+    }
+
+    window.onload = function(){
+        progress_audio.play();    
+    }
+    
+    progress({{ season_score }}, $('#progressBar'));
+
+    
+    {% if user.is_staff %}
+    // Get the modal
+    var season_modal = document.getElementById("newSeasonModal");
+    var promo_modal = document.getElementById("promoModal");
+    var sponsor_modal = document.getElementById("addSponsorModal");
+    // Get the button that opens the modal
+    var new_season_btn = document.getElementById("newSeasonButton");
+    var promo_btn = document.getElementById("newPromoButton");
+    var add_btn = document.getElementById("addSponsorButton");
+
+    // When the user clicks the button, open the modal 
+    new_season_btn.onclick = function() {
+      season_modal.style.display = "block";
+    }
+    promo_btn.onclick = function() {
+      promo_modal.style.display = "block";
+    }
+    add_btn.onclick = function() {
+      sponsor_modal.style.display = "block";
+    }
+    // When the user clicks on <span> (x), close the modal
+    $('.close').on('click', function() {
+      season_modal.style.display = "none";
+      promo_modal.style.display = "none";
+      sponsor_modal.style.display = "none";
+    });
+
+    // autocomplete
+    var availableFirstNames = {{ first_names | safe }};
+    var availableLastNames = {{ last_names | safe }};
+    var availableLastNamesTmp;
+
+    function getAllIndexes(arr, val) {
+        var indexes = [], i = -1;
+        while ((i = arr.indexOf(val, i+1)) != -1){
+            indexes.push(i);
+        }
+        return indexes;
+    }
+
+    $( "#id_first_name" ).autocomplete({
+        source: availableFirstNames,
+        select: function( event , ui ) {
+            availableLastNamesTmp = availableLastNames;
+            var indexes = getAllIndexes(availableFirstNames,ui.item.label);
+            availableLastNames = indexes.map(i => availableLastNames[i]);
+            if (availableLastNames.length == 1) {
+                $('#id_last_name')[0].value = availableLastNames[0]
+            }
+        }
+    });
+
+    $( "#id_last_name" ).autocomplete({
+        source: availableLastNames
+    });
+
+    {% endif %}
+
+
+</script>
+
+<script src="{% static 'js/jquery.formset.js' %}"></script>
+<script>
+    $('.link-formset').formset({
+        addText: 'add item',
+        deleteText: 'remove'
+    });
+</script>
+{% endblock %}

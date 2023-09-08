@@ -1,0 +1,11 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}Hi {{ user.username }},
+
+your account is now active. 
+{% endblocktrans %}
+{% trans "Please use the following link to log in :" %}
+http://{{ domain }}{% url 'login' %}
+
+{% blocktrans %}The Wodkafisch team{% endblocktrans %}
+
+{% endautoescape %}

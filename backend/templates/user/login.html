@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wodkafisch - Log in{% endblock%}
+
+{% block content %}
+
+        <section class="bg-dark wrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 text-center"></div>
+                    <div class="col-md-4 text-center">
+                        {% if messages %}
+                            <h3 class="section-subheading text-muted">
+                                {% for message in messages %}
+                                
+                                <!--{% if message.tags %} 
+                                    {{ message.tags }}
+                                {% endif %}-->
+
+                                {{ message }} 
+                                </br>
+                                {% endfor %}
+                            </h3>
+                            
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2"></div>
+                    <div class="col-lg-8 text-center">
+                        <h2 class="section-heading">Log In</h2>
+                        <h3 class="section-subheading text-muted"> </h3>
+                        
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{form.as_p}}
+                            <button type="submit">Log in</button>
+                        </form>
+                        Don't have an account? Sign up <a href="/signup"><strong>here</strong></a>!</br>
+                        Forgot your password? Reset it <a href="/password_reset"><strong>here</strong></a>!
+                    </div>
+                </div>
+            </div>
+        </section>
+
+{% endblock%}
+

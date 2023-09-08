@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}{% endblock%}</title>
+        <meta name="author" content="jhay" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=PT+Sans+Narrow:regular,bold">  
+        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+        <script type="text/javascript" src="{% static 'js/navbar_animation.js' %}"></script> 
+        <!-- jQuery Version 1.11.0 -->
+        <script src="https://raw.githubusercontent.com/IronSummitMedia/startbootstrap/gh-pages/templates/agency/js/jquery-1.11.0.js"></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="https://raw.githubusercontent.com/IronSummitMedia/startbootstrap/gh-pages/templates/agency/js/bootstrap.min.js"></script>
+
+        <!-- Plugin JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+        <script src="https://raw.githubusercontent.com/IronSummitMedia/startbootstrap/gh-pages/templates/agency/js/classie.js"></script>
+        <script src="https://raw.githubusercontent.com/IronSummitMedia/startbootstrap/gh-pages/templates/agency/js/cbpAnimatedHeader.js"></script>
+
+        <!-- Contact Form JavaScript -->
+        <script src="https://raw.githubusercontent.com/IronSummitMedia/startbootstrap/gh-pages/templates/agency/js/jqBootstrapValidation.js"></script>
+        <script src="https://raw.githubusercontent.com/IronSummitMedia/startbootstrap/gh-pages/templates/agency/js/contact_me.js"></script>
+        {% block extra_header%}{% endblock%}
+        <link rel="icon" type="image/x-icon" href="{% static "images/fisch.svg" %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    </head>
+
+    <body id="page-top" class="index" data-pinterest-extension-installed="cr1.3.4">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-fixed-top navbar-shrink" style="flex-wrap: initial; margin-bottom: 0;">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header page-scroll">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand page-scroll" style="float: left; height: 50px; padding: 15px 15px; font-size: 18px; line-height: 20px;margin-left: 35px;" href="/">
+                         <img src="{% static "images/fisch.svg" %}" style="width:30px;top: 50%; margin-top: -15px; margin-left: -35px;position:absolute;"> <span>Wodkafisch</span>
+                    </a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right" style="flex-direction: row;font-size: 14px;">
+                        <li class="hidden active">
+                            <a href="#page-top"></a>
+                        </li>
+                        <li class="">
+                            <a class="page-scroll" style="text-decoration: none;" href="/about"><i class="fa-solid fa-info"></i> About</a>
+                        </li>
+                        <!---
+                        <li class="">
+                            <a class="page-scroll" style="text-decoration: none;" href="/services">Services</a>
+                        </li>  -->                      
+                        <li class="">
+                            <a class="page-scroll" style="text-decoration: none;" href="/contact"><i class="fa-regular fa-address-card"></i> Contact</a>
+                        </li>
+                        
+                        {% if user.is_authenticated %}
+                        <li class="">
+                            <a class="page-scroll" style="text-decoration: none;" href="/events"><i class="fa-regular fa-calendar-days"></i> Events</a>
+                        </li>
+                        <li class="">
+                            <a class="page-scroll" style="text-decoration: none;" href="/pictures"><i class="fa-solid fa-camera"></i> Pictures</a>
+                        </li>
+                        <li class="">
+                            <a class="page-scroll" style="text-decoration: none;" href="/sponsors"><i class="fa-solid fa-money-bill-1-wave"></i> Sponsors</a>
+                        </li>
+                        <li class="">
+                              <!--<a href="#"><i class="fa fa-fw fa-user"></i>Profile</a>-->
+                            <div class="dropdown">
+                                <button class="dropbtn"><a href=""><i class="fa-solid fa-user"></i> Profile</a> 
+                                </button>
+                                <div class="dropdown-content">
+                                    <a href="/change_password"><i class="fa-solid fa-key"></i> Change password</a>
+                                    <a href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</a>
+                                </div>
+                            </div>
+
+                        </li>
+                        {% else %}
+                        <li class="">
+                            <a class="page-scroll" style="text-decoration: none;" href="/signup"><i class="fa-solid fa-user-plus"></i> Sign Up</a>
+                        </li>
+                        <li class="">
+                              <a class="page-scroll" style="text-decoration: none;" href="/login"><i class="fa-solid fa-arrow-right-to-bracket"></i> Log in</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
+
+        <!-- Header -->
+        <header>
+            <div class="container">
+
+            </div>
+        </header>
+
+        {% block content %}{% endblock%}
+
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <span class="copyright">Copyright © Wodkafisch 2023</span>
+                    </div>
+                    <div class="col-md-4">
+                        <!--<ul class="list-inline social-buttons">
+
+                            <li><a href="#"><i class="fa fa-twitter"></i></a>
+                            </li>
+                            <li><a href="#"><i class="fa fa-facebook"></i></a>
+                            </li>
+                            <li><a href="https://www.linkedin.com/in/julian-hay-8aab34161/" target="_blank" rel="noopener noreferrer"><i class="fa fa-linkedin"></i></a>
+                            </li>
+                        </ul>-->
+                    </div>
+                    <div class="col-md-4">
+                        <ul class="list-inline quicklinks">
+                            <li><a href="/privacy_policy">Privacy Policy</a>
+                            </li>
+                            <li><a href="/terms_and_conditions">Terms of Use</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% block extra_footer %}{% endblock%}
+        </footer>
+
+        
+        
+        {% block scripts %}{% endblock %}
+
+        <span style="height: 20px; width: 40px; min-height: 20px; min-width: 40px; position: absolute; opacity: 0.85; z-index: 8675309; display: none; cursor: pointer; background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAUCAYAAAD/Rn+7AAADU0lEQVR42s2WXUhTYRjHz0VEVPRFUGmtVEaFUZFhHxBhsotCU5JwBWEf1EWEEVHQx4UfFWYkFa2biPJiXbUta33OXFtuUXMzJ4bK3Nqay7m5NeZq6h/tPQ+xU20zugjOxR/+7/O8539+5znnwMtNTExwJtMb3L/fiLv3botCSmUjeCaejTOb39AiFothfHxcFIrHY8RksZjBsckJcOIRMfFsHD/SsbExUYpnI8DR0dGUGjSb0byhEJp5Uqg5CTSzc2CQleJbMEj9/ywBcGRkJEk9DQqouEVQT1sK444yWI9UonmTjGqauVLEIlHa9x8lAMbj8SSpp0rwKGMVvg8P46vbg0C7na8z8JsMcgHe7jlEa+edRhiLy8n/TUMfu6EvLElk+U0WtGwrTrdfAGQf5J8iiK4LVzDU28t8JtMSocf8E+l68myaNFXm/6rXslLK7ay5TOunuRvZWpJuvwAYjUaTpOIWoquuAZ219RTaxKYp9BbjycoN5FvL9qH9TBX5rvoGdJythvXYSTxdtRnWylO/ZdqrLsGwszzhWQ593z2KlAwCYCQSSZJ6ehZ0W7bD9VBLgN0NCqr3qR7R2rBrL3pu3Sb/7nDlz2uy6cG0OXk0GTbZXzNp8trsPAQdTj6frlWzN2DcXZGKQQAMh8NJ6rpyHe+PnkCr/CAFdZyvpfpjuvkifLF9wIt1Wwlo0OHie1RvWrKa93RjzfzliTzPKz3ltB0/Tevmwp14wGUgHAzSOoUEwFAolFaaBSuhnslPRkJexUJtZ6v5HtUeLswl33n1BgEY5fvhs9sJ3FAiT+QYyyvoAQJuD0KBAFRTJNAuz5/s3gJgMBhMJwrVFRThM5tY5zUF/A4X1f2fvQTRLCuBreoim0YmAbqNJryvPEXeeq46kaNdkQ/1HCncbJKPs9ZSv2VHGfWsZ2hfkhKAfr8/pdxWKx4wwD69PmVfNSOL+lr2w+gYqHpWDtXt1xQ8AMlWU0e1lqLd/APRHoP8AJqWrQG9gYxcPMsvSJUvAA4MDKTUJ7MZLaVy8v+qT21tcDx/OemePr0RTkNrur4A6PP5xCgBsL+/X4wiQDpuuVxOeL1eMYmYeDY6sOp0z+B0OuHxeEQhxkJMFosJiSO/UinOI/8Pc+l7KKArAT8AAAAASUVORK5CYII=);"></span>
+    </body>
+</html>

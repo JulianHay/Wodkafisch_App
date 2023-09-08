@@ -1,0 +1,11 @@
+{{ title }}
+
+{{ hello }}  {{ user.username }}
+
+{% for m in message %}
+	{{ m }}
+{% endfor %}
+
+{{ additional_text }}
+
+{{ bye }}

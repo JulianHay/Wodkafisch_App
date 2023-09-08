@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wodkafisch - Sponsors{% endblock%}
+
+{% block extra_header%}
+{% endblock%}
+
+{% block content %}
+
+        <section  class="bg-dark wrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-1 text-center">
+                    </div>
+                    <div class="col-md-10 text-center">
+                        
+                        {% if user.is_staff %}
+
+                            <div class="row">
+                                <form method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                    <button type="submit">Save</button>
+                                </form>
+                            </div>
+                        {% endif%}
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+{% endblock%}
+
+{% block scripts %}
+{% if user.is_staff %}
+
+{% endif %}
+{% endblock %}

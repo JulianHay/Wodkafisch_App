@@ -1,0 +1,580 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wodkafisch - Idea Board{% endblock%}
+
+{% block extra_header%}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+{% endblock%}
+
+{% block content %}
+
+        <section  class="bg-dark wrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2 text-center">
+                    </div>
+                    <div class="col-md-8 text-center">
+                        {% if messages %}
+                            <h3 class="section-subheading text-center">
+                                {% for message in messages %}
+                                {{ message }} 
+                                </br>
+                                {% endfor %}
+                            </h3>
+                        {% endif %}
+
+
+                        <h2 class="section-heading"> Event Idea Board</h2>
+                        <h3 class="section-subheading text-center"></h3>
+                        
+                        <div class="tab">
+                          <button class="tablinks active" onclick="openTab(event, 'Active_Events')">Active</button>
+                          <button class="tablinks" onclick="openTab(event, 'Backlog_Events')">Backlog</button>
+                        </div>
+
+                        <div id="Active_Events" class="tabcontent" style="display: block">
+                            <table style="width:100%">
+                                <tr style="font-weight: bold; font-size: 18px; border-bottom: 1px solid #ccc">
+                                    <td>Location</td>
+                                    <td>Food</td>
+                                    <td>Drinks</td>
+                                    <td>Comments</td>
+                                </tr>
+                                {% for event_proposal in event_proposals %}
+                                    {% if event_proposal.is_active == 1 %}
+                                    <tr>
+                                        <td name="location">{{ event_proposal.location }}</td>
+                                        <td name="food">{{ event_proposal.food }}</td>
+                                        <td name="drinks">{{ event_proposal.drinks }}</td>
+                                        <td name="comments">{{ event_proposal.comments }}</td>
+                                        <td> <span>{{ event_proposal.likes }}</span> <a id="event_proposal_likes{{ forloop.counter }}" name="event_proposal_likes" 
+                                            {% if event_proposal.user_like == 1 %} style="color: rgb(0, 128, 0)" {% endif %}><i class="fa-regular fa-thumbs-up"></i></a>
+                                        </td>
+                                        <td> <span>{{ event_proposal.dislikes }}</span> <a id="event_proposal_dislikes{{ forloop.counter }}" name="event_proposal_dislikes"
+                                            {% if event_proposal.user_dislike == 1 %} style="color: rgb(255, 0, 0)" {% endif %}><i class="fa-regular fa-thumbs-down"></i></a>
+                                        </td>
+                                        <td><a class='edit' name='{{event_proposal.id}}'><i class="fa-solid fa-pencil"></i></a></td>
+                                        {% if user.is_staff%}
+                                            <td><span class="remove">&times;</span></td>
+                                        {% endif %}
+
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>
+
+                        <div id="Backlog_Events" class="tabcontent">
+                            <table style="width:100%">
+                                <tr style="font-weight: bold; font-size: 18px; border-bottom: 1px solid #ccc">
+                                    <td>Location</td>
+                                    <td>Food</td>
+                                    <td>Drinks</td>
+                                    <td>Comments</td>
+                                </tr>
+                                {% for event_proposal in event_proposals %}
+                                    {% if event_proposal.is_active == 0 %}
+                                    <tr>
+                                        <td name="location">{{ event_proposal.location }} </td>
+                                        <td name="food">{{ event_proposal.food }} </td>
+                                        <td name="drinks">{{ event_proposal.drinks }} </td>
+                                        <td name="comments">{{ event_proposal.comments }} </td>
+                                        <td> <span>{{ event_proposal.likes }}</span> <a ><i class="fa-regular fa-thumbs-up"></i></a></td>
+                                        <td> <span>{{ event_proposal.dislikes }}</span> <a><i class="fa-regular fa-thumbs-down"></i></a></td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                              
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 text-center"></div>
+                    <div class="col-md-2 text-center">
+                            <button id=addEventProposal type="submit" class="btn btn-xl" style="margin-bottom: 20px">Add New</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 text-center"></div>
+                    <div class="col-md-4 text-center">
+                        <div id="addEventProposalModal" class="modal">
+
+                          <div class="modal-content">
+                            <span class="close">&times;</span>
+                            
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% for field in event_proposal_form %}
+                                  <p>
+                                    {{ field.label_tag }}<br>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                      <i class="info fa-solid fa-circle-info"></i>
+                                      <small id="help"">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                      <p style="color: red">{{ error }}</p>
+                                    {% endfor %}
+                                  </p>
+                                {% endfor %}
+                                <button type="submit" name="new_event_proposal">Save</button>
+                            </form>
+
+                          </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 text-center"></div>
+                    <div class="col-md-8 text-center">
+                        <div id="editEventProposalModal" class="modal">
+
+                          <div class="modal-content" style="width: 66%; height:200px">
+                            <span class="close">&times;</span>
+                            <table style="width:100%">
+                                <tr style="font-weight: bold; font-size: 18px; border-bottom: 1px solid #ccc">
+                                    <td>Location</td>
+                                    <td>Food</td>
+                                    <td>Drinks</td>
+                                    <td>Comments</td>
+                                </tr>
+                                <tr>
+                                    <td name="location"><textarea rows="2" cols="15"></textarea></td>
+                                    <td name="food"><textarea rows="2" cols="15"></textarea></td>
+                                    <td name="drinks"><textarea rows="2" cols="15"></textarea></td>
+                                    <td name="comments"><textarea rows="2" cols="15"></textarea></td>
+                                </tr>
+                            </table>
+                            <span class="save"><i class="fa-solid fa-check"></i></span>
+
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+                <section  class="bg-light wrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2 text-center">
+                    </div>
+                    <div class="col-md-8 text-center">
+
+                        <h2 class="section-heading"> Item Idea Board</h2>
+                        <h3 class="section-subheading text-center"></h3>
+
+                        <div class="tab">
+                          <button class="tablinks active" onclick="openTab(event, 'Active_Items')">Active</button>
+                          <button class="tablinks" onclick="openTab(event, 'Backlog_Items')">Backlog</button>
+                        </div>
+
+                        <div id="Active_Items" class="tabcontent" style="display: block">
+                            <table style="width:100%">
+                                <tr style="font-weight: bold;font-size: 18px; border-bottom: 1px solid #ccc"">
+                                    <td>Name</td>
+                                    <td>Description</td>
+                                    <td>Image</td>
+                                    <td>Comments</td>
+                                </tr>
+                                {% for item_proposal in item_proposals %}
+                                {% if item_proposal.is_active == 1 %}
+                                <tr>
+                                    <td name="name">{{ item_proposal.name }} </td>
+                                    <td name="description">{{ item_proposal.description }} </td>
+                                    <td name="image"><a  target="_blank" href="/media/{{ item_proposal.image }}"><img src="/media/{{ item_proposal.image }}" style="height: 0.5cm"></a> </td>
+                                    <td name="comments">{{ item_proposal.comments }} </td>
+                                    <td> <span>{{ item_proposal.likes }}</span> <a id="item_proposal_likes{{ forloop.counter }}" name="item_proposal_likes" 
+                                        {% if item_proposal.user_like == 1 %} style="color: rgb(0, 128, 0)" {% endif %}><i class="fa-regular fa-thumbs-up"></i></a>
+                                    </td>
+                                    <td> <span>{{ item_proposal.dislikes }}</span> <a id="item_proposal_dislikes{{ forloop.counter }}" name="item_proposal_dislikes"
+                                        {% if item_proposal.user_dislike == 1 %} style="color: rgb(255, 0, 0)" {% endif %}><i class="fa-regular fa-thumbs-down"></i></a>
+                                    </td>
+                                    <td><a class='edit' name='{{item_proposal.id}}'><i class="fa-solid fa-pencil"></i></a></td><!--<i class="fa-solid fa-check"></i>-->
+                                    {% if user.is_staff%}
+                                    <td><span class="remove">&times;</span></td>
+                                    {% endif %}
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>
+
+                        <div id="Backlog_Items" class="tabcontent">
+                            <table style="width:100%">
+                                <tr style="font-weight: bold;font-size: 18px;">
+                                    <td>Name</td>
+                                    <td>Description</td>
+                                    <td>Image</td>
+                                    <td>Comments</td>
+                                </tr>
+                                {% for item_proposal in item_proposals %}
+                                {% if item_proposal.is_active == 0 %}
+                                <tr>
+                                    <td name="name">{{ item_proposal.name }} </td>
+                                    <td name="description">{{ item_proposal.description }} </td>
+                                    <td name="image"><a  target="_blank" href="/media/{{ item_proposal.image }}"><img src="/media/{{ item_proposal.image }}" style="height: 0.5cm"></a> </td>
+                                    <td name="comments">{{ item_proposal.comments }} </td>
+                                    <td> <span>{{ item_proposal.likes }}</span> <a id="item_proposal_likes{{ forloop.counter }}" name="item_proposal_likes" 
+                                        {% if item_proposal.user_like == 1 %} style="color: rgb(0, 128, 0)" {% endif %}><i class="fa-regular fa-thumbs-up"></i></a>
+                                    </td>
+                                    <td> <span>{{ item_proposal.dislikes }}</span> <a id="item_proposal_dislikes{{ forloop.counter }}" name="item_proposal_dislikes"
+                                        {% if item_proposal.user_dislike == 1 %} style="color: rgb(255, 0, 0)" {% endif %}><i class="fa-regular fa-thumbs-down"></i></a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8 text-center"></div>
+                    <div class="col-md-2 text-center">
+                            <button id=addItemProposal type="submit" class="btn btn-xl" style="margin-bottom: 20px">Add New</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 text-center"></div>
+                    <div class="col-md-4 text-center">
+                        <div id="addItemProposalModal" class="modal">
+
+                          <div class="modal-content">
+                            <span class="close">&times;</span>
+                            
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% for field in item_proposal_form %}
+                                  <p>
+                                    {{ field.label_tag }}<br>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                      <i class="info fa-solid fa-circle-info"></i>
+                                      <small id="help"">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                      <p style="color: red">{{ error }}</p>
+                                    {% endfor %}
+                                  </p>
+                                {% endfor %}
+                                <button type="submit" name="new_item_proposal">Save</button>
+                            </form>
+
+                          </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 text-center"></div>
+                        <div class="col-md-8 text-center">
+                            <div id="editItemProposalModal" class="modal">
+
+                              <div class="modal-content" style="width: 66%; height:200px">
+                                <span class="close">&times;</span>
+                                <table style="width:100%">
+                                    <tr style="font-weight: bold; font-size: 18px; border-bottom: 1px solid #ccc">
+                                        <td>Name</td>
+                                        <td>Description</td>
+                                        <td>Image</td>
+                                        <td>Comments</td>
+                                    </tr>
+                                    <tr>
+                                        <td name="name"><textarea rows="2" cols="15"></textarea></td>
+                                        <td name="description"><textarea rows="2" cols="15"></textarea></td>
+                                        <td name="image"><img id="itemImg" src="#" style="height: 0.5cm"/><input accept="image/*" type='file' id="imgInp" /></td>
+                                        <td name="comments"><textarea rows="2" cols="15"></textarea></td>
+                                    </tr>
+                                </table>
+                                <span class="save"><i class="fa-solid fa-check"></i></span>
+
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+{% endblock%}
+
+{% block scripts %}
+<script type="text/javascript">
+    // Get the modal
+    var event_modal = document.getElementById("addEventProposalModal");
+    var item_modal = document.getElementById("addItemProposalModal");
+    var edit_event_modal = document.getElementById('editEventProposalModal'); 
+    var edit_item_modal = document.getElementById('editItemProposalModal');
+    // Get the button that opens the modal
+    var event_btn = document.getElementById("addEventProposal");
+    var item_btn = document.getElementById("addItemProposal");
+
+    // When the user clicks the button, open the modal 
+    event_btn.onclick = function() {
+      event_modal.style.display = "block";
+    }
+    item_btn.onclick = function() {
+      item_modal.style.display = "block";
+    }
+    // When the user clicks on <span> (x), close the modal
+    $('.close').on('click', function() {
+      event_modal.style.display = "none";
+      item_modal.style.display = "none";
+      edit_event_modal.style.display = "none";
+      edit_item_modal.style.display = "none";
+    });
+
+
+    // manage likes and dislikes
+    post_likes = function(elements,like,dislike,type){
+        var data = {};
+        for (let i = 1; i < elements.length-4; i+=2) {
+          data[[elements[i].getAttribute("name")]] = elements[i].innerText;
+        }
+        data['like'] = like;
+        data['dislike'] = dislike;
+        
+        $.ajax({
+            type: "POST",
+            url: "/fischboard/",
+            data: {
+                'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val(),
+                'data': JSON.stringify(data),
+                'submit_likes': true,
+                [type]:true,
+            },
+            success: function (response) {}
+            });
+    }
+
+    set_like_value = function(element,type){
+        if (type=='remove') {
+            var count = Number($(element).siblings()[0].innerText);
+            $(element).siblings()[0].innerText = count-1;
+        } else {
+            var count = Number($(element).siblings()[0].innerText);
+            $(element).siblings()[0].innerText = count+1;
+            if (type=='change') {
+                var neighbor_count = Number($(element.parentElement).siblings()[4].children[0].innerText)
+                $(element.parentElement).siblings()[4].children[0].innerText = (neighbor_count==0) ? (0) : (neighbor_count-1)
+            }  
+        } 
+    }
+
+    $("[name=event_proposal_likes]").on("click",function(){
+        var elements = this.parentElement.parentElement.childNodes
+        if ($('#'+this.id)[0].style.color=="rgb(0, 128, 0)"){
+            post_likes(elements,0,0,'event')
+            $('#'+this.id).css('color','#fff')
+            set_like_value(this,'remove')
+        } else {
+            post_likes(elements,1,0,'event')
+            $('#'+this.id).css('color','green')
+            if ($('#event_proposal_dislikes'+this.id.slice(-1))[0].style.color=="rgb(255, 0, 0)") {
+                $('#event_proposal_dislikes'+this.id.slice(-1)).css('color','#fff') 
+                set_like_value(this,'change')
+            } else {
+                set_like_value(this,'add')
+            }   
+        }
+    })
+
+    $("[name=event_proposal_dislikes]").on("click",function(){
+        var elements = this.parentElement.parentElement.childNodes
+        if ($('#'+this.id)[0].style.color=="rgb(255, 0, 0)"){
+            post_likes(elements,0,0,'event')
+            $('#'+this.id).css('color','#fff')
+            set_like_value(this,'remove')
+        } else {
+            post_likes(elements,0,1,'event')
+            $('#'+this.id).css('color','red')
+            if ($('#event_proposal_likes'+this.id.slice(-1))[0].style.color=="rgb(0, 128, 0)") {
+                $('#event_proposal_likes'+this.id.slice(-1)).css('color','#fff') 
+                set_like_value(this,'change')
+            } else {
+                set_like_value(this,'add') 
+            }
+        }
+    })
+
+    $("[name=item_proposal_likes]").on("click",function(){
+        var elements = this.parentElement.parentElement.childNodes
+        if ($('#'+this.id)[0].style.color=="rgb(0, 128, 0)"){
+            post_likes(elements,0,0,'item')
+            $('#'+this.id).css('color','#fff')
+            set_like_value(this,'remove')
+        } else {
+            post_likes(elements,1,0,'item')
+            $('#'+this.id).css('color','green')
+            if ($('#item_proposal_dislikes'+this.id.slice(-1))[0].style.color=="rgb(255, 0, 0)") {
+                $('#item_proposal_dislikes'+this.id.slice(-1)).css('color','#fff') 
+                set_like_value(this,'change')
+            } else {
+                set_like_value(this,'add')
+            }   
+        }
+    })
+
+    $("[name=item_proposal_dislikes]").on("click",function(){
+        var elements = this.parentElement.parentElement.childNodes
+        if ($('#'+this.id)[0].style.color=="rgb(255, 0, 0)"){
+            post_likes(elements,0,0,'item')
+            $('#'+this.id).css('color','#fff')
+            set_like_value(this,'remove')
+        } else {
+            post_likes(elements,0,1,'item')
+            $('#'+this.id).css('color','red')
+            if ($('#item_proposal_likes'+this.id.slice(-1))[0].style.color=="rgb(0, 128, 0)") {
+                $('#item_proposal_likes'+this.id.slice(-1)).css('color','#fff') 
+                set_like_value(this,'change')
+            } else {
+                set_like_value(this,'add') 
+            }
+        }
+    })
+
+
+    // Open Tabs
+    function openTab(evt, tab_name) {
+      var i, tabcontent, tablinks;
+      tabcontent = $('*[id*='+ tab_name.split('_')[1] + '].tabcontent')//document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = evt.target.parentElement.childNodes//document.getElementsByClassName("tablinks");
+      for (i = 1; i < tablinks.length; i+=2) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tab_name).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+
+    // move elements to backlog 
+    $('.remove').on('click', function() {
+        var element = this;
+        var data = {};
+        if (this.closest(".tabcontent").id.includes('Event')) {
+            data['event'] = true;
+            data['location'] = this.closest("tr").childNodes[1].innerText;
+            var event = true;
+        } else if (this.closest(".tabcontent").id.includes('Item')) {
+            data['item'] = true;
+            data['name'] = this.closest("tr").childNodes[1].innerText;
+            var item = true;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/fischboard/",
+            data: {
+                'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val(),
+                'data': JSON.stringify(data),
+                'backlog': true,
+            },
+            success: function (response) {
+                if (event) {
+                    jQuery(element.closest("tr")).detach().appendTo($('#Backlog_Events')[0].childNodes[1])
+                } else if (item) {
+                    jQuery(element.closest("tr")).detach().appendTo($('#Backlog_Items')[0].childNodes[1])
+                }
+            }
+            });
+    })
+
+    // edit elements
+    $('.edit').on('click', function() {
+        var content = this.closest("tr").children;
+        if (this.closest('div').id.includes('Event')) {
+            var modal_content = edit_event_modal.children[0].children[1].children[0].children[1].children;
+            for (let i = 0; i < 4; i++) {
+                modal_content[i].children[0].value = content[i].innerText;
+            }  
+            edit_event_modal.children[0].children[1].children[0].children[1].name = this.name;
+            edit_event_modal.style.display = "block";
+        }
+        else if (this.closest('div').id.includes('Item')) {
+            var modal_content = edit_item_modal.children[0].children[1].children[0].children[1].children;
+            
+            modal_content[0].children[0].value = content[0].innerText;
+            modal_content[1].children[0].value = content[1].innerText;
+            modal_content[2].children[0].src = content[2].children[0].children[0].src;
+            modal_content[3].children[0].value = content[3].innerText;
+  
+            edit_item_modal.children[0].children[1].children[0].children[1].name = this.name;
+            edit_item_modal.style.display = "block";
+        }
+        
+    })
+
+    $('.save').on('click', function() {
+        var textareas = $('td textarea');
+        var formData = new FormData();
+        formData.append("csrfmiddlewaretoken", $("input[name=csrfmiddlewaretoken]").val())
+        formData.append("edit",true)
+        
+        if (this.closest('.modal').id.includes('Event')) {
+            const id = Number(textareas[0].parentElement.parentElement.name);
+            formData.append("id",id);
+            formData.append("event",true);
+            const location = textareas[0].value;
+            formData.append("location",location);
+            const food = textareas[1].value;
+            formData.append("food",food);
+            const drinks = textareas[2].value;
+            formData.append("drinks",drinks);
+            
+            formData.append("comments",textareas[3].value);
+        } else if (this.closest('.modal').id.includes('Item')) {
+            const id = Number(textareas[4].parentElement.parentElement.name);
+            formData.append("id",id);
+            formData.append("item",true);
+            const name = textareas[4].value;
+            formData.append("name",name);
+            const description = textareas[5].value;
+            formData.append("description",description);
+            const comments = textareas[6].value;
+            formData.append("comments",comments);
+            formData.append("image", $('#imgInp')[0].files[0]);
+        }
+        
+        $.ajax({
+            type: "POST",
+            url: "/fischboard/",
+            data: formData,
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            success: function (response) {
+                if (formData.has('event')) {
+                    var table_data = $('#Active_Events [name='+formData.get('id')+']').closest('tr').children();
+                    table_data[0].innerText = formData.get('location'); 
+                    table_data[1].innerText = formData.get('food');
+                    table_data[2].innerText = formData.get('drinks');
+                    table_data[3].innerText = formData.get('comments');
+                    edit_event_modal.style.display = "none";
+                } else if (formData.has('item')) {
+                    var table_data = $('#Active_Items [name='+formData.get('id')+']').closest('tr').children();
+                    table_data[0].innerText = formData.get('name');
+                    table_data[1].innerText = formData.get('description');
+                    table_data[2].childNodes[0].childNodes[0].src = $('#itemImg')[0].src;
+                    table_data[3].innerText = formData.get('comments');
+                    edit_item_modal.style.display = "none";
+                }
+            }
+            });
+    })
+
+    imgInp.onchange = evt => {
+      const [file] = imgInp.files
+      if (file) {
+        itemImg.src = URL.createObjectURL(file)
+      }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wodkafisch - Sign up{% endblock%}
+
+{% block content %}
+
+        <section class="bg-dark wrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-2"></div>
+                    <div class="col-lg-8 text-center">
+                        <h2 class="section-heading">Sign up</h2>
+                        <h3 class="section-subheading text-muted"> </h3>
+                        
+                        <form method="post">
+                          {% csrf_token %}
+                          {% for field in form %}
+                            <p>
+                              {{ field.label_tag }}<br>
+                              {{ field }}
+                              {% if field.help_text %}
+                                <i class="info fa-solid fa-circle-info"></i>
+                                <small id="help"">{{ field.help_text }}</small>
+                              {% endif %}
+                              {% for error in field.errors %}
+                                <p style="color: red">{{ error }}</p>
+                              {% endfor %}
+                            </p>
+                          {% endfor %}
+                          <button type="submit">Sign up</button>
+                        </form>
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+
+{% endblock%}
+
+{% block scripts%}
+{% endblock%}
