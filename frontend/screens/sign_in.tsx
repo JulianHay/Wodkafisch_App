@@ -36,7 +36,7 @@ const SignInScreen = ({login}) => {
                 <CustomInput placeholder='password' value={password} setValue={setPassword} secureTextEntry/>
                 <CustomButton text='Sign In' onPress={onSignInPressed}/>
                 <CustomButton text='Forgot password?' onPress={onForgotPasswordPressed} type='TERTIARY'/>
-                <CustomButton text="Don't have an account? Sing up" onPress={onSignUpPressed} type='TERTIARY'/>
+                <CustomButton text="Don't have an account? Sign up" onPress={onSignUpPressed} type='TERTIARY'/>
             </View>
         </ScrollView>
     )
