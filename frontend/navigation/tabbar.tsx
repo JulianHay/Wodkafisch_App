@@ -1,11 +1,11 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { FontAwesome } from '@expo/vector-icons';
 import SponsorScreen from '../screens/sponsors';
 import HomeScreen from '../screens/home';
 import MapScreen from '../screens/map';
 import PictureScreen from '../screens/pictures';
 import AboutScreen from '../screens/about';
-import SettingsStack from './settingsstack';
+import LoginStack from './loginStack';
 import { connect } from 'react-redux';
 import { useEffect } from 'react';
 import { checkAuthenticated } from '../actions/auth';
@@ -24,18 +24,19 @@ const TabBar = ({isAuthenticated}) => {
           let iconName;
   
           if (route.name === 'Home') {
-            iconName = focused ? 'ios-home' : 'ios-home-outline';
+            iconName = 'home';
           } else if (route.name === 'Map') {
-            iconName = focused ? 'world' : 'world';
+            iconName = 'map-marker';
           } else if (route.name === 'Pictures') {
-            iconName = focused ? 'picture' : 'picture';
+            iconName = 'picture-o';
           } else if (route.name === 'Sponsors') {
-            iconName = focused ? 'dollar-sign' : 'dollar-sign';
+            iconName = 'money';
           } else if (route.name === 'About') {
-            iconName = focused ? 'ios-information-circle' : 'ios-information-circle-outline';
+            iconName = 'info';
           }
+          const colorFocused = focused ? 'white' : 'grey'
            
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <FontAwesome name={iconName} size={size} color={colorFocused} />;
         },
         tabBarActiveTintColor: 'white',
         tabBarInactiveTintColor: 'gray',
@@ -45,7 +46,7 @@ const TabBar = ({isAuthenticated}) => {
       })}>
         {isAuthenticated ? (
         <>
-          <Tab.Screen name="Home" component={SettingsStack}/>
+          <Tab.Screen name="Home" component={LoginStack}/>
           <Tab.Screen name="Map" component={MapScreen}/>
           <Tab.Screen name="Pictures" component={PictureScreen}/>
           <Tab.Screen name="Sponsors" component={SponsorScreen}/>
@@ -53,7 +54,7 @@ const TabBar = ({isAuthenticated}) => {
         </>
         ) : (
         <>
-        <Tab.Screen name=" " component={SettingsStack}/>
+        <Tab.Screen name=" " component={LoginStack}/>
         </>)}
     </Tab.Navigator>
   );
