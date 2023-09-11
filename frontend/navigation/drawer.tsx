@@ -1,6 +1,6 @@
 import { DrawerContentScrollView, DrawerItem, createDrawerNavigator } from "@react-navigation/drawer";
 import { TouchableOpacity, View, Image, SafeAreaView} from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { FontAwesome } from '@expo/vector-icons';
 import TabBar from "./tabbar";
 import { logout } from "../actions/auth";
 import { connect } from 'react-redux';
@@ -52,7 +52,7 @@ const DrawerNavigator = ({isAuthenticated}) => {
             headerRight: () => (
             <View style={{padding: 20}}>
                 <TouchableOpacity onPress={() => (isAuthenticated ? (navigation.openDrawer()):(''))}>
-                <Ionicons name='menu' color='white' size={40}/>
+                <FontAwesome name='bars' color='white' size={18}/>
                 </TouchableOpacity>
             </View>
         ),
