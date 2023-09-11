@@ -30,7 +30,7 @@ const HomeScreen = ({navigation}) => {
 
                         <CustomBox onPress= {() => navigation.navigate('Map')} >
                             <Text style={{fontWeight:'bold'}}>Upcoming Fisch Event</Text>
-                            <Image source={eventData[0].image} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
+                            <Image source={{uri:eventData[0].image}} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
                             <Text>{eventData[0].title}</Text>
                             <Text>{eventDate}</Text>
                         </CustomBox>
@@ -51,7 +51,7 @@ const HomeScreen = ({navigation}) => {
 
                         <CustomBox onPress= {() => navigation.navigate('Pictures')} >
                         <Text style={{fontWeight:'bold'}}>Fisch picture of the day</Text>
-                            <Image source={pictureData[0].image} style={{ width: 300, height: 140, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
+                            <Image source={{uri:pictureData[0].image}} style={{ width: 300, height: 140, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
                             <Text>{pictureData[0].description}</Text>    
                         </CustomBox>
                                 {/* <FlatList
