@@ -7,11 +7,10 @@ import SignUpScreen from "../screens/sign_up";
 import { connect } from 'react-redux';
 import { checkAuthenticated } from '../actions/auth';
 import ResetPasswordScreen from "../screens/reset_password";
-import PictureScreen from "../screens/pictures";
 
 const Stack = createStackNavigator()
 
-const SettingsStack = ({isAuthenticated}) => {
+const LoginStack = ({isAuthenticated}) => {
 
     useEffect(() => {
         checkAuthenticated();
@@ -24,13 +23,11 @@ const SettingsStack = ({isAuthenticated}) => {
         
             {isAuthenticated ? (
                 <>
-                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="HomeScreen" component={HomeScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 </>
             ) : (
                 <>
-                
-                <Stack.Screen name="Sponsor" component={PictureScreen} />
                 <Stack.Screen name="SignIn" component={SignInScreen} />
                 <Stack.Screen name="SignUp" component={SignUpScreen} />
                 <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
@@ -44,4 +41,4 @@ const mapStateToProps = state => ({
     isAuthenticated: state.auth.isAuthenticated
 });
 
-export default connect(mapStateToProps, {checkAuthenticated})(SettingsStack);
+export default connect(mapStateToProps, {checkAuthenticated})(LoginStack);
