@@ -3,8 +3,8 @@ import {View, Text, StyleSheet, Image, Linking, Dimensions, SafeAreaView, FlatLi
 import { TouchableOpacity, ScrollView } from "react-native-gesture-handler";
 import Battlepass from '../components/progress';
 import { CustomText } from '../components/text';
-//import LinearGradient from 'react-native-linear-gradient';
-import LinearGradient from 'react-native-web-linear-gradient';
+import LinearGradient from 'react-native-linear-gradient';
+//import LinearGradient from 'react-native-web-linear-gradient';
 import CustomButton from '../components/costum_botton';
 import client from '../actions/client';
 import moment from 'moment'
