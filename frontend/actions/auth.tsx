@@ -155,19 +155,16 @@ export const login = (username, password) => async dispatch => {
                 type: LOGIN_SUCCESS,
                 payload: res.data.token
             });
-            localStorage.setItem('token',res.data.token)
 
         } else {
             dispatch({
                 type: LOGIN_FAIL
             });
-            localStorage.removeItem('token')
         }
     } catch(err) {
         dispatch({
             type: LOGIN_FAIL
         });
-        localStorage.removeItem('token')
     }
 };
 
