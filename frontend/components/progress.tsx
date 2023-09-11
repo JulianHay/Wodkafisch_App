@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef} from 'react';
 import { View, StyleSheet, Animated, Image, Dimensions} from 'react-native';
-//import LinearGradient from 'react-native-linear-gradient';
-import LinearGradient from 'react-native-web-linear-gradient';
+import LinearGradient from 'react-native-linear-gradient';
+//import LinearGradient from 'react-native-web-linear-gradient';
 import { CustomText } from './text';
 
 function Battlepass({ sponsorData, seasonData, itemData }) {
