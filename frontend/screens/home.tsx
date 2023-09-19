@@ -1,79 +1,77 @@
 import { useEffect, useState } from 'react';
-import {View, Text, StyleSheet, Image, SafeAreaView, FlatList, Touchable} from 'react-native';
-import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import {View, Text, StyleSheet, Image, SafeAreaView,ScrollView, FlatList, Touchable,Dimensions} from 'react-native';
 import * as Progress from 'react-native-progress';
 import client from '../actions/client';
-import { CustomBox } from '../components/costum_container';
+import { CustomBox } from '../components/custom_container';
 import moment from 'moment';
+import FischLoading from '../components/loading';
+import { CustomText } from '../components/text';
 
 const HomeScreen = ({navigation}) => {
     const [eventData,setEventData] = useState([])
     const [pictureData,setPictureData] = useState([])
     const [sponsorData,setSponsorData] = useState([])
+    const [seasonData,setSeasonData] = useState([])
+    const [seasonItemData,setSeasonItemData] = useState([])
     const [loading, setLoading] = useState(true)
     useEffect(()=>{
 
-        client.get('/latest_event').then((res) => setEventData(res.data))
-        .then(() => client.get('/sponsor_user_data').then((res) => setSponsorData(res.data)))
-        .then(() => client.get('/latest_picture').then((res) => setPictureData(res.data)))
+        client.get('/latest_event/').then((res) => setEventData(res.data))
+        .then(() => client.get('/sponsor_user_data/').then((res) => setSponsorData(res.data)))
+        .then(() => client.get('/latest_picture/').then((res) => setPictureData(res.data)))
+        .then(() => client.get('/season/').then((res) => setSeasonData(res.data)))
+        .then(() => client.get('/season_items/').then((res) => setSeasonItemData(res.data)))
         .finally(() => setLoading(false))
     },[])  
     
     const eventDate = loading ? '' : moment(eventData[0].start,'YYYY-MM-DD').format('DD.MM.YYYY')
-
+    const itemUlockAmount = loading ? 0 : seasonItemData.find(item => item.price > sponsorData[0].season_score)
     return (
-        <SafeAreaView style={styles.screen}>
-            <ScrollView>
-                    
-                {loading ? <Text>Loading..</Text>:(
-                    <View style={styles.container}>   
-
+        loading ? <FischLoading/>:(
+            <SafeAreaView style={styles.screen}>
+                <ScrollView>
+                    <View style={styles.container}>
                         <CustomBox onPress= {() => navigation.navigate('Map')} >
-                            <Text style={{fontWeight:'bold'}}>Upcoming Fisch Event</Text>
+                            <CustomText fontWeight='bold'>Upcoming Fisch Event</CustomText>
                             <Image source={{uri:eventData[0].image}} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
-                            <Text>{eventData[0].title}</Text>
-                            <Text>{eventDate}</Text>
+                            <CustomText fontSize={14}>{eventData[0].title}</CustomText>
+                            <CustomText fontSize={14}>{eventDate}</CustomText>
                         </CustomBox>
 
                         <CustomBox onPress= {() => navigation.navigate('Sponsors')} >
-                            <Image source={
-                                sponsorData[0].diamond_sponsor>0 ? require('../assets/diamond_badge.png') : 
-                                sponsorData[0].black_sponsor>0 ? require('../assets/black_badge.png'):
-                                sponsorData[0].gold_sponsor>0 ? require('../assets/gold_badge.png') :
-                                sponsorData[0].silver_sponsor>0 ? require('../assets/silver_badge.png') :
-                                sponsorData[0].bronze_sponsor>0 ? require('../assets/bronze_badge.png') :
-                                null
-                                } style={{ width: '100%', height: 60, resizeMode: 'contain' }} />
-                            <Text> hi {sponsorData[0].first_name}!</Text> 
-                            <Progress.Bar progress={0.3} width={300} height={10} animationType='timing'/>
-                            <Text>xx Fischflocken left to unlock the next item</Text>
+                            <CustomText> hi {sponsorData[0].first_name}!</CustomText> 
+                            <View style={{margin:5}}>
+                                <Image source={
+                                    sponsorData[0].diamond_sponsor>0 ? require('../assets/diamond_badge.png') : 
+                                    sponsorData[0].black_sponsor>0 ? require('../assets/black_badge.png'):
+                                    sponsorData[0].gold_sponsor>0 ? require('../assets/gold_badge.png') :
+                                    sponsorData[0].silver_sponsor>0 ? require('../assets/silver_badge.png') :
+                                    sponsorData[0].bronze_sponsor>0 ? require('../assets/bronze_badge.png') :
+                                    null
+                                    } style={{ width: 50, height: 50, resizeMode: 'contain' }} />
+                            </View>
+                            <Progress.Bar progress={sponsorData[0].season_score/seasonData[0].max_donation} width={200} height={10} animationType='timing' color='darkblue'/>
+                            <View style={{marginTop:5,alignItems:'center',flexDirection:'row'}}>
+                                <CustomText fontSize={14}>Only {itemUlockAmount.price-sponsorData[0].season_score}</CustomText>
+                                <Image source={require('../assets/fisch_flakes.png')} 
+                                    style={{width:12,height:12, marginLeft:1.5}}/>
+                                <CustomText fontSize={14}> left to unlock the next item!</CustomText>
+                            </View>
                         </CustomBox>
 
                         <CustomBox onPress= {() => navigation.navigate('Pictures')} >
-                        <Text style={{fontWeight:'bold'}}>Fisch picture of the day</Text>
-                            <Image source={{uri:pictureData[0].image}} style={{ width: 300, height: 140, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
-                            <Text>{pictureData[0].description}</Text>    
+                        <CustomText fontWeight='bold'>Fisch picture of the day</CustomText>
+                            <Image source={{uri:pictureData[0].image}} style={{ width: Dimensions.get('window').width*0.7, height: Dimensions.get('window').width*0.35, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
+                            <CustomText>{pictureData[0].description}</CustomText>    
                         </CustomBox>
-                                {/* <FlatList
-                                    data={eventData}
-                                    keyExtractor={item=>item.id}
-                                    renderItem={({item}) => {
-                                        return (
-                                        <TouchableOpacity>
-                                            <Text>{item.title}</Text>
-                                            <Text>{item.date}</Text>
-                                        </TouchableOpacity>
-                                        )
-                                    }}
-                                /> */}
+
                         <CustomBox onPress= {() => navigation.navigate('Home')} >
                             <Image source={require('../assets/fisch.png')} style={{ width: '100%', height: 180, resizeMode: 'contain' }}  />
                         </CustomBox>
                     </View>
-                )}
-                
-            </ScrollView>
-        </SafeAreaView>
+                </ScrollView>
+            </SafeAreaView>
+        )
     );
 }
 
