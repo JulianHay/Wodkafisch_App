@@ -1,11 +1,12 @@
 import {View, Text, StyleSheet, useWindowDimensions} from 'react-native';
 import CustomInput from "../components/custom_input";
 import { useState } from 'react';
-import CustomButton from '../components/costum_botton';
+import CustomButton from '../components/custom_botton';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { login } from '../actions/auth';
 import { connect } from 'react-redux';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 const SignInScreen = ({login}) => {
 
