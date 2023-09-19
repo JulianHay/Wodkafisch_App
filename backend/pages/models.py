@@ -56,6 +56,7 @@ class Event(models.Model):
     lat = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=9)
     long = models.DecimalField(null=True, blank=True, max_digits=20, decimal_places=9)
     user = models.CharField(max_length=200, null=True,blank=True)
+    country = models.CharField(max_length=200, null=True, blank=True)
 
 
     def __str__(self):
