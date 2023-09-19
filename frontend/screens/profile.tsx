@@ -1,43 +1,45 @@
 import {View, Text, StyleSheet} from 'react-native';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import FischLoading from '../components/loading';
+import client from '../actions/client';
+import { CustomText } from '../components/text';
+import CustomButton from '../components/custom_botton';
 
-axios.defaults.xsrfCookieName = 'csrftoken';
-axios.defaults.xsrfHeaderName = 'X-CSRFToken';
-axios.defaults.withCredentials = true;
-
-const client = axios.create({
-    baseURL: "http://127.0.0.1:8000"
-  });
 
 
 const ProfileScreen = () => {
 
-    const [sponsorData,setSponsorData] = useState([])
+    const [profileData,setProfileData] = useState([])
+    const [loading, setLoading] = useState(true)
     useEffect(()=>{
-        fetchData();
-    },[])  
-    const fetchData = async () => {
-        const response = await client.get('app/latest_event/',
-            {'withCredentials': true });
-        console.log(response)
-        setSponsorData(response.data);
-        console.log(sponsorData);
-        console.log(response.data);
+        client.get('/sponsor_user_data/').then((res) => setProfileData(res.data))
+        .finally(() => setLoading(false))
+    },[])
+
+    const onChangePasswordPressed = () => {
+        console.log('change password')
     }
-
-
     return (
+        loading ? <FischLoading/> :
         <View style={styles.screen}>
-            <Text>profile</Text>
-            <Text></Text>
-        </View>
+            <CustomText fontWeight='bold' fontSize={24}>Profile</CustomText>
+            <View style={{width:'100%',alignItems:'center',margin:20}}>
+                
+                <CustomText>{profileData[0].first_name} {profileData[0].last_name}</CustomText>
+                {/* <CustomText>{profileData[0].email}</CustomText> */}
+            </View>
+            <View style={{width:'50%'}}>
+                <CustomButton text='Change Password' onPress={onChangePasswordPressed}/>
+            </View>
+            </View>
     )
 }
 
 const styles = StyleSheet.create({
     screen: {
         padding: 20,
+        alignItems:'center'
     }
 })
 
