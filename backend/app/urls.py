@@ -26,4 +26,9 @@ urlpatterns = [
     path(r'login', LoginView.as_view(),name='login'),
     path(r'logout', LogoutView.as_view(),name='logout'),
     path(r'authenticated',CheckAuthenticatedView.as_view(),name='authenticated'),
-]
+    path(r'home',HomeView.as_view(),name='home'),
+    path(r'map', MapView.as_view(), name='map'),
+    path(r'sponsor', SponsorView.as_view(), name='sponsor'),
+    path(r'upload_picture', ImageUploadView.as_view(), name='upload_picture'),
+    path(r'password_change', change_password, name='change_password'),
+    ]
