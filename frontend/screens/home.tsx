@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import {View, Text, StyleSheet, Image, SafeAreaView,ScrollView, FlatList, Touchable,Dimensions} from 'react-native';
+import {View, StyleSheet, Image, SafeAreaView, ScrollView, RefreshControl, Dimensions} from 'react-native';
 import * as Progress from 'react-native-progress';
 import client from '../actions/client';
 import { CustomBox } from '../components/custom_container';
@@ -14,14 +14,19 @@ const HomeScreen = ({navigation}) => {
     const [seasonData,setSeasonData] = useState([])
     const [seasonItemData,setSeasonItemData] = useState([])
     const [loading, setLoading] = useState(true)
-    useEffect(()=>{
 
+    const onRefresh = () => {
+        setLoading(true)
         client.get('/latest_event/').then((res) => setEventData(res.data))
         .then(() => client.get('/sponsor_user_data/').then((res) => setSponsorData(res.data)))
         .then(() => client.get('/latest_picture/').then((res) => setPictureData(res.data)))
         .then(() => client.get('/season/').then((res) => setSeasonData(res.data)))
         .then(() => client.get('/season_items/').then((res) => setSeasonItemData(res.data)))
         .finally(() => setLoading(false))
+    }
+
+    useEffect(()=>{
+        onRefresh()
     },[])  
     
     const eventDate = loading ? '' : moment(eventData[0].start,'YYYY-MM-DD').format('DD.MM.YYYY')
@@ -29,7 +34,7 @@ const HomeScreen = ({navigation}) => {
     return (
         loading ? <FischLoading/>:(
             <SafeAreaView style={styles.screen}>
-                <ScrollView>
+                <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}>
                     <View style={styles.container}>
                         <CustomBox onPress= {() => navigation.navigate('Map')} >
                             <CustomText fontWeight='bold'>Upcoming Fisch Event</CustomText>

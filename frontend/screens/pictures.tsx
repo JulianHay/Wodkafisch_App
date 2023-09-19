@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, Image, FlatList, Dimensions, TouchableOpacity, ImageBackground, Alert} from 'react-native';
+import {View, Text, StyleSheet, Image, FlatList, Dimensions, TouchableOpacity, ImageBackground, Alert, RefreshControl} from 'react-native';
 import { useEffect, useState } from 'react';
 import client from '../actions/client';
 import { CustomText } from '../components/text';
@@ -90,9 +90,13 @@ const PictureScreen = ({ route, navigation }) => {
     const [isPreviewModalVisible, setPreviewModalVisible] = useState(false);
     const [pictureData,setPictureData] = useState([])
     const [loading, setLoading] = useState(true)
-    useEffect(()=>{
-        client.get('/pictures/').then((res) => setPictureData(res.data))
+    const onRefresh = () => {
+      setLoading(true)
+      client.get('/pictures/').then((res) => setPictureData(res.data))
         .finally(() => setLoading(false))
+    }
+    useEffect(()=>{
+      onRefresh()
     },[])  
 
     const renderItem = ({ item }) => (
@@ -127,6 +131,7 @@ const PictureScreen = ({ route, navigation }) => {
                     renderItem={renderItem}
                     numColumns={2}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}
                 />
                 
                 <Modal isVisible={isPictureModalVisible} 
