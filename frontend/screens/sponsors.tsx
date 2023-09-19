@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import {View, Text, StyleSheet, Image, Linking, Dimensions, SafeAreaView, FlatList, TouchableOpacity} from 'react-native';
-import { ScrollView } from "react-native-gesture-handler";
+import {View, ScrollView, RefreshControl, StyleSheet, Image, Linking, TouchableOpacity} from 'react-native';
 import Battlepass from '../components/progress';
 import { CustomText } from '../components/text';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,7 +17,8 @@ const SponsorScreen = () => {
     const [donationData,setDonationData] = useState([])
     const [promoData,setPromoData] = useState([])
     const [loading, setLoading] = useState(true)
-    useEffect(()=>{
+    const onRefresh = () => {
+        setLoading(true)
         client.get('/sponsors/').then((res) => setSponsorData(res.data))
         .then(() => client.get('/sponsor_user_data/').then((res) => setUserSponsorData(res.data)))
         .then(() => client.get('/season/').then((res) => setSeasonData(res.data)))
@@ -26,13 +26,17 @@ const SponsorScreen = () => {
         .then(() => client.get('/donations/').then((res) => setDonationData(res.data)))
         .then(() => client.get('/promo/').then((res) => setPromoData(res.data)))
         .finally(() => setLoading(false))
+    }
+
+    useEffect(()=>{
+        onRefresh()
     },[]) 
 
     const promoDate = !loading ? moment(promoData[0].date.split(' ')[0]) : moment()
     const isPromo = promoDate>= moment()
 
     const renderSponsors = (item) => (
-        <View style={{flexDirection: 'row', marginBottom:3,left:-15}}>
+        <View key={item.username} style={{flexDirection: 'row', marginBottom:3,left:-15}}>
             <View style={{width:110,alignItems:'flex-end', marginRight:20}}>
                 <CustomText fontSize={12} style={{left:0}}>{item.username}:</CustomText>
             </View>
@@ -75,7 +79,7 @@ const SponsorScreen = () => {
         );
 
     const renderDonations = (item) => (
-        <View style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center',margin:5}}>
+        <View key={item.date} style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center',margin:5}}>
             <CustomText>{item.date.split(' ')[0]}:  {item.value} </CustomText>
             <Image source={require('../assets/fisch_flakes.png')} style={{width:15,height:15,top:-1}}/>
         </View>
@@ -83,21 +87,21 @@ const SponsorScreen = () => {
 
     return (
         !loading ?
-        <ScrollView>
+        <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}>
             <View style={styles.container}>
                 <LinearGradient colors={['#007ae6', '#000ddd']} style={styles.battlepass}>
                     {/* Season */}
                     <LinearGradient colors={['#E0AA3E', '#845800']} style={styles.season}>
                         <View>
-                            <CustomText fontSize={14} color={'#fff'} fontWeight={'bold'}>Season 1</CustomText>
-                        </View>
-                            <View>
-                            <Image source={require('../assets/flussbarsch.png')} style={styles.seasonImage}/>
+                            <CustomText fontSize={14} color={'#fff'} fontWeight={'bold'}>Season {seasonData[0].id}</CustomText>
                         </View>
                         <View style={{ alignItems:'flex-end'}}>
-                            <CustomText fontSize={14} color={'#fff'} fontWeight={'bold'}>Flussbarsch</CustomText>
+                            <CustomText fontSize={14} color={'#fff'} fontWeight={'bold'}>{seasonData[0].title}</CustomText>
                         </View>
                     </LinearGradient>
+                    <View>
+                        <Image source={require('../assets/flussbarsch.png')} style={styles.seasonImage}/>
+                    </View>
                     {/* Progress Bar */}
                     <View style={styles.progressBar}>
                         <Battlepass itemData={seasonItemData} seasonData={seasonData} sponsorData={sponsorUserData}/>
@@ -157,7 +161,7 @@ const styles = StyleSheet.create({
     },
     season: {
         width: '90%',
-        height: 40,
+        height: 36,
         borderRadius: 10,
         border: '1px solid #fff',
         fontWeight: 'bold',
@@ -165,16 +169,17 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         flexDirection: 'row',
-        paddingHorizontal: 16,
+        paddingHorizontal: 10,
     },
     progressBar: {
         margin: 0,
     },
     seasonImage: {
         height: 80,
-        width: 110,
-        resizeMode: 'contain',
-        margin: 5, 
+        width: 90,
+        top: -78,
+        resizeMode: 'contain',      
+        marginBottom: -78
     },
     badgeImageContainer: {
         width:33,
