@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable,TouchableOpacity } from "react-native";
 import { useFonts } from 'expo-font';
+import { CustomText } from "./text";
 
 const CustomButton = ({onPress, text, type='PRIMARY',bgColor,fgColor}) =>{
     const [loaded] = useFonts({
@@ -31,6 +32,15 @@ const CustomButton = ({onPress, text, type='PRIMARY',bgColor,fgColor}) =>{
     )
 }
 
+const CloseButton = ({onPress}) => {
+    
+    return (
+        <TouchableOpacity style={{width:30,height:30, backgroundColor:'white',borderRadius:50, alignItems:'center',justifyContent:'center'}} onPress={onPress}>
+            <CustomText fontWeight='bold' fontSize={24}>X</CustomText>
+        </TouchableOpacity>
+    )
+}
+
 const styles = StyleSheet.create({
     container: {
         width: '100%',
@@ -57,3 +67,4 @@ const styles = StyleSheet.create({
 })
 
 export default CustomButton
+export {CloseButton}
