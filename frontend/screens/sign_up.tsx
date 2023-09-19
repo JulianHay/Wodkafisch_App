@@ -1,7 +1,7 @@
-import {View, Text, StyleSheet, useWindowDimensions} from 'react-native';
+import {View, Text, StyleSheet, useWindowDimensions, Linking} from 'react-native';
 import CustomInput from "../components/custom_input";
 import { useState } from 'react';
-import CustomButton from '../components/costum_botton';
+import CustomButton from '../components/custom_botton';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 
@@ -21,11 +21,11 @@ const SignUpScreen = () => {
     }
 
     const onPricacyPolicyPressed = () => {
-        console.warn('Privacy Policy');
+        Linking.openURL('https://www.wodkafis.ch/privacy_policy/');
     }
 
     const onTermsOfUsePressed = () => {
-        console.warn('Terms of Use');
+        Linking.openURL('https://www.wodkafis.ch/terms_and_conditions/')
     }
 
     const onSignInPressed = () => {
