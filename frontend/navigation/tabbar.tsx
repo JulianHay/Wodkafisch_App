@@ -43,10 +43,16 @@ const TabBar = ({isAuthenticated}) => {
         tabBarActiveBackgroundColor: 'darkblue',
         tabBarInactiveBackgroundColor: 'darkblue',
         headerShown: false,
+        tabBarStyle: {backgroundColor: 'darkblue'}
       })}>
         {isAuthenticated ? (
         <>
-          <Tab.Screen name="Home" component={LoginStack}/>
+        <Tab.Screen name="Home" component={LoginStack} 
+          listeners={({ navigation }) => ({
+          tabPress: (e) => {
+          e.preventDefault();
+          navigation.navigate("HomeScreen");
+        },})}/>
           <Tab.Screen name="Map" component={MapScreen}/>
           <Tab.Screen name="Pictures" component={PictureScreen}/>
           <Tab.Screen name="Sponsors" component={SponsorScreen}/>
