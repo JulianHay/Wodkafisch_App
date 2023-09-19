@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef} from 'react';
 import { View, StyleSheet, Animated, Image, Dimensions} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 //import LinearGradient from 'react-native-web-linear-gradient';
 import { CustomText } from './text';
+import { useFocusEffect } from '@react-navigation/native';
 
 function Battlepass({ sponsorData, seasonData, itemData }) {
   const itemSize = 30
-  const progressBarWidth = Dimensions.get('window').width*0.64
+  const progressBarWidth = Dimensions.get('window').width*0.78
   const animatedItemWidths = useRef([]);
 
   const itemAnimations = itemData.map((data, index) => {
@@ -20,7 +21,7 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
     return animation
   });
 
-  const progress = new Animated.Value(0);
+  const [progress] = useState(new Animated.Value(0));
   const progressAnimation = Animated.timing(progress, {
     toValue: sponsorData[0].season_score / seasonData[0].max_donation * progressBarWidth, 
     duration: 3000, 
@@ -53,9 +54,9 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
       left:itemData[index].price/ seasonData[0].max_donation * progressBarWidth}]}>
 
       <View style={{flex:1, flexDirection: 'row', position:'absolute', top: -15, width:30, justifyContent:'center',}}>
-        <CustomText color='white' fontSize={10}>{itemData[index].price}</CustomText>
+        <CustomText color='white' fontSize={8}>{itemData[index].price}</CustomText>
         <Image source={require('../assets/fisch_flakes.png')} 
-        style={{width:10,height:10,marginLeft:3}}/>
+        style={{width:8,height:8,marginLeft:3}}/>
       </View>
 
         <Animated.View
@@ -76,9 +77,11 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
     </View>
   ));
 
-  useEffect(() => {
+  useFocusEffect(() => {
+    progress.setValue(0)
+    itemData.map((data, index) => {animatedItemWidths.current[index].setValue(0)})
     progressAnimation.start();
-  }, []);
+  });
 
   return (
     <View style={styles.container}>
@@ -96,7 +99,7 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
             </LinearGradient>
           </Animated.View>
           <View style={{position: 'absolute', left:5, top:1}}>
-            <CustomText color={'white'} fontSize={12} >{sponsorData[0].season_score}</CustomText>
+            <CustomText color={'white'} fontSize={10} >{sponsorData[0].season_score}</CustomText>
           </View>
       </View>
       <View style={[styles.progressContainer,{width: progressBarWidth}]}>{animatedItems}</View>
@@ -106,7 +109,7 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
+      marginTop: 20,
       alignItems: 'center',
       justifyContent: 'center',
     },
