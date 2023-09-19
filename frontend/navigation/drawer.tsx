@@ -45,21 +45,21 @@ const DrawerNavigator = ({isAuthenticated}) => {
             headerLeft: () => (
             <View style={{padding: 20}}>
                 <SafeAreaView>
-                <Image source={require('../assets/fisch.png')} style={{ width: 50, height: 50, resizeMode: 'contain' }}  />
+                  <Image source={require('../assets/fisch.png')} style={{ width: 50, height: 50, resizeMode: 'contain' }}  />
                 </SafeAreaView>
             </View> 
             ),
             headerRight: () => (
-            <View style={{padding: 20}}>
+            <View style={{paddingRight:20}}>
                 <TouchableOpacity onPress={() => (isAuthenticated ? (navigation.openDrawer()):(''))}>
-                <FontAwesome name='bars' color='white' size={18}/>
+                  <FontAwesome name='bars' color='white' size={20}/>
                 </TouchableOpacity>
             </View>
         ),
         headerStyle: {backgroundColor: 'darkblue'},
         drawerPosition: "right",
         })} drawerContent={(props) => isAuthenticated ? <CustomDrawerContent {...props}/> : (props.navigation.closeDrawer())}>
-            <Drawer.Screen name="Home" component={TabBar}/>
+            <Drawer.Screen name="TabBar" component={TabBar}/>
         </Drawer.Navigator>
     );
 }
