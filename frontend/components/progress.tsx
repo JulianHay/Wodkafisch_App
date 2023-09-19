@@ -72,8 +72,8 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
         <Image source={imagePaths[index]} 
           style={{width:28, height:28, top:2, position:'absolute'} }/>
 
-        <Image source={itemData[index].image} 
-            style={{width:28, height:'100%', top:32, position:'absolute'} }/>
+        <Image source={{uri:itemData[index].image}} 
+            style={{width:28, height:30, top:32, position:'absolute'}} resizeMode='contain'/>
     </View>
   ));
 
@@ -110,6 +110,7 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
 const styles = StyleSheet.create({
     container: {
       marginTop: 20,
+      marginBottom: 30,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -117,7 +118,6 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-start',
-      marginBottom: 20,
       position: 'absolute',
       top: 8,
     },
