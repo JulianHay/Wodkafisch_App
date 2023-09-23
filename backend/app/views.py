@@ -195,6 +195,8 @@ def change_password(request):
             return Response({'error': 'Incorrect old password.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
 class HomeView(APIView):
 
     def get(self,request):
@@ -219,7 +221,7 @@ class MapView(APIView):
         picture = FischPicture.objects.all().order_by('-id')
 
         return Response({
-            'events': event.values('title','image','lat','long'),
+            'events': event.values('title','image','lat','long','country'),
             'pictures': picture.values()
         })
 
@@ -228,19 +230,19 @@ class SponsorView(APIView):
     def get(self,request):
         profile = Profile.objects.get(user_id=request.user.id)
         sponsor_user = Sponsor.objects.filter(id=profile.sponsor_id)
-        sponsor = Sponsor.objects.all()
+        sponsors = Sponsor.objects.all()
         season = Season.objects.all().order_by('-id')[:1]
         season_items = SeasonItem.objects.filter(season_id=season[0].id)
         promo = Promo.objects.all().order_by('-id')[:1]
         donations = Donation.objects.all().order_by('-id')[:5]
         for i, item in enumerate(season_items):
-            if sponsor_user.season_score >= item.price and sponsor.unlocked_items_animation < i + 1:
-                sponsor.unlocked_items_animation += 1
-                sponsor.save()
+            if sponsor_user[0].season_score >= item.price and sponsor_user[0].unlocked_items_animation < i + 1:
+                sponsor_user[0].unlocked_items_animation += 1
+                sponsor_user[0].save()
 
         return Response({
             'sponsor_user': sponsor_user.values(),
-            'sponsor': sponsor.values(),
+            'sponsor': sponsors.values(),
             'season': season.values(),
             'season_items': season_items.values(),
             'promo': promo.values(),

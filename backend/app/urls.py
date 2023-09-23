@@ -16,9 +16,6 @@ router.register(r'season',SeasonViewSet)
 router.register(r'season_items',SeasonItemViewSet)
 router.register(r'donations',DonationViewSet)
 router.register(r'promo',PromoViewSet)
-#router.register(r'register', UserRegister,basename='register')
-#router.register(r'login', UserLogin,basename='login')
-#router.register(r'logout', UserLogout,basename='logout')
 
 urlpatterns = [
     path('',include(router.urls)),
@@ -31,4 +28,5 @@ urlpatterns = [
     path(r'sponsor', SponsorView.as_view(), name='sponsor'),
     path(r'upload_picture', ImageUploadView.as_view(), name='upload_picture'),
     path(r'password_change', change_password, name='change_password'),
+    path(r'password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
     ]
