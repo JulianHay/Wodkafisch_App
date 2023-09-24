@@ -19,14 +19,19 @@ const MapScreen = () => {
   const [imageData,setImageData] = useState([])
   const [loading, setLoading] = useState(true)
   useEffect(()=>{
-      client.get('/events/').then((res) => setEventData(res.data))
-      .then(() => client.get('/pictures/').then((res) => setImageData(res.data)))
+      client.get('/map').then((res) => {
+        setEventData(res.data.events.slice(0))
+        setImageData(res.data.pictures)
+      })
       .finally(() => setLoading(false))
   },[]) 
 
-  const countryList = ['Germany','Germany','Finland','Greece','Italy','Mexico','Brazil']
-  const countries = Countries.features.filter(feature =>
-    countryList.includes(feature.properties.name));
+  // const countryList = loading ? [] : eventData.map((event) => (event.country))
+  // const countries = loading ? [] : Countries.features.filter(feature =>
+  //   countryList.includes(feature.properties.name));
+  const countries = eventData.map(event => {
+    return Countries.features.find(obj => obj.properties.name === event.country);
+  }).filter(Boolean)
 
   const coloredCountries = countries.map((country,index)=> (
     <Geojson key={index} 
@@ -44,7 +49,7 @@ const MapScreen = () => {
     /> 
     ))
   
-  const imageMarkers =  imageData.map((image, index) => (
+  const imageMarkers = imageData.map((image, index) => (
       <Marker key={index} 
       coordinate={{longitude:parseFloat(image.long),latitude:parseFloat(image.lat)}}
       image={require('../assets/maps_marker.png')}
@@ -78,7 +83,7 @@ const MapScreen = () => {
 
               <CustomText color='white' fontSize={24} fontWeight='bold'>{selectedEvent.title}</CustomText>
               <View style={{margin:-40}}>
-                <Image source={{uri:selectedEvent.image}} style={{width:Dimensions.get('window').width*0.4, height:Dimensions.get('window').height*0.4}} resizeMode='contain'/>
+                <Image source={{uri:'https://wodkafis.ch/media/'+selectedEvent.image}} style={{width:Dimensions.get('window').width*0.4, height:Dimensions.get('window').height*0.4}} resizeMode='contain'/>
               </View>
               <CustomText color='white' fontSize={24} fontWeight='bold'>{moment(selectedEvent.start,'YYYY-MM-DD').format('DD.MM.YYYY')}</CustomText>
               {/* <CustomText color='white'>{selectedEvent.description}</CustomText> */}
@@ -94,7 +99,7 @@ const MapScreen = () => {
         <View style={{alignItems:'center'}}>
           {selectedImage && (
             <>
-              <Image source={{uri:selectedImage.image}} 
+              <Image source={{uri:'https://wodkafis.ch/media/'+selectedImage.image}} 
                 style={{width:Dimensions.get('window').width, height:Dimensions.get('window').height}} 
                 resizeMode='contain'/>
               <View style={styles.closeButton}>

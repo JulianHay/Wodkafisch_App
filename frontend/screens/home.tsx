@@ -6,6 +6,10 @@ import { CustomBox } from '../components/custom_container';
 import moment from 'moment';
 import FischLoading from '../components/loading';
 import { CustomText } from '../components/text';
+import Modal from "react-native-modal";
+import FischGame from '../components/game/game';
+import { CloseButton } from '../components/custom_botton';
+import { StatusBar } from 'expo-status-bar';
 
 const HomeScreen = ({navigation}) => {
     const [eventData,setEventData] = useState([])
@@ -14,14 +18,18 @@ const HomeScreen = ({navigation}) => {
     const [seasonData,setSeasonData] = useState([])
     const [seasonItemData,setSeasonItemData] = useState([])
     const [loading, setLoading] = useState(true)
+    const [isEventModalVisible, setEventModalVisible] = useState(false);
+    const [isGameModalVisible, setGameModalVisible] = useState(false);
 
     const onRefresh = () => {
         setLoading(true)
-        client.get('/latest_event/').then((res) => setEventData(res.data))
-        .then(() => client.get('/sponsor_user_data/').then((res) => setSponsorData(res.data)))
-        .then(() => client.get('/latest_picture/').then((res) => setPictureData(res.data)))
-        .then(() => client.get('/season/').then((res) => setSeasonData(res.data)))
-        .then(() => client.get('/season_items/').then((res) => setSeasonItemData(res.data)))
+        client.get('/home').then((res) => {
+            setEventData(res.data.upcoming_event)
+            setPictureData(res.data.picture)
+            setSponsorData(res.data.sponsor)
+            setSeasonData(res.data.season)
+            setSeasonItemData(res.data.season_items)
+        })
         .finally(() => setLoading(false))
     }
 
@@ -38,7 +46,7 @@ const HomeScreen = ({navigation}) => {
                     <View style={styles.container}>
                         <CustomBox onPress= {() => navigation.navigate('Map')} >
                             <CustomText fontWeight='bold'>Upcoming Fisch Event</CustomText>
-                            <Image source={{uri:eventData[0].image}} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
+                            <Image source={{uri:'https://wodkafis.ch/media/'+eventData[0].image}} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
                             <CustomText fontSize={14}>{eventData[0].title}</CustomText>
                             <CustomText fontSize={14}>{eventDate}</CustomText>
                         </CustomBox>
@@ -66,15 +74,33 @@ const HomeScreen = ({navigation}) => {
 
                         <CustomBox onPress= {() => navigation.navigate('Pictures')} >
                         <CustomText fontWeight='bold'>Fisch picture of the day</CustomText>
-                            <Image source={{uri:pictureData[0].image}} style={{ width: Dimensions.get('window').width*0.7, height: Dimensions.get('window').width*0.35, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
+                            <Image source={{uri:'https://wodkafis.ch/media/'+pictureData[0].image}} style={{ width: Dimensions.get('window').width*0.7, height: Dimensions.get('window').width*0.35, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
                             <CustomText>{pictureData[0].description}</CustomText>    
                         </CustomBox>
 
-                        <CustomBox onPress= {() => navigation.navigate('Home')} >
+                        <CustomBox onPress= {() => setGameModalVisible(true)} >
                             <Image source={require('../assets/fisch.png')} style={{ width: '100%', height: 180, resizeMode: 'contain' }}  />
                         </CustomBox>
                     </View>
                 </ScrollView>
+
+                <Modal isVisible={isEventModalVisible} 
+                backdropOpacity={1}
+                onBackdropPress={() => setEventModalVisible(false)}>
+                    <View>
+
+                    </View>
+                </Modal>
+
+                <Modal isVisible={isGameModalVisible} 
+                backdropOpacity={1}
+                statusBarTranslucent={true}>
+                    <View style={{position:'absolute',top:'2%',left:'3%',zIndex:1,transform:[{rotate:'90deg'}]}}>
+                        <CloseButton onPress={()=>{setGameModalVisible(false)}}/>
+                    </View>
+                    <FischGame/>
+                    {/* <StatusBar style='dark' hidden={true} translucent/> */}
+                </Modal>
             </SafeAreaView>
         )
     );

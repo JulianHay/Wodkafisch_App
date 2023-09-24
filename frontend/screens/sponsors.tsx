@@ -19,12 +19,14 @@ const SponsorScreen = () => {
     const [loading, setLoading] = useState(true)
     const onRefresh = () => {
         setLoading(true)
-        client.get('/sponsors/').then((res) => setSponsorData(res.data))
-        .then(() => client.get('/sponsor_user_data/').then((res) => setUserSponsorData(res.data)))
-        .then(() => client.get('/season/').then((res) => setSeasonData(res.data)))
-        .then(() => client.get('/season_items/').then((res) => setSeasonItemData(res.data)))
-        .then(() => client.get('/donations/').then((res) => setDonationData(res.data)))
-        .then(() => client.get('/promo/').then((res) => setPromoData(res.data)))
+        client.get('/sponsor').then((res) => {
+            setSponsorData(res.data.sponsor)
+            setSeasonData(res.data.season)
+            setSeasonItemData(res.data.season_items)
+            setUserSponsorData(res.data.sponsor_user)
+            setDonationData(res.data.donations)
+            setPromoData(res.data.promo) 
+        })
         .finally(() => setLoading(false))
     }
 

@@ -42,7 +42,7 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
               const paths = imagePaths
               paths[index] = require('../assets/chest_open.png')
               setImagePaths(paths)
-              console.log('item unlocked!')
+              // console.log('item unlocked!')
           }})
       }
     }
@@ -72,7 +72,7 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
         <Image source={imagePaths[index]} 
           style={{width:28, height:28, top:2, position:'absolute'} }/>
 
-        <Image source={{uri:itemData[index].image}} 
+        <Image source={{uri:'https://wodkafis.ch/media/'+itemData[index].image}} 
             style={{width:28, height:30, top:32, position:'absolute'}} resizeMode='contain'/>
     </View>
   ));
