@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, useWindowDimensions} from 'react-native';
+import {View, Text, StyleSheet, useWindowDimensions, Alert} from 'react-native';
 import CustomInput from "../components/custom_input";
 import { useState } from 'react';
 import CustomButton from '../components/custom_botton';
@@ -6,7 +6,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { login } from '../actions/auth';
 import { connect } from 'react-redux';
-import * as LocalAuthentication from 'expo-local-authentication';
+import client from '../actions/client';
 
 const SignInScreen = ({login}) => {
 
@@ -17,8 +17,32 @@ const SignInScreen = ({login}) => {
 
     const {height} = useWindowDimensions();
 
-    const onSignInPressed = () => {
-        login(username,password);
+    const onSignInPressed = async() => {
+        if (!username ) {
+            Alert.alert('Please enter your username')
+            return
+        } else if (!password) {
+            Alert.alert('Please enter your password')
+            return
+        }
+        const config = {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        };
+    
+        const body = JSON.stringify({ username, password });
+    
+        try {
+            const res = await client.post('/login', body, config);
+    
+            if (res.data.success) {
+                login(res.data.token)
+            } 
+        } catch(err) {
+            Alert.alert(err.response.data["non_field_errors"][0])
+        }
     }
 
     const onForgotPasswordPressed = () => {

@@ -1,23 +1,39 @@
-import {View, Text, StyleSheet, useWindowDimensions} from 'react-native';
+import {View, Text, StyleSheet, useWindowDimensions, Alert} from 'react-native';
 import CustomInput from "../components/custom_input";
 import { useState } from 'react';
 import CustomButton from '../components/custom_botton';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
+import client from '../actions/client';
+import Modal from 'react-native-modal';
+import { CustomText } from '../components/text';
+import axios from 'axios';
 
 const ResetPasswordScreen = () => {
-
-    const [username,setUsername] = useState('');
-    const [password,setPassword] = useState('');
     const [email,setEmail] = useState('');
-    const [passwordRepeat,setPasswordRepeat] = useState('');
-    
-    const {height} = useWindowDimensions();
 
     const navigation = useNavigation();
 
-    const onResetPasswordPressed = () => {
-        console.warn('ResetPassword');
+    const onResetPasswordPressed = async() => {
+        
+        if (!email) {
+            Alert.alert('please enter your email')
+            return
+          }
+        const config = {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        };
+        try {
+            const res = await client.post('/password_reset/',JSON.stringify({email}),config);
+            if (res.data.status) {
+                navigation.navigate('SubmitResetPasswordCode')
+            }
+        } catch (err) {
+            Alert.alert('Please enter a valid email')
+        }
     }
 
     const onSignInPressed = () => {
@@ -27,9 +43,11 @@ const ResetPasswordScreen = () => {
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.screen}>            
-                <Text style={styles.title}>Reset Password</Text>
-                <CustomInput placeholder='Username' value={username} setValue={setUsername}/>
-                <CustomButton text='Reset Password' onPress={onResetPasswordPressed}/>
+                <CustomText fontSize={24} fontWeight='bold'>Reset Password</CustomText>
+                <View style={{width:'60%',marginTop:10,alignItems:'center'}}>
+                    <CustomInput placeholder='Email' value={email} setValue={setEmail}/>
+                    <CustomButton text='Reset Password' onPress={onResetPasswordPressed}/>
+                </View>
                 <CustomButton text="Have an account? Sign in" onPress={onSignInPressed} type='TERTIARY'/>
             </View>
         </ScrollView>
@@ -39,21 +57,8 @@ const ResetPasswordScreen = () => {
 const styles = StyleSheet.create({
     screen: {
         padding: 20,
+        alignItems:'center'
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#051C60',
-        margin: 10,
-    },
-    text: {
-        color: 'grey',
-        marginVertical: 10,
-    },
-    link: {
-        color: '#FDB075'
-    }
-
 })
 
 export default ResetPasswordScreen

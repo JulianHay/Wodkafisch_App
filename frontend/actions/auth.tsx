@@ -9,8 +9,14 @@ import {
     AUTHENTICATED_FAIL,
     DELETE_USER_SUCCESS,
     DELETE_USER_FAIL,
+    CHANGE_PASSWORD_FAIL,
+    CHANGE_PASSWORD_SUCCESS,
+    CHANGE_PASSWORD_TOKEN_FAIL,
+    CHANGE_PASSWORD_TOKEN_SUCCESS
 } from './types';
 import client from './client';
+import {toast} from 'react-toastify'
+import { useNavigation } from '@react-navigation/native';
 
 export const checkAuthenticated = () => async dispatch => {
     const config = {
@@ -49,7 +55,7 @@ export const checkAuthenticated = () => async dispatch => {
     }
 };
 
-export const register = (username, password, re_password) => async dispatch => {
+export const register = (first_name, last_name, username, email, password, re_password) => async dispatch => {
     const config = {
         headers: {
             'Accept': 'application/json',
@@ -57,7 +63,7 @@ export const register = (username, password, re_password) => async dispatch => {
         }
     };
 
-    const body = JSON.stringify({ username, password, re_password });
+    const body = JSON.stringify({ first_name, last_name, username, email, password, re_password });
 
     try {
         const res = await client.post('/register', body, config);
@@ -137,35 +143,11 @@ export const delete_account = () => async dispatch => {
     }
 };
 
-export const login = (username, password) => async dispatch => {
-    const config = {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        }
-    };
-
-    const body = JSON.stringify({ username, password });
-
-    try {
-        const res = await client.post('/login', body, config);
-
-        if (res.data.success) {
-            dispatch({
-                type: LOGIN_SUCCESS,
-                payload: res.data.token
-            });
-
-        } else {
-            dispatch({
-                type: LOGIN_FAIL
-            });
-        }
-    } catch(err) {
-        dispatch({
-            type: LOGIN_FAIL
-        });
-    }
+export const login = (token) => async dispatch => {
+    dispatch({
+        type: LOGIN_SUCCESS,
+        payload: token
+    });
 };
 
 export const fetchData = (url) => async dispatch => {
@@ -184,3 +166,16 @@ export const fetchData = (url) => async dispatch => {
     }
 
 };
+
+export const setPasswordResetToken = (token) => async dispatch => {
+    dispatch({
+        type: CHANGE_PASSWORD_TOKEN_SUCCESS,
+        payload: token
+        });
+}
+
+export const passwordReset = () =>async dispatch => {
+    dispatch({
+        type: CHANGE_PASSWORD_SUCCESS
+        });
+}

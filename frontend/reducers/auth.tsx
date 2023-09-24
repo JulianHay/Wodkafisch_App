@@ -9,11 +9,16 @@ import {
     AUTHENTICATED_FAIL,
     DELETE_USER_SUCCESS,
     DELETE_USER_FAIL,
+    CHANGE_PASSWORD_FAIL,
+    CHANGE_PASSWORD_SUCCESS,
+    CHANGE_PASSWORD_TOKEN_FAIL,
+    CHANGE_PASSWORD_TOKEN_SUCCESS
 } from '../actions/types';
 
 const initialState = {
     isAuthenticated: null,
-    token: null
+    token: null,
+    passwordResetToken: null
 };
 
 export default function(state = initialState, action) {
@@ -44,7 +49,19 @@ export default function(state = initialState, action) {
                 isAuthenticated: false,
                 token: null
             }
+        case CHANGE_PASSWORD_TOKEN_SUCCESS:
+            return {
+                ...state,
+                passwordResetToken: payload
+            }
+        case CHANGE_PASSWORD_SUCCESS:
+            return {
+                ...state,
+                passwordResetToken: null
+            }
         case REGISTER_FAIL:
+        case CHANGE_PASSWORD_TOKEN_FAIL:
+        case CHANGE_PASSWORD_FAIL:
         case LOGIN_FAIL:
         case LOGOUT_FAIL:
         case DELETE_USER_FAIL:

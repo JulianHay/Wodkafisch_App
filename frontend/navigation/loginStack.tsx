@@ -7,6 +7,9 @@ import SignUpScreen from "../screens/sign_up";
 import { connect } from 'react-redux';
 import { checkAuthenticated } from '../actions/auth';
 import ResetPasswordScreen from "../screens/reset_password";
+import SubmitResetPasswordCodeScreen from "../screens/submit_reset_password_code";
+import SubmitResetPasswordScreen from "../screens/submit_reset_password";
+import ChangePasswordScreen from "../screens/change_password";
 
 const Stack = createStackNavigator()
 
@@ -25,12 +28,15 @@ const LoginStack = ({isAuthenticated}) => {
                 <>
                 <Stack.Screen name="HomeScreen" component={HomeScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
                 </>
             ) : (
                 <>
                 <Stack.Screen name="SignIn" component={SignInScreen} />
                 <Stack.Screen name="SignUp" component={SignUpScreen} />
                 <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+                <Stack.Screen name="SubmitResetPasswordCode" component={SubmitResetPasswordCodeScreen} />
+                <Stack.Screen name="SubmitResetPassword" component={SubmitResetPasswordScreen} />
                 </>
             )}
         </Stack.Navigator>

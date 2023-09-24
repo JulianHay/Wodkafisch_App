@@ -4,9 +4,13 @@ import { useState } from 'react';
 import CustomButton from '../components/custom_botton';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
+import client from '../actions/client';
+import { register } from '../actions/auth';
 
 const SignUpScreen = () => {
 
+    const [firstName,setFirstName] = useState('');
+    const [lastName,setLastName] = useState('');
     const [username,setUsername] = useState('');
     const [password,setPassword] = useState('');
     const [email,setEmail] = useState('');
@@ -17,7 +21,7 @@ const SignUpScreen = () => {
     const navigation = useNavigation();
 
     const onRegisterPressed = () => {
-        console.warn('Register');
+        register(firstName,lastName,username,email,password,passwordRepeat);
     }
 
     const onPricacyPolicyPressed = () => {
@@ -36,6 +40,8 @@ const SignUpScreen = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.screen}>            
                 <Text style={styles.title}>Sign Up</Text>
+                <CustomInput placeholder='Fisrt Name' value={firstName} setValue={setFirstName}/>
+                <CustomInput placeholder='Last Name' value={lastName} setValue={setLastName}/>
                 <CustomInput placeholder='Username' value={username} setValue={setUsername}/>
                 <CustomInput placeholder='Email' value={email} setValue={setEmail} />
                 <CustomInput placeholder='Password' value={password} setValue={setPassword} secureTextEntry/>

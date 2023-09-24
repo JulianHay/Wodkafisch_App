@@ -5,6 +5,7 @@ import FischLoading from '../components/loading';
 import client from '../actions/client';
 import { CustomText } from '../components/text';
 import CustomButton from '../components/custom_botton';
+import { useNavigation } from '@react-navigation/native';
 
 
 
@@ -12,13 +13,14 @@ const ProfileScreen = () => {
 
     const [profileData,setProfileData] = useState([])
     const [loading, setLoading] = useState(true)
+    const navigation = useNavigation()
     useEffect(()=>{
         client.get('/sponsor_user_data/').then((res) => setProfileData(res.data))
         .finally(() => setLoading(false))
     },[])
 
     const onChangePasswordPressed = () => {
-        console.log('change password')
+        navigation.navigate('ChangePassword') 
     }
     return (
         loading ? <FischLoading/> :
