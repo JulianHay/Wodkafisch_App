@@ -52,7 +52,7 @@ const PictureScreen = ({ route, navigation }) => {
               'Content-Type': 'application/json',
           }
         };
-        const image = capturedImage
+        const image = capturedImage.uri
         const lat = location.coords.latitude
         const long = location.coords.longitude
         const body = JSON.stringify({ image, description, lat, long});
