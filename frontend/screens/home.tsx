@@ -78,9 +78,9 @@ const HomeScreen = ({navigation}) => {
                             <CustomText>{pictureData[0].description}</CustomText>    
                         </CustomBox>
 
-                        <CustomBox onPress= {() => setGameModalVisible(true)} >
+                        {/* <CustomBox onPress= {() => setGameModalVisible(true)} >
                             <Image source={require('../assets/fisch.png')} style={{ width: '100%', height: 180, resizeMode: 'contain' }}  />
-                        </CustomBox>
+                        </CustomBox> */}
                     </View>
                 </ScrollView>
 
@@ -92,15 +92,15 @@ const HomeScreen = ({navigation}) => {
                     </View>
                 </Modal>
 
-                <Modal isVisible={isGameModalVisible} 
+                {/* <Modal isVisible={isGameModalVisible} 
                 backdropOpacity={1}
                 statusBarTranslucent={true}>
                     <View style={{position:'absolute',top:'2%',left:'3%',zIndex:1,transform:[{rotate:'90deg'}]}}>
                         <CloseButton onPress={()=>{setGameModalVisible(false)}}/>
                     </View>
                     <FischGame/>
-                    {/* <StatusBar style='dark' hidden={true} translucent/> */}
-                </Modal>
+                    <StatusBar style='dark' hidden={true} translucent/>
+                </Modal> */}
             </SafeAreaView>
         )
     );

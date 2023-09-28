@@ -4,6 +4,7 @@ import { Text, TouchableOpacity, View, Dimensions } from 'react-native';
 import { GameEngine } from 'react-native-game-engine';
 import entities from './entities';
 import Physics from './physics';
+import { CustomText } from '../text';
 
 const FischGame = () => {
     const [running, setRunning] = useState(false)
@@ -13,8 +14,8 @@ const FischGame = () => {
       setRunning(false)
     }, [])
     return (
-      <View style={{ flex: 1, transform: [{rotate:'-90deg'}],alignItems:'center' }}>
-        <Text style={{ textAlign: 'center', fontSize: 40, fontWeight: 'bold', margin: 20 }}>{currentPoints}</Text>
+      <View style={{ backgroundColor:'black',width:Dimensions.get('window').height,height:Dimensions.get('window').width, transform: [{rotate:'-90deg'}],alignItems:'center' }}>
+        <CustomText fontSize={40} fontWeight='bold' color='white'>{currentPoints}</CustomText>
         <GameEngine
           ref={(ref) => { setGameEngine(ref) }}
           systems={[Physics]}
@@ -45,9 +46,9 @@ const FischGame = () => {
                 setRunning(true)
                 gameEngine.swap(entities())
               }}>
-              <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 30 }}>
+              <CustomText fontWeight='bold' color='white' fontSize={30}>
                 START GAME
-              </Text>
+              </CustomText>
             </TouchableOpacity>
   
           </View> : null}

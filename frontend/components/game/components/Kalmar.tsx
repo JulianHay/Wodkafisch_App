@@ -2,7 +2,7 @@ import Matter from 'matter-js'
 import React from 'react'
 import { View } from 'react-native'
 
-const Obstacle = props => {
+const Kalmar = props => {
     const widthBody = props.body.bounds.max.x - props.body.bounds.min.x
     const heightBody = props.body.bounds.max.y - props.body.bounds.min.y
 
@@ -13,14 +13,14 @@ const Obstacle = props => {
 
     return (
         <View style={{
-            borderWidth: 1,
+            borderWidth: 3,
             borderColor: color,
             borderStyle: 'solid',
             position: 'absolute',
             left: xBody,
             top: yBody,
             width: widthBody,
-            height: heightBody
+            height: heightBody,
         }} />
     )
 }
@@ -33,7 +33,17 @@ export default (world, label, color, pos, size) => {
         size.height,
         {
             label,
-            isStatic: true
+            restitution: 0, 
+            friction: 0, 
+            frictionAir: 0, 
+            frictionStatic: 0,
+            inertia: 'Infinity',
+            collisionFilter: {
+                group: -1,
+                category: 1,
+                mask: 2,
+            }
+
         }
     )
     Matter.World.add(world, initialObstacle)
@@ -42,6 +52,6 @@ export default (world, label, color, pos, size) => {
         body: initialObstacle,
         color,
         pos,
-        renderer: <Obstacle />
+        renderer: <Kalmar />
     }
 }

@@ -30,7 +30,13 @@ export default (world, color, pos, size) => {
        pos.x,
        pos.y,
        size.radius,
-       {label: 'Fisch'}
+       {label: 'Fisch',
+        collisionFilter: {
+        group: 0,
+        category: 2,
+        mask: 1,
+    }
+        }
    )
    Matter.World.add(world, initialFisch)
 
