@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Fisch",
-    "slug": "Fisch",
-    "version": "1.0.0",
+    "name": "Wodkafisch",
+    "slug": "frontend",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/app_icon.png",
     "userInterfaceStyle": "light",
@@ -19,14 +19,22 @@
       "bundleIdentifier": "com.wodkafisch.app",
       "infoPlist": {
         "NSFaceIDUsageDescription": "This app uses FaceID / TouchID for authentication."
-      }
+      },
+      "config":{
+        "googleMapsApiKey": "AIzaSyDdecQFweuYKopW_i5U5QwoVstW-GPZqk4"
+        }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/app_icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.wodkafisch.app"
+      "package": "com.wodkafisch.app",
+      "config":{
+        "googleMaps": {
+          "apiKey": "AIzaSyDdecQFweuYKopW_i5U5QwoVstW-GPZqk4"
+          }
+        }
     },
     "web": {
       "favicon": "./assets/favicon.png"
