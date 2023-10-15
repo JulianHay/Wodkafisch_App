@@ -1,5 +1,4 @@
-import {View, Text, StyleSheet} from 'react-native';
-import axios from 'axios';
+import {View, StyleSheet} from 'react-native';
 import { useEffect, useState } from 'react';
 import FischLoading from '../components/loading';
 import client from '../actions/client';
