@@ -1,8 +1,7 @@
-import {View, StyleSheet, Alert} from 'react-native';
+import {View, StyleSheet, Alert, ScrollView} from 'react-native';
 import CustomInput from "../components/custom_input";
 import { useState } from 'react';
 import CustomButton, { CloseButton } from '../components/custom_botton';
-import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import client from '../actions/client';
 import { CustomText } from '../components/text';

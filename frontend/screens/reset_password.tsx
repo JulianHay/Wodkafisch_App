@@ -1,13 +1,10 @@
-import {View, Text, StyleSheet, useWindowDimensions, Alert} from 'react-native';
+import {View, StyleSheet, ScrollView, Alert} from 'react-native';
 import CustomInput from "../components/custom_input";
 import { useState } from 'react';
 import CustomButton from '../components/custom_botton';
-import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import client from '../actions/client';
-import Modal from 'react-native-modal';
 import { CustomText } from '../components/text';
-import axios from 'axios';
 
 const ResetPasswordScreen = () => {
     const [email,setEmail] = useState('');

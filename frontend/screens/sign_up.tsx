@@ -1,8 +1,7 @@
-import {View, Text, StyleSheet, useWindowDimensions, Linking} from 'react-native';
+import {View, Text, StyleSheet, useWindowDimensions, Linking, ScrollView} from 'react-native';
 import CustomInput from "../components/custom_input";
 import { useState } from 'react';
 import CustomButton from '../components/custom_botton';
-import { ScrollView } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import client from '../actions/client';
 import { register } from '../actions/auth';

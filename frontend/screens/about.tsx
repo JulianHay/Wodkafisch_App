@@ -1,6 +1,5 @@
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet,ScrollView} from 'react-native';
 import { CustomText } from '../components/text';
-import { ScrollView } from 'react-native-gesture-handler';
 
 const AboutScreen = () => {
     return (
