@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Dimensions, Linking} from 'react-native';
-import MapView, { Marker, Geojson} from 'react-native-maps';
+import MapView, { Marker, Geojson, PROVIDER_GOOGLE} from 'react-native-maps';
+import { MapViewWithHeading, ArrowedPolyline } from 'react-native-maps-line-arrow';
 import Countries from '../assets/countries'
 import client from '../actions/client';
 import { CustomText } from '../components/text';
@@ -8,7 +9,7 @@ import Modal from "react-native-modal";
 import { FontAwesome5 } from '@expo/vector-icons';
 import moment from 'moment';
 import FischLoading from '../components/loading';
-import { CloseButton } from '../components/custom_botton';
+import CustomButton, { CloseButton } from '../components/custom_botton';
 
 const MapScreen = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -18,6 +19,7 @@ const MapScreen = () => {
   const [eventData,setEventData] = useState([])
   const [imageData,setImageData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [routeVisible,setRouteVisible] = useState(false)
   useEffect(()=>{
       client.get('/map').then((res) => {
         setEventData(res.data.events.slice(0))
@@ -26,9 +28,6 @@ const MapScreen = () => {
       .finally(() => setLoading(false))
   },[]) 
 
-  // const countryList = loading ? [] : eventData.map((event) => (event.country))
-  // const countries = loading ? [] : Countries.features.filter(feature =>
-  //   countryList.includes(feature.properties.name));
   const countries = eventData.map(event => {
     return Countries.features.find(obj => obj.properties.name === event.country);
   }).filter(Boolean)
@@ -61,14 +60,39 @@ const MapScreen = () => {
       }}>
       </Marker>
     ))
+
+  const fischRoute = eventData.map(event => (
+    {latitude:event.lat,longitude:event.long}
+  ))
+
+  const arrow = ({size,color}) => (
+      <View style={{
+            width: 0,
+            height: 0,
+            backgroundColor: 'transparent',
+            borderStyle: 'solid',
+            borderTopWidth: 0,
+            borderRightWidth: size/2,
+            borderBottomWidth: size,
+            borderLeftWidth: size/2,
+            borderTopColor: 'transparent',
+            borderRightColor: 'transparent',
+            borderBottomColor: color,
+            borderLeftColor: 'transparent',
+      }} />
+  )
   
   return (
     loading ? <FischLoading/> :
     <View style={styles.container}>
-      <MapView style={styles.map}>
+      <View style={{position:'absolute',top:10,right:20,zIndex:1}}>
+        <CustomButton onPress={()=>{setRouteVisible(!routeVisible)}} text={routeVisible ? 'Hide Route' : 'Show Route'} bgColor='darkblue' fgColor='white'/>
+      </View>
+      <MapViewWithHeading style={styles.map} provider={PROVIDER_GOOGLE}>
         {coloredCountries}
         {imageMarkers}
-      </MapView>
+        {routeVisible ? <ArrowedPolyline coordinates={fischRoute} arrowSize={15} strokeWidth={4} strokeColor="#000080" lineDashPattern={[1,10]} arrow={arrow} geodesic/> : null}
+      </MapViewWithHeading>
 
       <Modal isVisible={isEventModalVisible} 
       backdropOpacity={1}
