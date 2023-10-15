@@ -516,6 +516,15 @@ def battle_pass(request):
 
         return render(request, 'pages/battle_pass.html',context=context)
 
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete()
+        logout(request)
+        return redirect('home')
+    return render(request, 'user/delete_account.html')
+
 @user_passes_test(lambda u: u.is_staff)
 def fischboard(request):
     if request.method == 'POST':

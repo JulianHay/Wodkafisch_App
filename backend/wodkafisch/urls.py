@@ -73,7 +73,7 @@ urlpatterns = [
              template_name='user/password_reset_complete.html'
          ),
          name='password_reset_complete'),
-
+    path('delete_user/', delete_account, name='delete_user'),
     path('terms_and_conditions/', terms_and_conditions, name='Terms and Conditions'),
     path('privacy_policy/', privacy_policy, name='Privacy Policy'),
 

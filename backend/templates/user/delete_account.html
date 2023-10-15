@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wodkafisch - Password Change{% endblock%}
+
+{% block content %}
+
+        <section class="bg-dark wrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-2"></div>
+                    <div class="col-lg-8 text-center">
+                        <h2 class="section-heading">Delete Account</h2>
+                        <h3 class="section-subheading text-muted"> </h3>
+                        
+                        <form method="post">
+					        {% csrf_token %}
+					        <button type="submit">Delete Account</button>
+					        <p><a href="{% url 'home' %}">Back</a></p>
+					    </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+{% endblock%}
+
