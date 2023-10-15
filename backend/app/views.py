@@ -221,7 +221,7 @@ class MapView(APIView):
         picture = FischPicture.objects.all().order_by('-id')
 
         return Response({
-            'events': event.values('title','image','lat','long','country'),
+            'events': event.values('title','image','lat','long','country','start'),
             'pictures': picture.values()
         })
 
