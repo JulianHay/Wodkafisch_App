@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "wodkafisch",
+  "private_key_id": "3e4ca3360f3e7778bea020e490747c0643b51e5a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDAW2cjm+mL1iOg\nLTp0rhT/Hb+BsH9CbaPg7sn6A2IsyGMhztXjH1g5qggxsuYaO7zLxfrO5Cdc+Af7\nQhpNey3wjRnXuoh470bvaxga316VbIezO6Iz2hH3kQpvPV6nd6S4ZnRag4OCuQCe\npoKf1eABaVUGgs7921J4WaVdECMyxx6ll3e/uKOr1xIND0kcxnjHysPB/DdFpvY0\nz2CKzxYRwRHrvusPgpQ+cGbsWFfWqN2aMZ1TzQDTm1GrmSiUEoygUQyeStPCZDeQ\n1+/nj/QZTm5E2UyI/ip9ON8JBzKYNggQGXbzkuDe8yajSu25yjXGPwVN7ddRfpnI\n+rLVpsqJAgMBAAECggEADKK0brliKQZjBrWR3nJE/NEmcE14vpNXLYJiECNCwrBT\nGrhsgmPftsH9kc4voU+FQll59Tc1grzkQVQBSE+sH94U8X/WUSNepIGDbth3bRdY\n/qQPLprHjVygs9fzLMsGLfrE7+EttVuTt9g2QmuZMF6L8EaNdE2A6FjzLN7PgRlI\nFSJ0Nw0LDpUn8M2Xc3swNa2XhAjS2ZbQxxNZAI8TMZ7MBqbgnrNnsYIzgvj9/HIY\nzDdtjSpadUNnlQUtIvDm5iHEtt5HaNkNllI1qznPbpE3I4LiyzK9mHKP0SgAX3jY\nZq31aK/PcjWLmQNg7qfq5xC5mb5pmyKXLPYjhV5VhQKBgQD0+2ylndVcJEQ/tKHu\nGQ2oc2TQT7kWWMM59xawl4Kk7ohVbBBmK+WLUjRttlgfA8dJ/l0GQYaj2rHkvzEp\nW9kWvCOZHy5DWJxMx91OfGtTG6W7hPZIzURHo9cedOXr0wOZnjRkPJqs7KqbMeUg\nBmkaN9Y+pG2mYcbbqtuYJTduewKBgQDJAhXPApfuDk9qdhGk7RZAulWWG3tFaasp\nXgD+Nn2EENjmCeLF+D8dcZAOjH5Z6430CyMKCvdbCGGOMvJsgruUwIST3hQptVWZ\nHcoMMW7NkVVYQksuL9S3qnQ6+dPC2N3/ZCMH+PamHpX7BuVcW2ED1Jna6Xwvp7Fr\nuYvWoVbdywKBgDg/Lc/MsDsKnJzf1Tn8iJU/gUsOstk9of1CDPSYpMdHeQfb2twK\nghZ91knGTu84B96mRydzjf067hMuDpSHYQ2GPsoeTZnq02ARl284w89+DoxCV+WZ\nM28bX/2/Kzb86NuxZigJfh3r7LPbPdcfgawiW89gI0jLNEQlM2v4R4TXAoGAb7st\n/jS12QixUj8xDZkQDojE/DxoaCwVjVgIe0Y0vM1Uk4IZQOv9wVMXvU6RCVCrRmVO\nY822sy5Uc+OT54c/166vwzXlxU1buFHbtq1fpvrLEtU+zvydZD5mf0XRVPSRad3y\nrwLPr4U+3xt1MMJGigeKQioY8rBnKbcoqPRjwcMCgYEA2YkY+n4nlEcsQEWxPQHg\nxZ1PMxrEz2edr7MzRgYHKunOBpcRxRENTGiWGU9NNnd+RvTuqJDhy+9PVwJ29i5q\n9N7cdO9A2gQUnU+XegZDrF250ILeBPdiCVZE6N8BebQEefxkvZfVDDnneOoxcfGD\nfsigBNq93x2nFwrTpPrRmEY=\n-----END PRIVATE KEY-----\n",
+  "client_email": "wodkafisch@wodkafisch.iam.gserviceaccount.com",
+  "client_id": "106314737698728912977",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/wodkafisch%40wodkafisch.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
