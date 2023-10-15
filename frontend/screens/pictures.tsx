@@ -48,17 +48,33 @@ const PictureScreen = ({ route, navigation }) => {
       else {
         const config = {
           headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data'
           }
         };
-        const image = capturedImage.uri
-        const lat = location.coords.latitude
-        const long = location.coords.longitude
-        const body = JSON.stringify({ image, description, lat, long});
-        const res = await client.post('/upload_picture', body, config);
-        setCameraModalVisible(false)
-        setPreviewVisible(false)
+        // const image = capturedImage
+        // const lat = location.coords.latitude
+        // const long = location.coords.longitude
+        // const body = JSON.stringify({ image, description, lat, long});
+
+        const body = new FormData();
+    
+        body.append('image',{ uri: capturedImage.uri,
+                              type: 'image/jpeg',
+                              name: description+'.jpeg'})
+        body.append('lat', location.coords.latitude)
+        body.append('long',location.coords.longitude)
+        body.append('description',description)
+        try {
+          const res = await client.post('/upload_picture', body, config);
+          if (res.data.success) {
+            setCameraModalVisible(false)
+            setPreviewVisible(false)
+            onRefresh()
+          }
+        } catch (err) {
+          Alert.alert(err)
+        }
+          
       }
     }
     else {
@@ -99,11 +115,15 @@ const PictureScreen = ({ route, navigation }) => {
       onRefresh()
     },[])  
 
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item, index }) => (
         <TouchableOpacity style={styles.imageContainer} 
         onPress={() => {
-        setSelectedPicture(item);
-        setPictureModalVisible(true);}}>
+          navigation.navigate('PictureDetailScreen',{
+            index: index,
+          })
+        // setSelectedPicture(item);
+        // setPictureModalVisible(true);
+        }}>
             <Image source={{uri:item.image}} style={styles.image}/>
             <View style={styles.imageDescription}>
                 <View style={{width:'65%', alignItems:'flex-start',padding:10}}>
@@ -328,7 +348,7 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
             <View
               style={{
                 flexDirection: 'row',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}
             >
               {/* <TouchableOpacity
@@ -368,10 +388,10 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
                 </CustomText>
               </TouchableOpacity> */}
               <View style={{width: '35%', marginRight:40}}>
-                <CustomButton onPress={retakePicture} text='Re-take'/>
+                <CustomButton onPress={retakePicture} text='Re-take' bgColor='black' fgColor='white'/>
               </View>
               <View style={{width: '35%', marginLeft:40}}>
-                <CustomButton onPress={()=>{savePhoto(description)}} text='Save Picture'/>
+                <CustomButton onPress={()=>{savePhoto(description)}} text='Save' bgColor='black' fgColor='white'/>
               </View>
             </View>
           </View>

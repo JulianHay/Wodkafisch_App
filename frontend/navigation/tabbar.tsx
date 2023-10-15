@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome } from '@expo/vector-icons';
 import SponsorScreen from '../screens/sponsors';
-import HomeScreen from '../screens/home';
 import MapScreen from '../screens/map';
 import PictureScreen from '../screens/pictures';
 import AboutScreen from '../screens/about';
@@ -9,6 +8,7 @@ import LoginStack from './loginStack';
 import { connect } from 'react-redux';
 import { useEffect } from 'react';
 import { checkAuthenticated } from '../actions/auth';
+import PictureStack from './pictureStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -54,7 +54,7 @@ const TabBar = ({isAuthenticated}) => {
           navigation.navigate("HomeScreen");
         },})}/>
           <Tab.Screen name="Map" component={MapScreen}/>
-          <Tab.Screen name="Pictures" component={PictureScreen}/>
+          <Tab.Screen name="Pictures" component={PictureStack}/>
           <Tab.Screen name="Sponsors" component={SponsorScreen}/>
           <Tab.Screen name="About" component={AboutScreen}/>
         </>

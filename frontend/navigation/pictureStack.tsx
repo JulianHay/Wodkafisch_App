@@ -1,6 +1,6 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import PictureScreen from "../screens/pictures";
-import { CameraScreen, PreviewScreen } from "../screens/camera";
+import PictureDetailScreen from "../screens/picturesDetail";
 
 const Stack = createStackNavigator()
 
@@ -12,8 +12,7 @@ const PictureStack = () => {
         })}>
         
             <Stack.Screen name="PictureScreen" component={PictureScreen} />
-            <Stack.Screen name="Camera" component={CameraScreen} />
-            <Stack.Screen name="PicturePreview" component={PreviewScreen} />
+            <Stack.Screen name="PictureDetailScreen" component={PictureDetailScreen} />
 
         </Stack.Navigator>
     );
