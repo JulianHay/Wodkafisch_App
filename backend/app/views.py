@@ -18,6 +18,7 @@ from pages.tokens import account_activation_token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import update_session_auth_hash
+import random
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
@@ -27,8 +28,11 @@ class LatestEventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all().order_by('-id')[:1]
     serializer_class = EventModelSerializer
 
+def parse_date_string(date_string):
+    return datetime.strptime(date_string, '%d/%m/%Y')
+
 class PictureViewSet(viewsets.ModelViewSet):
-    queryset = FischPicture.objects.all()
+    queryset = FischPicture.objects.all().order_by('-id')
     serializer_class = PictureModelSerializer
 
 class LatestPictureViewSet(viewsets.ModelViewSet):
@@ -205,14 +209,18 @@ class HomeView(APIView):
         season = Season.objects.all().order_by('-id')[:1]
         season_items = SeasonItem.objects.filter(season_id=season[0].id)
         event = Event.objects.all().order_by('-id')[:1]
-        picture = FischPicture.objects.all().order_by('-id')[:1]
-
+        pictures = FischPicture.objects.all()
+        current_date = datetime.today()
+        date_seed = int(current_date.strftime("%Y%m%d"))
+        random.seed(date_seed)
+        latest_picture = random.sample(list(pictures), 1)[0]
+        serializer = PictureModelSerializer(latest_picture)
         return Response({
             'upcoming_event': event.values(),
             'sponsor': sponsor.values(),
             'season': season.values(),
             'season_items': season_items.values(),
-            'picture': picture.values()
+            'picture': serializer.data#picture.values()
         })
 
 class MapView(APIView):
