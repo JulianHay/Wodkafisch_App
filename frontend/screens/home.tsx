@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import {View, StyleSheet, Image, SafeAreaView, ScrollView, RefreshControl, Dimensions} from 'react-native';
-import * as Progress from 'react-native-progress';
+import {View, StyleSheet, Image, SafeAreaView, ScrollView, RefreshControl, Dimensions, Animated} from 'react-native';
 import client from '../actions/client';
 import { CustomBox } from '../components/custom_container';
 import moment from 'moment';
 import FischLoading from '../components/loading';
 import { CustomText } from '../components/text';
 import Modal from "react-native-modal";
-import FischGame from '../components/game/game';
-import { CloseButton } from '../components/custom_botton';
-import { StatusBar } from 'expo-status-bar';
+import { useFocusEffect } from '@react-navigation/native';
+// import FischGame from '../components/game/game';
+// import { CloseButton } from '../components/custom_botton';
+// import { StatusBar } from 'expo-status-bar';
 
 const HomeScreen = ({navigation}) => {
     const [eventData,setEventData] = useState([])
@@ -19,7 +19,14 @@ const HomeScreen = ({navigation}) => {
     const [seasonItemData,setSeasonItemData] = useState([])
     const [loading, setLoading] = useState(true)
     const [isEventModalVisible, setEventModalVisible] = useState(false);
-    const [isGameModalVisible, setGameModalVisible] = useState(false);
+    // const [isGameModalVisible, setGameModalVisible] = useState(false);
+
+    const [progress] = useState(new Animated.Value(0));
+    const progressAnimation = loading ? null : Animated.timing(progress, {
+        toValue: sponsorData[0].season_score/seasonData[0].max_donation * 250, 
+        duration: 2000, 
+        useNativeDriver: false, 
+      })
 
     const onRefresh = () => {
         setLoading(true)
@@ -36,6 +43,11 @@ const HomeScreen = ({navigation}) => {
     useEffect(()=>{
         onRefresh()
     },[])  
+
+    useFocusEffect(() => {
+        progress.setValue(0)
+        loading ? null : progressAnimation.start();
+      });
     
     const eventDate = loading ? '' : moment(eventData[0].start,'YYYY-MM-DD').format('DD.MM.YYYY')
     const itemUlockAmount = loading ? 0 : seasonItemData.find(item => item.price > sponsorData[0].season_score)
@@ -46,14 +58,31 @@ const HomeScreen = ({navigation}) => {
                     <View style={styles.container}>
                         <CustomBox onPress= {() => navigation.navigate('Map')} >
                             <CustomText fontWeight='bold'>Upcoming Fisch Event</CustomText>
+                            {moment(eventData[0].start,'YYYY-MM-DD')>moment() ?
+                            <>
                             <Image source={{uri:'https://wodkafis.ch/media/'+eventData[0].image}} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
                             <CustomText fontSize={14}>{eventData[0].title}</CustomText>
                             <CustomText fontSize={14}>{eventDate}</CustomText>
+                            </>
+                            :
+                            <>
+                            <Image source={require('../assets/upcoming_event_fisch.png')} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
+                            <CustomText fontSize={14}>will be announced soon!</CustomText>
+                            </>
+                        
+                        }
                         </CustomBox>
 
                         <CustomBox onPress= {() => navigation.navigate('Sponsors')} >
-                            <CustomText> hi {sponsorData[0].first_name}!</CustomText> 
-                            <View style={{margin:5}}>
+                            <CustomText fontWeight='bold'> hi {sponsorData[0].first_name}!</CustomText> 
+                            <View style={{margin:5, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+                                {sponsorData[0].diamond_sponsor>0 || 
+                                sponsorData[0].black_sponsor>0 || 
+                                sponsorData[0].gold_sponsor>0 ||
+                                sponsorData[0].silver_sponsor>0 ||
+                                sponsorData[0].bronze_sponsor>0 ? <CustomText>Level: </CustomText>:
+                                null}
+                                
                                 <Image source={
                                     sponsorData[0].diamond_sponsor>0 ? require('../assets/diamond_badge.png') : 
                                     sponsorData[0].black_sponsor>0 ? require('../assets/black_badge.png'):
@@ -61,9 +90,17 @@ const HomeScreen = ({navigation}) => {
                                     sponsorData[0].silver_sponsor>0 ? require('../assets/silver_badge.png') :
                                     sponsorData[0].bronze_sponsor>0 ? require('../assets/bronze_badge.png') :
                                     null
-                                    } style={{ width: 50, height: 50, resizeMode: 'contain' }} />
+                                    } style={{ width: 30, height: 30, resizeMode: 'contain' }} />
                             </View>
-                            <Progress.Bar progress={sponsorData[0].season_score/seasonData[0].max_donation} width={200} height={10} animationType='timing' color='darkblue'/>
+                            
+                            <View style={{width:250, height:10, borderRadius: 9, borderColor:'darkblue', borderWidth:2, margin:5}}>
+                                <Animated.View style={[{
+                                    width: progress,
+                                    height: '100%',
+                                    backgroundColor: 'darkblue' 
+                                },
+                                ]}/>
+                            </View>
                             <View style={{marginTop:5,alignItems:'center',flexDirection:'row'}}>
                                 <CustomText fontSize={14}>Only {itemUlockAmount.price-sponsorData[0].season_score}</CustomText>
                                 <Image source={require('../assets/fisch_flakes.png')} 
