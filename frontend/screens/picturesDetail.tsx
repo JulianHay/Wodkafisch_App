@@ -1,11 +1,12 @@
-import {View, Text, StyleSheet, Image, FlatList, Dimensions, TouchableOpacity, ImageBackground, Alert, RefreshControl} from 'react-native';
+import {View, Text, StyleSheet, Image, FlatList, Dimensions, TouchableOpacity, Modal, Alert, RefreshControl} from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import client from '../actions/client';
 import { CustomText } from '../components/text';
 import { Ionicons, FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import CustomButton, { CloseButton } from '../components/custom_botton';
-import Modal from "react-native-modal";
+// import Modal from "react-native-modal";
 import FischLoading from '../components/loading';
+import ImageViewer from 'react-native-image-zoom-viewer';
 
 const PictureDetailScreen = ({route,navigation}) => {
     const flatListRef = useRef(null);
@@ -29,11 +30,13 @@ const PictureDetailScreen = ({route,navigation}) => {
     //     flatListRef.current.scrollToIndex({ index: index, animated: true });
     //   }
     // }, [index]);
-
-    const renderItem = ({ item }) => (
+    
+    const pictures = pictureData.map((picture,index) => ({url:picture.image}))
+    
+    const renderItem = ({ item,index }) => (
         <TouchableOpacity style={styles.imageContainer} 
         onPress={() => {
-        setSelectedPicture(item);
+        setSelectedPicture(index);
         setPictureModalVisible(true);
         }}>
             <Image source={{uri:item.image}} style={styles.image}/>
@@ -80,24 +83,56 @@ const PictureDetailScreen = ({route,navigation}) => {
                     numColumns={1}
                     initialScrollIndex={index}
                     getItemLayout={(data, index) => (
-                      {length: Dimensions.get('window').width * 0.9, offset: Dimensions.get('window').width * 0.9 * index, index}
+                      {length: Dimensions.get('window').width * 0.9 + 17, offset: (Dimensions.get('window').width * 0.9 + 17) * index, index}
                     )}
                     showsVerticalScrollIndicator={false}
                     refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}
                 />
                 
-                <Modal isVisible={isPictureModalVisible} 
+                {/* <Modal isVisible={isPictureModalVisible} 
                 backdropOpacity={1}
                 onBackdropPress={() => setPictureModalVisible(false)}
-                >
-                    <View style={{alignItems:'center'}}>
+                > */}
+                <Modal visible={isPictureModalVisible} transparent={true}>
+
+                <ImageViewer imageUrls={pictures} index={selectedPicture} enableSwipeDown 
+                onSwipeDown={()=>{setPictureModalVisible(false)}}
+                renderHeader={(index)=>{return(
+                  <>
+                  <View style={{position:'absolute', top:'8%', right:'5%',zIndex:1}}>
+                    <CloseButton onPress={()=>{setPictureModalVisible(false)}}/>
+                  </View>
+                  <View style={{position:'absolute', width:'100%',left:0, bottom:40 ,alignItems:'center',zIndex:1}}>
+                    <View style={{position:'absolute', bottom:60, padding:5, backgroundColor: 'grey',width:'50%',borderRadius:10, alignItems:'center'}}>
+                      <CustomText fontWeight='bold'>{pictureData[index].description}</CustomText>
+                    </View>
+                    <View style={{position:'absolute', bottom:20, marginBottom:20}}>
+                      <CustomText fontSize={14} fontWeight='bold' color='white'>by {pictureData[index].username}</CustomText>
+                    </View>
+                  </View>
+                  </>
+                )}}
+                />
+                {/* <View style={{position:'absolute', top:'8%', right:'5%',}}>
+                  <CloseButton onPress={()=>{setPictureModalVisible(false)}}/>
+                </View>
+                {selectedPicture && (
+                <View style={{position:'absolute',width:'100%',bottom:40,alignItems:'center'}}>
+                  <View style={{position:'absolute', bottom:60, padding:5, backgroundColor: 'grey',width:'50%',borderRadius:10, alignItems:'center'}}>
+                    <CustomText fontWeight='bold'>{pictureData[selectedPicture].description}</CustomText>
+                  </View>
+                  <View style={{position:'absolute', bottom:20, marginBottom:20}}>
+                    <CustomText fontSize={14} fontWeight='bold' color='white'>by {pictureData[selectedPicture].username}</CustomText>
+                  </View>
+                </View> 
+                )} */}
+                    {/* <View style={{alignItems:'center'}}>
                     {selectedPicture && (
                         <>
                         <Image source={{uri:selectedPicture.image}} 
                         style={{width:Dimensions.get('window').width, height:Dimensions.get('window').height}} 
                         resizeMode='contain'/>
-                        
-                        
+
                         <View style={{position:'absolute', top:'8%', right:'5%',}}>
                             <CloseButton onPress={()=>{setPictureModalVisible(false)}}/>
                         </View>
@@ -109,7 +144,7 @@ const PictureDetailScreen = ({route,navigation}) => {
                         </View>
                         </>
                     )}
-                    </View>
+                    </View> */}
                 </Modal>
             </View>
         )
