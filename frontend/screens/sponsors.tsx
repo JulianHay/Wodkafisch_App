@@ -81,7 +81,7 @@ const SponsorScreen = () => {
         );
 
     const renderDonations = (item) => (
-        <View key={item.date} style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center',margin:5}}>
+        <View key={item.date+item.value+item.username} style={{flexDirection:'row',justifyContent:'flex-start',alignItems:'center',margin:5}}>
             <CustomText>{item.date.split(' ')[0]}:  {item.value} </CustomText>
             <Image source={require('../assets/fisch_flakes.png')} style={{width:15,height:15,top:-1}}/>
         </View>
