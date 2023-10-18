@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Dimensions, Linking} from 'react-native';
-import MapView, { Marker, Geojson, PROVIDER_GOOGLE} from 'react-native-maps';
-import { MapViewWithHeading, ArrowedPolyline } from 'react-native-maps-line-arrow';
+import { View, StyleSheet, Image, TouchableOpacity, Dimensions, Linking, Platform} from 'react-native';
+import MapView, { Marker, Geojson, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
 import Countries from '../assets/countries'
 import client from '../actions/client';
 import { CustomText } from '../components/text';
@@ -10,6 +9,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import moment from 'moment';
 import FischLoading from '../components/loading';
 import CustomButton, { CloseButton } from '../components/custom_botton';
+import calculateRotation from '../utils/mapUtils';
 
 const MapScreen = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -20,6 +20,7 @@ const MapScreen = () => {
   const [imageData,setImageData] = useState([])
   const [loading, setLoading] = useState(true)
   const [routeVisible,setRouteVisible] = useState(false)
+  const [mapReady,setMapReady] = useState(false)
   useEffect(()=>{
       client.get('/map').then((res) => {
         setEventData(res.data.events.slice(0))
@@ -51,13 +52,15 @@ const MapScreen = () => {
   const imageMarkers = imageData.map((image, index) => (
       <Marker key={index} 
       coordinate={{longitude:parseFloat(image.long),latitude:parseFloat(image.lat)}}
-      image={require('../assets/maps_marker.png')}
       anchor={{x: 0.5, y: 1}}
-      centerOffset={{x: 0, y: -20}}
       onPress={()=>{
         setSelectedImage(image)
         setImageModalVisible(true)
-      }}>
+      }}
+      tracksViewChanges={!mapReady}
+      >
+        <Image source={require('../assets/maps_marker.png')} style={{height:40,width:22.7}} resizeMode="contain"/>
+        
       </Marker>
     ))
 
@@ -65,22 +68,31 @@ const MapScreen = () => {
     {latitude:event.lat,longitude:event.long}
   ))
 
-  const arrow = ({size,color}) => (
-      <View style={{
-            width: 0,
-            height: 0,
-            backgroundColor: 'transparent',
-            borderStyle: 'solid',
-            borderTopWidth: 0,
-            borderRightWidth: size/2,
-            borderBottomWidth: size,
-            borderLeftWidth: size/2,
-            borderTopColor: 'transparent',
-            borderRightColor: 'transparent',
-            borderBottomColor: color,
-            borderLeftColor: 'transparent',
-      }} />
-  )
+  const Arrow = ({size,color,index}) => {
+    return (
+      <View style={{height:size+2,width:2*size,marginLeft:15}}>
+        <View style={{
+              width: 0,
+              height: 0,
+              backgroundColor: 'transparent',
+              borderStyle: 'solid',
+              borderTopWidth: 0,
+              borderRightWidth: size/2,
+              borderBottomWidth: size,
+              borderLeftWidth: size/2,
+              borderTopColor: 'transparent',
+              borderRightColor: 'transparent',
+              borderBottomColor: color,
+              borderLeftColor: 'transparent',
+              marginTop:-2
+        }} />
+        <View style={{borderColor:'darkblue',width:size*2/3,height:size,position:'absolute',top:-2,right:8}}>
+          <CustomText fontSize={13} fontWeight='bold' color='darkblue'>{index}</CustomText>
+        </View>
+      </View>
+  )}
+  const markerData = fischRoute.map((coord, index) => calculateRotation(coord, fischRoute[index - 1], geodesic=true, heading=0)).slice(1);
+
   
   return (
     loading ? <FischLoading/> :
@@ -88,11 +100,20 @@ const MapScreen = () => {
       <View style={{position:'absolute',top:10,right:20,zIndex:1}}>
         <CustomButton onPress={()=>{setRouteVisible(!routeVisible)}} text={routeVisible ? 'Hide Route' : 'Show Route'} bgColor='darkblue' fgColor='white'/>
       </View>
-      <MapViewWithHeading style={styles.map} provider={PROVIDER_GOOGLE}>
+      <MapView style={styles.map} provider={PROVIDER_GOOGLE} onMapReady={() => setTimeout(() => setMapReady(true), 100)}>
         {coloredCountries}
         {imageMarkers}
-        {routeVisible ? <ArrowedPolyline coordinates={fischRoute} arrowSize={15} strokeWidth={4} strokeColor="#000080" lineDashPattern={[1,10]} arrow={arrow} geodesic/> : null}
-      </MapViewWithHeading>
+        {routeVisible ? <>
+          <Polyline coordinates={fischRoute} strokeWidth={4} strokeColor="#000080" geodesic/>
+          {markerData.map((markerProps, index) => {
+            return (
+              <Marker  {...markerProps} key={eventData[index].title} tappable={false} anchor={{ y: 0, x: 0.5 }}>
+                <Arrow color={"#000080"} size={15} index={index+1}/>
+              </Marker>
+            );
+          })} 
+          </> : null}
+      </MapView>
 
       <Modal isVisible={isEventModalVisible} 
       backdropOpacity={1}
@@ -151,10 +172,11 @@ const MapScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex:1,
   },
   map: {
-    flex: 1,
+    alignSelf: 'stretch', 
+    height: '101%'
   },
   closeButton: {
     position:'absolute', 
