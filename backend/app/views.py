@@ -28,9 +28,6 @@ class LatestEventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all().order_by('-id')[:1]
     serializer_class = EventModelSerializer
 
-def parse_date_string(date_string):
-    return datetime.strptime(date_string, '%d/%m/%Y')
-
 class PictureViewSet(viewsets.ModelViewSet):
     queryset = FischPicture.objects.all().order_by('-id')
     serializer_class = PictureModelSerializer
@@ -238,7 +235,7 @@ class SponsorView(APIView):
     def get(self,request):
         profile = Profile.objects.get(user_id=request.user.id)
         sponsor_user = Sponsor.objects.filter(id=profile.sponsor_id)
-        sponsors = Sponsor.objects.all()
+        sponsors = Sponsor.objects.filter(sponsor_score__gt=0).order_by('-sponsor_score')
         season = Season.objects.all().order_by('-id')[:1]
         season_items = SeasonItem.objects.filter(season_id=season[0].id)
         promo = Promo.objects.all().order_by('-id')[:1]
