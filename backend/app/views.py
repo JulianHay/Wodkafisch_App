@@ -19,6 +19,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import update_session_auth_hash
 import random
+from django.db.models import Sum, Case, Value, When, Q, Exists, OuterRef
+from django.db.models.functions import Coalesce
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
@@ -217,7 +219,7 @@ class HomeView(APIView):
             'sponsor': sponsor.values(),
             'season': season.values(),
             'season_items': season_items.values(),
-            'picture': serializer.data#picture.values()
+            'picture': [serializer.data]#picture.values()
         })
 
 class MapView(APIView):
@@ -268,3 +270,30 @@ class ImageUploadView(APIView):
             return Response({'success':'Image upload successful'})
         except:
             return Response({'error': 'something went wrong'})
+
+class PictureLikeView(APIView):
+    def post(self,request):
+        user = Profile.objects.get(user_id=request.user.id)
+        picture = FischPicture.objects.get(id=request.data['picture_id'])
+        try:
+            FischPictureLikes.objects.update_or_create(
+                user=user,
+                picture=picture,
+                defaults=dict(
+                like=request.data['like']))
+            return Response({'success':'Like successful'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+class PictureView(APIView):
+    def get(self,request):
+        user = Profile.objects.get(user_id=request.user.id)
+        picture = FischPicture.objects.annotate(likes=Coalesce(Sum('like__like'),0),
+                                                user_like=Exists(FischPicture.objects.filter(
+                                                    like__user_id=user.id,
+                                                    like__picture_id = OuterRef('pk'),
+                                                    like__like = 1))).order_by('-id')
+
+        return Response({
+            'pictures': picture.values()
+        })

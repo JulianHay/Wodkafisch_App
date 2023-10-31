@@ -70,6 +70,11 @@ class FischPicture(models.Model):
     date = models.CharField(max_length=50, null=True,blank=True)
     username = models.CharField(max_length=50, null=True,blank=True)
 
+class FischPictureLikes(models.Model):
+    picture = models.ForeignKey(FischPicture, on_delete=models.CASCADE, related_name="like")
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="fisch_picture_likes")
+    like = models.IntegerField(default=0)
+
 class SeasonItem(models.Model):
     image = models.ImageField(null=True, blank=True, verbose_name='Pictures', upload_to='battlepass/')
     price = models.IntegerField(default=0)

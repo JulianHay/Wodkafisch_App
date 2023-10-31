@@ -7,7 +7,7 @@ router = routers.DefaultRouter()
 
 router.register(r'events',EventViewSet)
 router.register(r'latest_event',LatestEventViewSet)
-router.register(r'pictures',PictureViewSet)
+#router.register(r'pictures',PictureViewSet)
 router.register(r'latest_picture',LatestPictureViewSet)
 router.register(r'sponsors',SponsorViewSet)
 router.register(r'sponsor_user_data',SponsorUserViewSet)
@@ -26,7 +26,10 @@ urlpatterns = [
     path(r'home',HomeView.as_view(),name='home'),
     path(r'map', MapView.as_view(), name='map'),
     path(r'sponsor', SponsorView.as_view(), name='sponsor'),
+    path(r'pictures', PictureView.as_view(), name='pictures'),
     path(r'upload_picture', ImageUploadView.as_view(), name='upload_picture'),
+    path(r'like_picture', PictureLikeView.as_view(), name='picture_like'),
     path(r'password_change', change_password, name='change_password'),
     path(r'password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+
     ]
