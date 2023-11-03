@@ -57,9 +57,10 @@ const MapScreen = () => {
         setSelectedImage(image)
         setImageModalVisible(true)
       }}
+      image={Platform.OS=='ios' ? null : require('../assets/maps_marker.png')}
       tracksViewChanges={!mapReady}
       >
-        <Image source={require('../assets/maps_marker.png')} style={{height:40,width:22.7}} resizeMode="contain"/>
+        {Platform.OS=='ios' ? <Image source={require('../assets/maps_marker.png')} style={{height:40,width:22.7}} resizeMode="contain"/> : null}
         
       </Marker>
     ))

@@ -48,7 +48,7 @@ const HomeScreen = ({navigation}) => {
         progress.setValue(0)
         loading ? null : progressAnimation.start();
       });
-    
+      
     const eventDate = loading ? '' : moment(eventData[0].start,'YYYY-MM-DD').format('DD.MM.YYYY')
     const itemUlockAmount = loading ? 0 : seasonItemData.find(item => item.price > sponsorData[0].season_score)
     return (
@@ -111,7 +111,7 @@ const HomeScreen = ({navigation}) => {
 
                         <CustomBox onPress= {() => navigation.navigate('Pictures')} >
                         <CustomText fontWeight='bold'>Fisch picture of the day</CustomText>
-                            <Image source={{uri:'https://wodkafis.ch/media/'+pictureData[0].image}} style={{ width: Dimensions.get('window').width*0.7, height: Dimensions.get('window').width*0.35, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
+                            <Image source={{uri:'https://wodkafis.ch/'+pictureData[0].image}} style={{ width: Dimensions.get('window').width*0.7, height: Dimensions.get('window').width*0.35, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
                             <CustomText>{pictureData[0].description}</CustomText>    
                         </CustomBox>
 
@@ -128,6 +128,7 @@ const HomeScreen = ({navigation}) => {
 
                     </View>
                 </Modal>
+
 
                 {/* <Modal isVisible={isGameModalVisible} 
                 backdropOpacity={1}

@@ -108,7 +108,7 @@ const PictureScreen = ({ route, navigation }) => {
     const [loading, setLoading] = useState(true)
     const onRefresh = () => {
       setLoading(true)
-      client.get('/pictures/').then((res) => setPictureData(res.data))
+      client.get('/pictures').then((res) => setPictureData(res.data['pictures']))
         .finally(() => setLoading(false))
     }
     useEffect(()=>{
@@ -124,7 +124,7 @@ const PictureScreen = ({ route, navigation }) => {
         // setSelectedPicture(item);
         // setPictureModalVisible(true);
         }}>
-            <Image source={{uri:item.image}} style={styles.image}/>
+            <Image source={{uri:'https://wodkafis.ch/media/'+item.image}} style={styles.image}/>
             <View style={styles.imageDescription}>
                 <View style={{width:'65%', alignItems:'flex-start',padding:10}}>
                     <CustomText color='white' fontSize={10}>{item.date}</CustomText>

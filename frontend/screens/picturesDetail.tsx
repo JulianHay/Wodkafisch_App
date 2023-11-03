@@ -18,7 +18,7 @@ const PictureDetailScreen = ({route,navigation}) => {
     const [loading, setLoading] = useState(true)
     const onRefresh = () => {
       setLoading(true)
-      client.get('/pictures/').then((res) => setPictureData(res.data))
+      client.get('/pictures').then((res) => setPictureData(res.data['pictures']))
         .finally(() => setLoading(false))
     }
     useEffect(()=>{
@@ -30,16 +30,33 @@ const PictureDetailScreen = ({route,navigation}) => {
     //     flatListRef.current.scrollToIndex({ index: index, animated: true });
     //   }
     // }, [index]);
-    
     const pictures = pictureData.map((picture,index) => ({url:picture.image}))
-    
+    const pictureLikePressed = (picture_id,like) => {
+      
+      const itemIndex = pictureData.findIndex(item => item.id === picture_id);
+        if (itemIndex !== -1) {
+          const updatedData = [...pictureData];
+          updatedData[itemIndex].user_like = like;
+          like ? updatedData[itemIndex].likes += 1 : updatedData[itemIndex].likes -= 1 
+          setPictureData(updatedData);
+        }
+      const config = {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+      };
+
+      const body = JSON.stringify({ picture_id, like });
+      client.post('/like_picture',body,config)
+    }
     const renderItem = ({ item,index }) => (
         <TouchableOpacity style={styles.imageContainer} 
         onPress={() => {
         setSelectedPicture(index);
         setPictureModalVisible(true);
         }}>
-            <Image source={{uri:item.image}} style={styles.image}/>
+            <Image source={{uri:'https://wodkafis.ch/media/'+item.image}} style={styles.image}/>
             <View style={styles.imageDescription}>
                 <View style={{maxWidth:'40%', alignItems:'flex-start',padding:10}}>
                     <CustomText color='white' fontSize={10}>{item.date}</CustomText>
@@ -52,12 +69,15 @@ const PictureDetailScreen = ({route,navigation}) => {
                 </View>
                 <View style={{flex:1,maxWidth:'60%', alignItems:'flex-end', padding:10}}>
                   <View style={{flexDirection:'row'}}>
-                    <TouchableOpacity style={{marginRight:10}}>
-                      <FontAwesome5 name="thumbs-up" size={24} color="white" />
+                    <View style={{paddingTop:7,paddingRight:5}}>
+                      <CustomText color='white'>{item.likes}</CustomText>
+                    </View>
+                    <TouchableOpacity style={{marginRight:10}} onPress={() => {pictureLikePressed(item.id,!item.user_like)}}>
+                      <FontAwesome5 name="thumbs-up" solid={item.user_like} size={24} color="white"/>
                     </TouchableOpacity>
-                    <TouchableOpacity >
+                    {/* <TouchableOpacity >
                       <FontAwesome5 name="thumbs-down" size={24} color="white" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                   </View>
                   
                 </View>
