@@ -10,8 +10,10 @@ import moment from 'moment';
 import FischLoading from '../components/loading';
 import CustomButton, { CloseButton } from '../components/custom_botton';
 import calculateRotation from '../utils/mapUtils';
+import { checkLocalData, getFromLocal, saveToLocal, updateLocalData } from '../components/localStorage';
 
-const MapScreen = () => {
+const MapScreen = ({route,navigation}) => {
+
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isEventModalVisible, setEventModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -21,11 +23,45 @@ const MapScreen = () => {
   const [loading, setLoading] = useState(true)
   const [routeVisible,setRouteVisible] = useState(false)
   const [mapReady,setMapReady] = useState(false)
+  const initialRegion = {latitude: route.params && route.params.coords ? route.params.coords.latitude : 48.746417, 
+                longitude: route.params && route.params.coords ? route.params.coords.longitude :9.105801,
+                latitudeDelta: 20,
+                longitudeDelta: 20,
+              }
+
+  const updateLocalStorage = async (data) => {
+    const res = await checkLocalData(data.events.slice(0),'events')
+    const newEventData = [...res?.existingData,...res?.newData]
+    setEventData(newEventData)
+
+    const res2 = await checkLocalData(data.pictures,'pictures')
+    const newPictureData = [...res2?.existingData,...res2?.newData]
+    setImageData(newPictureData)
+    setLoading(false)
+
+    if (res?.newData.length) {
+      await updateLocalData(res?.newData,res?.existingData,'events','image')
+      const localEventData = await getFromLocal('events');
+      if (localEventData) {
+        setEventData(localEventData)
+      }
+    }
+    
+    if (res2?.newData.length) {
+      await updateLocalData(res2?.newData,res2?.existingData,'pictures','image')
+      const localImageData = await getFromLocal('pictures');
+      if (localImageData) {
+        setImageData(localImageData)
+      }
+    }
+    
+    
+  }
+
   useEffect(()=>{
       client.get('/map').then((res) => {
-        setEventData(res.data.events.slice(0))
-        setImageData(res.data.pictures)
-      })
+        updateLocalStorage(res.data)
+        })
       .finally(() => setLoading(false))
   },[]) 
 
@@ -39,7 +75,7 @@ const MapScreen = () => {
         type: 'FeatureCollection',
         features: [country]}} 
     strokeColor="#0568AE"
-    fillColor="#009FDB"
+    fillColor="rgba(0, 159, 219,0.5)"
     strokeWidth={2}
     tappable={true}
     onPress={() => {
@@ -57,17 +93,15 @@ const MapScreen = () => {
         setSelectedImage(image)
         setImageModalVisible(true)
       }}
-      image={Platform.OS=='ios' ? null : require('../assets/maps_marker.png')}
-      tracksViewChanges={!mapReady}
+      tracksViewChanges={Platform.OS==='android' ? !mapReady : true}
       >
-        {Platform.OS=='ios' ? <Image source={require('../assets/maps_marker.png')} style={{height:40,width:22.7}} resizeMode="contain"/> : null}
-        
+        <Image source={require('../assets/maps_marker.png')} style={{height:40,width:22.7}} resizeMode="contain"/>
       </Marker>
     ))
 
   const fischRoute = eventData.map(event => (
     {latitude:event.lat,longitude:event.long}
-  ))
+  )).filter(data => data && data.latitude !== null)
 
   const Arrow = ({size,color,index}) => {
     return (
@@ -94,21 +128,26 @@ const MapScreen = () => {
   )}
   const markerData = fischRoute.map((coord, index) => calculateRotation(coord, fischRoute[index - 1], geodesic=true, heading=0)).slice(1);
 
-  
   return (
     loading ? <FischLoading/> :
     <View style={styles.container}>
       <View style={{position:'absolute',top:10,right:20,zIndex:1}}>
         <CustomButton onPress={()=>{setRouteVisible(!routeVisible)}} text={routeVisible ? 'Hide Route' : 'Show Route'} bgColor='darkblue' fgColor='white'/>
       </View>
-      <MapView style={styles.map} provider={PROVIDER_GOOGLE} onMapReady={() => setTimeout(() => setMapReady(true), 100)}>
+      <MapView 
+        key={JSON.stringify(initialRegion)}
+        style={styles.map} 
+        provider={PROVIDER_GOOGLE} 
+        onMapReady={() => setTimeout(() => setMapReady(true), 100)}
+        initialRegion={initialRegion}
+        >
         {coloredCountries}
         {imageMarkers}
         {routeVisible ? <>
           <Polyline coordinates={fischRoute} strokeWidth={4} strokeColor="#000080" geodesic/>
           {markerData.map((markerProps, index) => {
             return (
-              <Marker  {...markerProps} key={eventData[index].title} tappable={false} anchor={{ y: 0, x: 0.5 }}>
+              <Marker {...markerProps} key={eventData[index].title} tappable={false} anchor={{ y: 0, x: 0.5 }}>
                 <Arrow color={"#000080"} size={15} index={index+1}/>
               </Marker>
             );
@@ -129,7 +168,7 @@ const MapScreen = () => {
 
               <CustomText color='white' fontSize={24} fontWeight='bold'>{selectedEvent.title}</CustomText>
               <View style={{margin:-40}}>
-                <Image source={{uri:'https://wodkafis.ch/media/'+selectedEvent.image}} style={{width:Dimensions.get('window').width*0.4, height:Dimensions.get('window').height*0.4}} resizeMode='contain'/>
+                <Image source={{uri:selectedEvent.localPath ? selectedEvent.localPath : 'https://wodkafis.ch/media/'+selectedEvent.image}} style={{width:Dimensions.get('window').width*0.4, height:Dimensions.get('window').height*0.4}} resizeMode='contain'/>
               </View>
               <CustomText color='white' fontSize={24} fontWeight='bold'>{moment(selectedEvent.start,'YYYY-MM-DD').format('DD.MM.YYYY')}</CustomText>
               {/* <CustomText color='white'>{selectedEvent.description}</CustomText> */}
@@ -145,7 +184,7 @@ const MapScreen = () => {
         <View style={{alignItems:'center'}}>
           {selectedImage && (
             <>
-              <Image source={{uri:'https://wodkafis.ch/media/'+selectedImage.image}} 
+              <Image source={{uri:selectedImage.localPath ? selectedImage.localPath : 'https://wodkafis.ch/media/' + selectedImage.image}} 
                 style={{width:Dimensions.get('window').width, height:Dimensions.get('window').height}} 
                 resizeMode='contain'/>
               <View style={styles.closeButton}>
