@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import {View, StyleSheet, Image, SafeAreaView, ScrollView, RefreshControl, Dimensions, Animated} from 'react-native';
+import {View, StyleSheet, Image, SafeAreaView, ScrollView, RefreshControl, Dimensions, Animated, Modal} from 'react-native';
 import client from '../actions/client';
 import { CustomBox } from '../components/custom_container';
 import moment from 'moment';
 import FischLoading from '../components/loading';
 import { CustomText } from '../components/text';
-import Modal from "react-native-modal";
 import { useFocusEffect } from '@react-navigation/native';
+import { CloseButton } from '../components/custom_botton';
 // import FischGame from '../components/game/game';
 // import { CloseButton } from '../components/custom_botton';
 // import { StatusBar } from 'expo-status-bar';
@@ -20,7 +20,7 @@ const HomeScreen = ({navigation}) => {
     const [loading, setLoading] = useState(true)
     const [isEventModalVisible, setEventModalVisible] = useState(false);
     // const [isGameModalVisible, setGameModalVisible] = useState(false);
-
+    
     const [progress] = useState(new Animated.Value(0));
     const progressAnimation = loading ? null : Animated.timing(progress, {
         toValue: sponsorData[0].season_score/seasonData[0].max_donation * 250, 
@@ -56,31 +56,53 @@ const HomeScreen = ({navigation}) => {
             <SafeAreaView style={styles.screen}>
                 <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}>
                     <View style={styles.container}>
-                        <CustomBox onPress= {() => navigation.navigate('Map')} >
-                            <CustomText fontWeight='bold'>Upcoming Fisch Event</CustomText>
+                        <CustomBox onPress= {() => setEventModalVisible(true)}  colors={['#007ae6', '#000ddd']} borderWidth={1}>
+                            <CustomText fontWeight='bold' color='white'>Upcoming Fisch Event</CustomText>
                             {moment(eventData[0].start,'YYYY-MM-DD')>moment() ?
                             <>
                             <Image source={{uri:'https://wodkafis.ch/media/'+eventData[0].image}} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
-                            <CustomText fontSize={14}>{eventData[0].title}</CustomText>
-                            <CustomText fontSize={14}>{eventDate}</CustomText>
+                            <CustomText fontSize={14} color='white'>{eventData[0].title}</CustomText>
+                            <CustomText fontSize={14} color='white'>{eventDate}</CustomText>
                             </>
                             :
                             <>
                             <Image source={require('../assets/upcoming_event_fisch.png')} style={{ width: 300, height: 100, resizeMode: 'contain', margin: 5}}/>
-                            <CustomText fontSize={14}>will be announced soon!</CustomText>
+                            <CustomText fontSize={14} color='white'>will be announced soon!</CustomText>
                             </>
                         
                         }
                         </CustomBox>
 
-                        <CustomBox onPress= {() => navigation.navigate('Sponsors')} >
-                            <CustomText fontWeight='bold'> hi {sponsorData[0].first_name}!</CustomText> 
+                        <Modal visible={isEventModalVisible}>
+                            <CustomBox bgColor='darkblue'>
+                                <CloseButton onPress={()=>{setEventModalVisible(false)}}/>
+                                <CustomText>
+                                    {eventData[0].hello}
+                                </CustomText>
+                                <CustomText>
+                                    {eventData[0].message}
+                                </CustomText>
+                                <CustomText>
+                                    {eventData[0].additional_text}
+                                </CustomText>
+                                <CustomText>
+                                    {eventData[0].bye}
+                                </CustomText>
+                                <CustomText>
+                                    Fisch
+                                </CustomText>
+
+                            </CustomBox>
+                        </Modal>
+
+                        <CustomBox onPress= {() => navigation.navigate('Sponsors')}  colors={['#007ae6', '#000ddd']} borderWidth={1}>
+                            <CustomText fontWeight='bold' color='white'> hi {sponsorData[0].first_name}!</CustomText> 
                             <View style={{margin:5, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
                                 {sponsorData[0].diamond_sponsor>0 || 
                                 sponsorData[0].black_sponsor>0 || 
                                 sponsorData[0].gold_sponsor>0 ||
                                 sponsorData[0].silver_sponsor>0 ||
-                                sponsorData[0].bronze_sponsor>0 ? <CustomText>Level: </CustomText>:
+                                sponsorData[0].bronze_sponsor>0 ? <CustomText color='white'>Level: </CustomText>:
                                 null}
                                 
                                 <Image source={
@@ -93,26 +115,26 @@ const HomeScreen = ({navigation}) => {
                                     } style={{ width: 30, height: 30, resizeMode: 'contain' }} />
                             </View>
                             
-                            <View style={{width:250, height:10, borderRadius: 9, borderColor:'darkblue', borderWidth:2, margin:5}}>
+                            <View style={{width:250, height:10, borderRadius: 9, borderColor:'#008181ff', borderWidth:2, margin:5}}>
                                 <Animated.View style={[{
                                     width: progress,
                                     height: '100%',
-                                    backgroundColor: 'darkblue' 
+                                    backgroundColor: '#008181ff' 
                                 },
                                 ]}/>
                             </View>
                             <View style={{marginTop:5,alignItems:'center',flexDirection:'row'}}>
-                                <CustomText fontSize={14}>Only {itemUlockAmount.price-sponsorData[0].season_score}</CustomText>
+                                <CustomText fontSize={14} color='white'>Only {itemUlockAmount.price-sponsorData[0].season_score}</CustomText>
                                 <Image source={require('../assets/fisch_flakes.png')} 
                                     style={{width:12,height:12, marginLeft:1.5}}/>
-                                <CustomText fontSize={14}> left to unlock the next item!</CustomText>
+                                <CustomText fontSize={14} color='white'> left to unlock the next item!</CustomText>
                             </View>
                         </CustomBox>
-
-                        <CustomBox onPress= {() => navigation.navigate('Pictures')} >
-                        <CustomText fontWeight='bold'>Fisch picture of the day</CustomText>
+                        
+                        <CustomBox onPress= {() => navigation.navigate('Pictures',{id: pictureData[0].id})} colors={['#007ae6', '#000ddd']} borderWidth={1}>
+                            <CustomText fontWeight='bold' color='white'>Fisch picture of the day</CustomText>
                             <Image source={{uri:'https://wodkafis.ch/'+pictureData[0].image}} style={{ width: Dimensions.get('window').width*0.7, height: Dimensions.get('window').width*0.35, resizeMode: 'cover', overflow: 'hidden', borderRadius: 10, margin: 5}}/>
-                            <CustomText>{pictureData[0].description}</CustomText>    
+                            <CustomText color='white'>{pictureData[0].description}</CustomText>    
                         </CustomBox>
 
                         {/* <CustomBox onPress= {() => setGameModalVisible(true)} >
@@ -120,15 +142,6 @@ const HomeScreen = ({navigation}) => {
                         </CustomBox> */}
                     </View>
                 </ScrollView>
-
-                <Modal isVisible={isEventModalVisible} 
-                backdropOpacity={1}
-                onBackdropPress={() => setEventModalVisible(false)}>
-                    <View>
-
-                    </View>
-                </Modal>
-
 
                 {/* <Modal isVisible={isGameModalVisible} 
                 backdropOpacity={1}
