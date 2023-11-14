@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable,TouchableOpacity } from "react-native
 import { useFonts } from 'expo-font';
 import { CustomText } from "./text";
 
-const CustomButton = ({onPress, text, type='PRIMARY',bgColor,fgColor}) =>{
+const CustomButton = ({onPress, text, type='PRIMARY',bgColor,fgColor,borderColor}) =>{
     const [loaded] = useFonts({
         ArialRounded: require('../assets/fonts/Arial-Rounded.ttf'),
         ArialRoundedBold: require('../assets/fonts/Arial-RoundedBold.ttf'),
@@ -19,7 +19,8 @@ const CustomButton = ({onPress, text, type='PRIMARY',bgColor,fgColor}) =>{
         style={[
             styles.container,
             styles[`container_${type}`],
-            bgColor ? {backgroundColor: bgColor} : {}
+            bgColor ? {backgroundColor: bgColor} : {},
+            borderColor ? {borderColor: borderColor, borderWidth:2} : {}
             ]}>
             <Text style={[
                 styles.text, 

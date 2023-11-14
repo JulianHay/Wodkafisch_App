@@ -1,9 +1,10 @@
+import { LinearGradient } from "expo-linear-gradient";
 import React, { Children } from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 export const CustomBox = (props) => {
-    const { onPress,width,bgColor,borderColor,children } = props;
+    const { onPress,width,bgColor,borderColor,borderRadius,borderWidth,colors,children } = props;
 
     return (
         <TouchableOpacity 
@@ -12,9 +13,13 @@ export const CustomBox = (props) => {
             styles.box,
             width ? {width: Dimensions.get('window').width*width} : {},
             bgColor ? {backgroundColor: bgColor} : {},
-            borderColor ? {borderColor: borderColor} : {}
+            borderColor ? {borderColor: borderColor} : {},
+            borderRadius ? {borderRadius: borderRadius} : {},
+            borderWidth ? {borderWidth: borderWidth} : {},
+            colors ? {padding:0} : {}
             ]}>
-            {children}
+            {colors ? <LinearGradient colors={colors} 
+            style={{borderRadius:7,width:'100%',padding:10,justifyContent:'center',alignItems:'center'}}>{children}</LinearGradient> : children}
         </TouchableOpacity>
     )
 }
