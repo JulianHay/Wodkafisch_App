@@ -69,11 +69,14 @@ const PictureDetailScreen = ({route,navigation}) => {
                 </View>
                 <View style={{flex:1,maxWidth:'60%', alignItems:'flex-end', padding:10}}>
                   <View style={{flexDirection:'row'}}>
-                    <View style={{paddingTop:7,paddingRight:5}}>
+                    <View style={{paddingTop:3,paddingRight:5}}>
                       <CustomText color='white'>{item.likes}</CustomText>
                     </View>
-                    <TouchableOpacity style={{marginRight:10}} onPress={() => {pictureLikePressed(item.id,!item.user_like)}}>
-                      <FontAwesome5 name="thumbs-up" solid={item.user_like} size={24} color="white"/>
+                    <TouchableOpacity style={{marginRight:10,alignItems:'center',justifyContent:'center'}} onPress={() => {pictureLikePressed(item.id,!item.user_like)}}>
+                      <Image source={item.user_like ? require('../assets/like_on.png') : require('../assets/like_off.png')} 
+                        style={{width:20,height:25}} 
+                        resizeMode='contain'/>
+                      {/* <FontAwesome5 name="thumbs-up" solid={item.user_like} size={24} color="white"/> */}
                     </TouchableOpacity>
                     {/* <TouchableOpacity >
                       <FontAwesome5 name="thumbs-down" size={24} color="white" />
