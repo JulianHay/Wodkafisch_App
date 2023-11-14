@@ -225,8 +225,12 @@ class HomeView(APIView):
 class MapView(APIView):
     def get(self,request):
         event = Event.objects.all()
-        picture = FischPicture.objects.all().order_by('-id')
-
+        user = Profile.objects.get(user_id=request.user.id)
+        picture = FischPicture.objects.annotate(likes=Coalesce(Sum('like__like'), 0),
+                                                user_like=Exists(FischPicture.objects.filter(
+                                                    like__user_id=user.id,
+                                                    like__picture_id=OuterRef('pk'),
+                                                    like__like=1))).order_by('-id')
         return Response({
             'events': event.values('title','image','lat','long','country','start'),
             'pictures': picture.values()
