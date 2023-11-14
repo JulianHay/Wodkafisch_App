@@ -39,43 +39,54 @@ const SponsorScreen = () => {
 
     const renderSponsors = (item) => (
         <View key={item.username} style={{flexDirection: 'row', marginBottom:3,left:-15}}>
-            <View style={{width:110,alignItems:'flex-end', marginRight:20}}>
-                <CustomText fontSize={12} style={{left:0}}>{item.username}:</CustomText>
+            <View style={{width:125,alignItems:'flex-end', marginRight:10}}>
+                <CustomText fontSize={16} style={{left:0}}>{item.username}:</CustomText>
             </View>
             <View style={styles.badgeImageContainer}>
                 {item.diamond_sponsor!==0 ? 
-                <>
-                <CustomText fontSize={12}>{item.diamond_sponsor}</CustomText>
-                <Image source={require('../assets/diamond_badge.png')} style={styles.badgeImage}/>
-                </> : null}
+                <View style={{flexDirection:'row'}}>
+                    <Image source={require('../assets/diamond_badge.png')} style={styles.badgeImage}/>                
+                    <View style={{justifyContent:'flex-end',marginBottom:-2,marginLeft:-2}}>
+                        <CustomText fontSize={8}>{item.diamond_sponsor > 1 ? item.diamond_sponsor : ''}</CustomText>
+                    </View>
+                </View> : null}
             </View>
             <View style={styles.badgeImageContainer}>
                 {item.black_sponsor!==0 ? 
-                <>
-                <CustomText fontSize={12}>{item.black_sponsor}</CustomText>
-                <Image source={require('../assets/black_badge.png')} style={styles.badgeImage}/>
-                </> : null}
+                <View style={{flexDirection:'row'}}>
+                    <Image source={require('../assets/black_badge.png')} style={styles.badgeImage}/>                
+                    <View style={{justifyContent:'flex-end',marginBottom:-2,marginLeft:-2}}>
+                        <CustomText fontSize={8}>{item.black_sponsor > 1 ? item.black_sponsor : ''}</CustomText>
+                    </View>
+                </View> : null}
             </View>
             <View style={styles.badgeImageContainer}>
-                {item.gold_sponsor!==0 ? 
-                <>
-                <CustomText fontSize={12}>{item.gold_sponsor}</CustomText>
-                <Image source={require('../assets/gold_badge.png')} style={styles.badgeImage}/>
-                </> : null}
+                {item.gold_sponsor!==0 ?
+                <View style={{flexDirection:'row'}}>
+                    <Image source={require('../assets/gold_badge.png')} style={styles.badgeImage}/>                
+                    <View style={{justifyContent:'flex-end',marginBottom:-2,marginLeft:-2}}>
+                        <CustomText fontSize={8}>{item.gold_sponsor > 1 ? item.gold_sponsor : ''}</CustomText>
+                    </View>
+                </View>
+                : null}
             </View>
             <View style={styles.badgeImageContainer}>
                 {item.silver_sponsor!==0 ? 
-                <>
-                <CustomText fontSize={12}>{item.silver_sponsor}</CustomText>
-                <Image source={require('../assets/silver_badge.png')} style={styles.badgeImage}/>
-                </> : null}
+                <View style={{flexDirection:'row'}}>
+                    <Image source={require('../assets/silver_badge.png')} style={styles.badgeImage}/>                
+                    <View style={{justifyContent:'flex-end',marginBottom:-2,marginLeft:-2}}>
+                        <CustomText fontSize={8}>{item.silver_sponsor > 1 ? item.silver_sponsor : ''}</CustomText>
+                    </View>
+                </View> : null}
             </View>
             <View style={styles.badgeImageContainer}>
                 {item.bronze_sponsor!==0 ? 
-                <>
-                <CustomText fontSize={12}>{item.bronze_sponsor}</CustomText>
-                <Image source={require('../assets/bronze_badge.png')} style={styles.badgeImage}/>
-                </> : null}
+                <View style={{flexDirection:'row'}}>
+                    <Image source={require('../assets/bronze_badge.png')} style={styles.badgeImage}/>                
+                    <View style={{justifyContent:'flex-end',marginBottom:-2,marginLeft:-2}}>
+                        <CustomText fontSize={8}>{item.bronze_sponsor > 1 ? item.bronze_sponsor : ''}</CustomText>
+                    </View>
+                </View> : null}
             </View>
         </View>
         );
@@ -177,16 +188,16 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     seasonImage: {
-        height: 80,
-        width: 90,
+        height: 100,
+        width: 100,
         top: -78,
         resizeMode: 'contain',      
         marginBottom: -78
     },
     badgeImageContainer: {
-        width:33,
+        width:25,
         alignItems:'center',
-        justifyContent:'center',
+        justifyContent:'flex-start',
         flexDirection: 'row'
     },
     badgeImage: {
