@@ -2,7 +2,7 @@
   "expo": {
     "name": "Wodkafisch",
     "slug": "frontend",
-    "version": "1.0.4",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/app_icon.png",
     "userInterfaceStyle": "light",
@@ -26,7 +26,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app_icon.png",
+        "foregroundImage": "./assets/app_icon_google_play.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.wodkafisch.app",
@@ -34,10 +34,12 @@
         "googleMaps": {
           "apiKey": "AIzaSyDdecQFweuYKopW_i5U5QwoVstW-GPZqk4"
           }
-        }
+        },
+      "versionCode": 7,
+      "versionName": "1.0.9"  
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/fisch.png"
     },
     "extra": {
       "eas": {
@@ -61,6 +63,20 @@
         "expo-local-authentication",
         {
           "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ]
     ]
