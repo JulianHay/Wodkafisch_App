@@ -54,7 +54,7 @@ const TabBar = ({isAuthenticated}) => {
           navigation.navigate("HomeScreen");
         },})}/>
           <Tab.Screen name="Map" component={MapScreen}/>
-          <Tab.Screen name="Pictures" component={PictureStack}/>
+          <Tab.Screen name="Pictures" component={PictureScreen}/>
           <Tab.Screen name="Sponsors" component={SponsorScreen}/>
           <Tab.Screen name="About" component={AboutScreen}/>
         </>
