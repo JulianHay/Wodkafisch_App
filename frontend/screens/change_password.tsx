@@ -6,6 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import client from '../actions/client';
 import { CustomText } from '../components/text';
 
+const darkmode = true
+
 const ChangePasswordScreen = () => {
 
     const [oldPassword,setOldPassword] = useState('');
@@ -45,9 +47,8 @@ const ChangePasswordScreen = () => {
     }
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.screen}> 
-                <View style={{position:'absolute',right:'8%',top:'8%'}}>                           
+        <View style={styles.screen}> 
+                <View style={{alignItems:'flex-end',width:'100%',paddingRight:20}}>                           
                     <CloseButton onPress={()=>{{navigation.navigate('Profile')}}}/>
                 </View>
                 <CustomText fontSize={24} fontWeight='bold'>Change Password</CustomText>                         
@@ -60,15 +61,17 @@ const ChangePasswordScreen = () => {
                 <View style={{width:'40%'}}>
                     <CustomButton text='Submit' onPress={onSubmitPressed}/>
                 </View>
-            </View>
-        </ScrollView>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
     screen: {
-        padding: 20,
-        alignItems:'center'
+        paddingTop:20,
+        alignItems:'center',
+        backgroundColor: darkmode ? "#000022" : "darkblue",
+        flex:1,
+        width:'100%'
     },
 })
 

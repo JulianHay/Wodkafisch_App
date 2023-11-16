@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 function Battlepass({ sponsorData, seasonData, itemData }) {
   const itemSize = 30
-  const progressBarWidth = Dimensions.get('window').width*0.78
+  const progressBarWidth = Dimensions.get('window').width*0.67
   const animatedItemWidths = useRef([]);
 
   const itemAnimations = itemData.map((data, index) => {
@@ -65,7 +65,7 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
             height: itemSize, },
         ]}
         >
-          <LinearGradient colors={['#0099ff', '#000888']} 
+          <LinearGradient colors={['#047d7f', '#004a3e']} 
             style={[{borderRadius: 9} ,styles.progress]}/>
         </Animated.View>
 
@@ -90,7 +90,7 @@ function Battlepass({ sponsorData, seasonData, itemData }) {
               width: progress,
               height: '100%', },
           ]}>
-            <LinearGradient colors={['#0099ff', '#000888']} 
+            <LinearGradient colors={['#047d7f', '#004a3e']} 
             style={[{borderRadius: 9} ,styles.progress]}>
               <View style={{flexDirection:'column',alignItems:'flex-end', justifyContent:'center'}}>
                 <Image source={require('../assets/fisch.png')} 

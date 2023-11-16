@@ -9,8 +9,11 @@ import {StatusBar} from 'expo-status-bar'
 import * as NavigationBar from 'expo-navigation-bar';
 import FischLoading from './components/loading';
 
+
+const darkmode = true
+
 if (Platform.OS == 'android') {
-  NavigationBar.setBackgroundColorAsync("darkblue");
+  NavigationBar.setBackgroundColorAsync(darkmode ? "#000022" : "darkblue");
 }
 
 export default function App() {
@@ -20,7 +23,7 @@ export default function App() {
         <NavigationContainer style={styles.app}>
             <DrawerNavigator/>
         </NavigationContainer>
-        <StatusBar style="light" backgroundColor='darkblue'/>
+        <StatusBar style={darkmode ? "light" : "dark"} backgroundColor={darkmode ? "#000022" : "darkblue"}/>
       </PersistGate>
     </Provider>
     );
@@ -28,7 +31,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   app: {
-    backgroundColor: '#F9FBFC',
+    backgroundColor: darkmode ? '#000022' : '#F9FBFC',
     flex: 1,
   }
 });

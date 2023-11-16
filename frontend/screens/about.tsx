@@ -1,10 +1,12 @@
 import {View, Text, StyleSheet,ScrollView} from 'react-native';
 import { CustomText } from '../components/text';
+const darkmode = true
 
 const AboutScreen = () => {
     return (
-        <ScrollView>
-            <View style={styles.screen}>
+        
+        <View style={styles.screen}>
+            <ScrollView >
                 <CustomText fontSize={24} fontWeight='bold'>About the Wodkafisch</CustomText>
                 <View style={styles.about}>
                     <View style={styles.title}>
@@ -20,17 +22,19 @@ const AboutScreen = () => {
                     </View>
                     <CustomText>Today, the Wodkafisch is committed to charitable causes and organizes events that promote intercultural exchange and the advancement of talented researchers.</CustomText>
                 </View> 
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </View>
+        
     )
 }
 
 const styles = StyleSheet.create({
     screen: {
-        marginTop: 30,
         padding: 20,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: darkmode ? "#000022" : "darkblue",
+        flex:1
     },
     about: {
         width: '80%',

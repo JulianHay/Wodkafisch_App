@@ -6,6 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import client from '../actions/client';
 import { CustomText } from '../components/text';
 
+const darkmode=true
+
 const ResetPasswordScreen = () => {
     const [email,setEmail] = useState('');
 
@@ -38,7 +40,6 @@ const ResetPasswordScreen = () => {
     }
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.screen}>            
                 <CustomText fontSize={24} fontWeight='bold'>Reset Password</CustomText>
                 <View style={{width:'60%',marginTop:10,alignItems:'center'}}>
@@ -47,14 +48,16 @@ const ResetPasswordScreen = () => {
                 </View>
                 <CustomButton text="Have an account? Sign in" onPress={onSignInPressed} type='TERTIARY'/>
             </View>
-        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
     screen: {
         padding: 20,
-        alignItems:'center'
+        alignItems:'center',
+        backgroundColor: darkmode ? "#000022" : "darkblue",
+        flex:1,
+        width:'100%'
     },
 })
 

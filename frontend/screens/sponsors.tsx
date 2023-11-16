@@ -8,6 +8,9 @@ import CustomButton from '../components/custom_botton';
 import client from '../actions/client';
 import moment from 'moment'
 import FischLoading from '../components/loading';
+import { CustomContainer } from '../components/custom_container';
+
+const darkmode = true
 
 const SponsorScreen = () => {
     const [seasonData,setSeasonData] = useState([])
@@ -100,16 +103,17 @@ const SponsorScreen = () => {
 
     return (
         !loading ?
-        <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}>
-            <View style={styles.container}>
-                <LinearGradient colors={['#007ae6', '#000ddd']} style={styles.battlepass}>
+        <View style={styles.container}> 
+            <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}>
+                <CustomContainer title='Battle Pass'>
+                {/* <LinearGradient colors={['#007ae6', '#000ddd']} style={styles.battlepass}> */}
                     {/* Season */}
-                    <LinearGradient colors={['#E0AA3E', '#845800']} style={styles.season}>
+                    <LinearGradient colors={['#c59c34', '#9a690e']} style={styles.season}>
                         <View>
-                            <CustomText fontSize={14} color={'#fff'} fontWeight={'bold'}>Season {seasonData[0].id}</CustomText>
+                            <CustomText fontSize={12} color={'#fff'} fontWeight={'bold'}>Season {seasonData[0].id}</CustomText>
                         </View>
                         <View style={{ alignItems:'flex-end'}}>
-                            <CustomText fontSize={14} color={'#fff'} fontWeight={'bold'}>{seasonData[0].title}</CustomText>
+                            <CustomText fontSize={12} color={'#fff'} fontWeight={'bold'}>{seasonData[0].title}</CustomText>
                         </View>
                     </LinearGradient>
                     <View>
@@ -120,38 +124,43 @@ const SponsorScreen = () => {
                         <Battlepass itemData={seasonItemData} seasonData={seasonData} sponsorData={sponsorUserData}/>
                     </View>
                     {/* Promo */}
-                    {isPromo ? <View>                            <CustomText fontSize={10} color='white'>
+                    {isPromo ? <View>                            <CustomText fontSize={10}>
                             Until {promoDate.format('DD/MM/YYYY')} you will get {promoData[0].value*100}% more Fischflocken!
                         </CustomText>
                     </View> : null}
                     {/* Donation Button */}
-                    <View style={{width:'35%',marginTop:20,marginBottom:5}}>
-                        <CustomButton onPress={()=>{Linking.openURL('http://paypal.me/wodkafisch')}} text={'Donate now'} bgColor={'darkblue'}/> 
-                        <TouchableOpacity onPress={()=>{Linking.openURL('http://paypal.me/wodkafisch')}} style={{top:-45,left:-13, marginBottom:-30}}>
+                    <View style={{width:'45%',marginTop:20,marginBottom:5}}>
+                        <CustomButton onPress={()=>{Linking.openURL('http://paypal.me/wodkafisch')}} text={'Donate now'} fgColor='white' bgColor='#000022' borderColor='#19203c'/> 
+                        <TouchableOpacity onPress={()=>{Linking.openURL('http://paypal.me/wodkafisch')}} style={{top:-48,left:-13, marginBottom:-30}}>
                             <Image source={require('../assets/fisch_flakes.png')} style={{width:35,height:35}}/>
                         </TouchableOpacity>
                     </View>
-                </LinearGradient>
+                </CustomContainer>
                 
                 <View style={{marginTop:40,alignItems:'center'}}>
-                    <View style={{width:'100%',alignItems:'flex-start'}}>
-                        <CustomText fontWeight='bold'> Recent Donations</CustomText>
+                    {/* <View style={{width:'100%',alignItems:'flex-start'}}>
+                        <CustomText fontWeight='bold'> Recent Donations</CustomText> */}
+                    <CustomContainer title='Recent Donations'>
                         {donationData.slice(0,5).map((item)=>(
                             renderDonations(item)
                         ))}
-                    </View>
+                    </CustomContainer>
+                    {/* </View> */}
                         
-                    <View style={{alignItems:'center',justifyContent:'center',marginTop:40,marginBottom:40}}>
-                        <View style={{marginBottom:10}}>
+                    {/* <View style={{alignItems:'center',justifyContent:'center',marginTop:40,marginBottom:40}}> */}
+                        {/* <View style={{marginBottom:10}}>
                             <CustomText fontWeight='bold'> Sponsor List</CustomText>
-                        </View>
-                        {sponsorData.map((item)=>(
+                        </View> */}
+                        <CustomContainer title='Sponsor List'>
+                            {sponsorData.map((item)=>(
                             renderSponsors(item)
                         ))}
-                    </View> 
+                        </CustomContainer>
+                        
+                    {/* </View>  */}
                 </View>
-            </View>
-        </ScrollView> : <FischLoading/>
+            </ScrollView>
+        </View> : <FischLoading/>
     )
 }
 
@@ -160,10 +169,11 @@ const styles = StyleSheet.create({
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 0,
+        padding: 10,
+        backgroundColor: darkmode ? "#000022" : "darkblue"
       },
       battlepass: {
-        width: '90%',
+        width: '80%',
         borderRadius: 20,
         borderWidth: 1,
         borderColor:'#111',
@@ -173,7 +183,7 @@ const styles = StyleSheet.create({
         marginTop: 40,
     },
     season: {
-        width: '90%',
+        width: '95%',
         height: 36,
         borderRadius: 10,
         border: '1px solid #fff',
@@ -188,8 +198,8 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     seasonImage: {
-        height: 100,
-        width: 100,
+        height: 80,
+        width: 80,
         top: -78,
         resizeMode: 'contain',      
         marginBottom: -78

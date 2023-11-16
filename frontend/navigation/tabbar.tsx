@@ -8,7 +8,8 @@ import LoginStack from './loginStack';
 import { connect } from 'react-redux';
 import { useEffect } from 'react';
 import { checkAuthenticated } from '../actions/auth';
-import PictureStack from './pictureStack';
+
+const darkmode = true
 
 const Tab = createBottomTabNavigator();
 
@@ -34,16 +35,16 @@ const TabBar = ({isAuthenticated}) => {
           } else if (route.name === 'About') {
             iconName = 'info';
           }
-          const colorFocused = focused ? 'white' : 'grey'
+          const colorFocused = focused ? '#047d7f' : 'white'
            
           return <FontAwesome name={iconName} size={size} color={colorFocused} />;
         },
-        tabBarActiveTintColor: 'white',
-        tabBarInactiveTintColor: 'gray',
-        tabBarActiveBackgroundColor: 'darkblue',
-        tabBarInactiveBackgroundColor: 'darkblue',
+        tabBarActiveTintColor: '#047d7f',
+        tabBarInactiveTintColor: 'white',
+        tabBarActiveBackgroundColor: darkmode ? '#000022' : 'darkblue',
+        tabBarInactiveBackgroundColor: darkmode ? '#000022' : 'darkblue',
         headerShown: false,
-        tabBarStyle: {backgroundColor: 'darkblue'}
+        tabBarStyle: {backgroundColor: darkmode ? '#000022' : 'darkblue'}
       })}>
         {isAuthenticated ? (
         <>

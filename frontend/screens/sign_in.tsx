@@ -8,6 +8,9 @@ import { connect } from 'react-redux';
 import client from '../actions/client';
 import FischGame from '../components/game/game';
 import Modal from 'react-native-modal'
+import { CustomText } from '../components/text';
+
+const darkmode = true
 
 const SignInScreen = ({login}) => {
 
@@ -57,32 +60,26 @@ const SignInScreen = ({login}) => {
     const [isVisible,setIsVisible] = useState(false)  
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.screen}>
-                <Text style={styles.title}>Sign In</Text>
+                <CustomText fontSize={24} fontWeight='bold'>Sign In</CustomText>
                 <CustomInput placeholder='username' value={username} setValue={setUsername}/>
                 <CustomInput placeholder='password' value={password} setValue={setPassword} secureTextEntry/>
                 <CustomButton text='Sign In' onPress={onSignInPressed}/>
                 <CustomButton text='Forgot password?' onPress={onForgotPasswordPressed} type='TERTIARY'/>
-                <CustomButton text="Don't have an account? Sign up" onPress={onSignUpPressed} type='TERTIARY'/>
-            </View>
-            {/* <CustomButton onPress={()=>{setIsVisible(true)}}/>
-            <Modal isVisible={isVisible}
-            >
-                <View style={{width:'100%',height:'100%',alignItems:'center',justifyContent:'center'}}>
-                    <View style={{position:'absolute',top:'2%',left:'3%',zIndex:1,transform:[{rotate:'90deg'}]}}>
-                        <CloseButton onPress={()=>{setIsVisible(false)}}/>
-                    </View>
-                    <FischGame/>
+                <View style={{marginTop:-15}}>
+                    <CustomButton text="Don't have an account? Sign up" onPress={onSignUpPressed} type='TERTIARY'/>
                 </View>
-            </Modal> */}
-        </ScrollView>
+            </View>
     )
+
 }
 
 const styles = StyleSheet.create({
     screen: {
         padding: 20,
+        backgroundColor: darkmode ? "#000022" : "darkblue",
+        flex:1,
+        width:'100%'
 
     },
     title: {

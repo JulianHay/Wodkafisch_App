@@ -1,6 +1,8 @@
 import { Text, StyleSheet } from "react-native";
 import { useFonts } from 'expo-font';
 
+const darkmode = true
+
 export const CustomText = (props) => {
     const { fontSize, color, fontWeight, children } = props;
 
@@ -28,6 +30,6 @@ export const CustomText = (props) => {
 
 const styles = StyleSheet.create({
     text: {
-        
+        color: darkmode ? 'white' : 'black'
     },
 })

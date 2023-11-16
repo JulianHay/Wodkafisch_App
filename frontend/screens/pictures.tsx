@@ -5,7 +5,6 @@ import { CustomText } from '../components/text';
 import CustomInput from '../components/custom_input';
 import { Ionicons, FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import CustomButton, { CloseButton } from '../components/custom_botton';
-// import Modal from "react-native-modal";
 import FischLoading from '../components/loading';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Camera, CameraType } from 'expo-camera';
@@ -15,9 +14,10 @@ import { checkLocalData, getFromLocal, saveToLocal, updateLocalData } from '../c
 import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
 import MapView,{ Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import { useFocusEffect } from '@react-navigation/native';
+import { Container } from '../components/custom_container';
 
 let camera: Camera
+const darkmode = true
 
 const PictureScreen = ({route,navigation}) => {
 
@@ -34,6 +34,11 @@ const PictureScreen = ({route,navigation}) => {
     const [flashMode, setFlashMode] = useState('off')
     const [location, setLocation] = useState({});
     const index = pictureData.length!==0 && route.params && route.params.id ? pictureData.findIndex(item => item.id === route.params.id) : 0;
+    const [initialIndex, setInitialIndex] = useState(0);
+    
+    useEffect(()=>{
+      setInitialIndex(index)
+    },[route.params])
 
     const __startCamera = async () => {
     const {status} = await Camera.requestCameraPermissionsAsync()
@@ -297,41 +302,280 @@ const PictureScreen = ({route,navigation}) => {
       }
     };
 
-
+    const mapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#8ec3b9"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1a3646"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#64779e"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.province",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.man_made",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#334e87"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#6f9ba5"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#3C7680"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#304a7d"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#2c6675"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#255763"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#b0d5ce"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#3a4762"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#0e1626"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#4e6d70"
+      }
+    ]
+  }
+]
     const renderItem = ({ item,index }) => (
-        <TouchableOpacity style={styles.imageContainer} 
-        onPress={() => {
-        setSelectedPicture(index);
-        setPictureModalVisible(true);
-        }}>
+        // <TouchableOpacity style={styles.imageContainer} 
+        <Container
+        title={item.description}
+        width={0.9}
+        >
+          <TouchableOpacity onPress={() => {
+          setSelectedPicture(index);
+          setPictureModalVisible(true);
+          }}>
             {/* <Image source={{uri:'https://wodkafis.ch/media/'+item.image}} style={styles.image}/> */}
             <Image source={{uri:item.localPath ? item.localPath : 'https://wodkafis.ch/media/'+item.image}} style={styles.image}/>
-            
+          </TouchableOpacity>
+
             <View style={styles.imageDescription}>
-                <View style={{maxWidth:'40%', alignItems:'flex-start',padding:10}}>
-                    <CustomText color='white' fontSize={10}>{item.date}</CustomText>
-                    <CustomText color='white' fontSize={10}>{item.description}  <FontAwesome name="map-marker" size={18} color="white" /> </CustomText>
-                </View>
+                <View style={{width:'60%', alignItems:'flex-start',padding:10}}>
+                    <CustomText color='white' fontSize={18}>{item.date}</CustomText>
+                    <CustomText color='white' fontSize={18}>by {item.username}</CustomText>
+                    
+                    {/* <CustomText color='white' fontSize={10}>{item.date}</CustomText> */}
+                    {/* <CustomText color='white' fontSize={10}>{item.description}  <FontAwesome name="map-marker" size={18} color="white" /> </CustomText> */}
+                {/* </View>
                 <View style={{width:'40%',height:'100%', alignItems:'flex-start',padding:10}}>
                     <View style={{flex:1,justifyContent:'flex-end'}}>
                       <CustomText color='white' fontSize={10}>by {item.username}</CustomText>
-                    </View>
+                    </View> */}
                 </View>
-                <View style={{flex:1,maxWidth:'60%', alignItems:'flex-end', padding:10}}>
+                <View style={{flex:1,maxWidth:'40%', alignItems:'flex-end', justifyContent:'center'}}>
                   <View style={{flexDirection:'row'}}>
                     <View style={{paddingTop:3,paddingRight:5}}>
                       <CustomText color='white'>{item.likes}</CustomText>
                     </View>
-                    <TouchableOpacity style={{marginRight:10,alignItems:'center',justifyContent:'center'}} onPress={() => {pictureLikePressed(item.id,!item.user_like)}}>
+                    <TouchableOpacity style={{alignItems:'center',justifyContent:'center',marginRight:10,zIndex:1}} onPress={() => {pictureLikePressed(item.id,!item.user_like)}}>
                       <Image source={item.user_like ? require('../assets/like_on.png') : require('../assets/like_off.png')} 
                         style={{width:20,height:25}} 
                         resizeMode='contain'/>
                     </TouchableOpacity>
                   </View>
-                  
                 </View>
             </View>
-        </TouchableOpacity>
+        </Container>
       );
 
     return (
@@ -339,7 +583,7 @@ const PictureScreen = ({route,navigation}) => {
             <View style={styles.container}>
               <Animated.View style={{ ...headerStyle,flexDirection:'row',alignItems:'center', justifyContent:'center',width:'100%', position: 'absolute', top: 0, zIndex:1}}>
                 <View style={{width:'40%',marginTop:20,marginBottom:10}}>
-                      <CustomButton text={'Add Picture'} onPress={()=>{__startCamera()}} bgColor='darkblue'/>
+                      <CustomButton text={'Add Picture'} onPress={()=>{__startCamera()}}/>
                 </View>
 
                 <TouchableOpacity style={{padding:10,flexDirection:'row',position:'absolute',right:0}} 
@@ -349,9 +593,9 @@ const PictureScreen = ({route,navigation}) => {
                     } 
                   ref={sortButton}>
                   <View style={{marginTop:2}}>
-                    <CustomText color='darkblue'>sort by</CustomText>
+                    <CustomText>sort by</CustomText>
                   </View>
-                  <Ionicons name="chevron-down" size={24} color="darkblue" />
+                  <Ionicons name="chevron-down" size={24} color={darkmode ? 'white': 'black'} />
                 </TouchableOpacity>
 
                 <Modal
@@ -360,32 +604,32 @@ const PictureScreen = ({route,navigation}) => {
                   onRequestClose={() => setOrderModalVisible(false)}
                 >
                   <TouchableOpacity style={{width:'100%',height:'100%'}} onPress={() => setOrderModalVisible(false)}>
-                    <View style={{position: 'absolute', top: modalPosition.top, right:5, backgroundColor:'white',borderColor:'#3B71F3',borderRadius:3,borderWidth:1}}>
+                    <View style={{position: 'absolute', top: modalPosition.top, right:5, backgroundColor:'#161632',borderRadius:3}}>
                       <TouchableOpacity
                         onPress={() => sortPictures('date')}
                         style={{padding:3,paddingLeft:8,paddingRight:8,paddingTop:8}}
                       >
                         <View style={{flexDirection:'row'}}>
                           <Checkbox value={sortBy==='date'} onValueChange={() => sortPictures('date')} style={{marginRight:3}}/>
-                          <CustomText color='darkblue'>date</CustomText>
+                          <CustomText>date</CustomText>
                         </View>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => sortPictures('likes')}
-                        style={{padding:3,paddingLeft:8,paddingRight:8,backgroundColor: 'white'}}
+                        style={{padding:3,paddingLeft:8,paddingRight:8}}
                       >
                         <View style={{flexDirection:'row'}}>
                           <Checkbox value={sortBy==='likes'} onValueChange={() => sortPictures('likes')} style={{marginRight:3}}/>
-                          <CustomText color='darkblue'>likes</CustomText>
+                          <CustomText>likes</CustomText>
                         </View>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => sortPictures('distance')}
-                        style={{padding:3,paddingLeft:8,paddingRight:8,paddingBottom:8,backgroundColor:'white'}}
+                        style={{padding:3,paddingLeft:8,paddingRight:8,paddingBottom:8}}
                       >
                         <View style={{flexDirection:'row'}}>
                           <Checkbox value={sortBy==='distance'} onValueChange={() => sortPictures('distance')} style={{marginRight:3}}/>
-                          <CustomText color='darkblue'>distance</CustomText>
+                          <CustomText>distance</CustomText>
                         </View>
                       </TouchableOpacity>
                     </View>
@@ -403,10 +647,10 @@ const PictureScreen = ({route,navigation}) => {
                       {length: Dimensions.get('window').width * 0.9 + 17, offset: (Dimensions.get('window').width * 0.9 + 17) * index, index}
                     )}
                     showsVerticalScrollIndicator={false}
-                    refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}
+                    refreshControl={<RefreshControl refreshing={loading} onRefresh={() => {onRefresh();setInitialIndex(0)}}/>}
                     onScroll={handleScroll}
                     initialNumToRender={5}
-                    initialScrollIndex={index}
+                    initialScrollIndex={initialIndex}
                     ListHeaderComponent={()=>{return(<View style={{height:80}}/>)}}
                 />
                 
@@ -424,14 +668,14 @@ const PictureScreen = ({route,navigation}) => {
                     <TouchableOpacity onPress={()=>{
                       const coords = {latitude: pictureData[index].lat,  longitude: pictureData[index].long}
                       navigation.navigate('Map',{coords:coords})}}>
-                        <FontAwesome name="map-marker" size={30} color="white" />
+                        <FontAwesome name="map-marker" size={30} color={darkmode ? "white" : "black"} />
                     </TouchableOpacity>
                   </View>
                   <View style={{position:'absolute', top:'8%', right:'5%',zIndex:1}}>
                     <CloseButton onPress={()=>{setPictureModalVisible(false)}}/>
                   </View>
-                  <View style={{position:'absolute', width:'100%',left:0, bottom:40 ,alignItems:'center',zIndex:1}}>
-                    <View style={{position:'absolute', bottom:60, padding:5, backgroundColor: 'grey',width:'50%',borderRadius:10, alignItems:'center'}}>
+                  <View style={{position:'absolute', width:'100%',left:0, bottom:15 ,alignItems:'center',zIndex:1}}>
+                    <View style={{position:'absolute', bottom:60, padding:5, backgroundColor: '#161632',width:'50%',borderRadius:10, alignItems:'center'}}>
                       <CustomText fontWeight='bold'>{pictureData[index].description}</CustomText>
                     </View>
                     <View style={{position:'absolute', bottom:20, marginBottom:20}}>
@@ -665,6 +909,7 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
               }}
               onPress={handleMapPress}
               provider={PROVIDER_GOOGLE}
+              customMapStyle={mapStyle}
             >
               {markerLocation && 
               <Marker coordinate={markerLocation}> 
@@ -693,28 +938,30 @@ const styles = StyleSheet.create({
     container: {
         justifyContent: 'center', 
         alignItems:'center',
-        flex: 1
+        flex: 1,
+        backgroundColor: darkmode ? "#000022" : "darkblue"
     },
 
     image: {
-        width: Dimensions.get('window').width * 0.9,
-        height: Dimensions.get('window').width * 0.9,
+        width: Dimensions.get('window').width * 0.87,
+        height: Dimensions.get('window').width * 0.87,
         borderRadius: 10,
         borderWidth: 3,
-        borderColor: 'darkblue'
+        marginTop:-5
       },
     imageContainer: {
         margin:10,
-        marginBottom:-50
     },
     imageDescription: {
         flexDirection:'row',
         flex: 1,
-        top: -50,
-        backgroundColor:'darkblue',
-        borderBottomLeftRadius: 10,
-        borderBottomRightRadius: 10,
-        width: Dimensions.get('window').width * 0.9,
+        marginTop: -3,
+        marginBottom:-13,
+        // top: -50,
+        // backgroundColor:'darkblue',
+        // borderBottomLeftRadius: 10,
+        // borderBottomRightRadius: 10,
+        width: Dimensions.get('window').width * 0.87,
     }
 })
 

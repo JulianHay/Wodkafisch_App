@@ -75,7 +75,7 @@ const MapScreen = ({route,navigation}) => {
         type: 'FeatureCollection',
         features: [country]}} 
     strokeColor="#0568AE"
-    fillColor="rgba(0, 159, 219,0.5)"
+    fillColor="rgba(32, 32, 107, 0.5)"
     strokeWidth={2}
     tappable={true}
     onPress={() => {
@@ -127,12 +127,244 @@ const MapScreen = ({route,navigation}) => {
       </View>
   )}
   const markerData = fischRoute.map((coord, index) => calculateRotation(coord, fischRoute[index - 1], geodesic=true, heading=0)).slice(1);
-
+  const mapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#8ec3b9"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1a3646"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#64779e"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.province",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.man_made",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#334e87"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#6f9ba5"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#3C7680"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#304a7d"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#2c6675"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#255763"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#b0d5ce"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#3a4762"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#0e1626"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#4e6d70"
+      }
+    ]
+  }
+]
   return (
     loading ? <FischLoading/> :
     <View style={styles.container}>
       <View style={{position:'absolute',top:10,right:20,zIndex:1}}>
-        <CustomButton onPress={()=>{setRouteVisible(!routeVisible)}} text={routeVisible ? 'Hide Route' : 'Show Route'} bgColor='darkblue' fgColor='white'/>
+        <CustomButton onPress={()=>{setRouteVisible(!routeVisible)}} text={routeVisible ? 'Hide Route' : 'Show Route'} borderColor='#19203c'/>
       </View>
       <MapView 
         key={JSON.stringify(initialRegion)}
@@ -140,11 +372,12 @@ const MapScreen = ({route,navigation}) => {
         provider={PROVIDER_GOOGLE} 
         onMapReady={() => setTimeout(() => setMapReady(true), 100)}
         initialRegion={initialRegion}
+        customMapStyle={mapStyle}
         >
         {coloredCountries}
         {imageMarkers}
         {routeVisible ? <>
-          <Polyline coordinates={fischRoute} strokeWidth={4} strokeColor="#000080" geodesic/>
+          <Polyline coordinates={fischRoute} strokeWidth={4} strokeColor="#2121b4" geodesic/>
           {markerData.map((markerProps, index) => {
             return (
               <Marker {...markerProps} key={eventData[index].title} tappable={false} anchor={{ y: 0, x: 0.5 }}>
@@ -193,10 +426,10 @@ const MapScreen = ({route,navigation}) => {
               <TouchableOpacity style={{position:'absolute',top:'8%',left:'5%'}} onPress={()=>{Linking.openURL('https://www.google.de/maps/dir//'+selectedImage.lat+','+selectedImage.long)}}>
                 <FontAwesome5 name="directions" size={30} color="white" />
               </TouchableOpacity>
-              <View style={{position:'absolute', bottom:60, padding:5, backgroundColor: 'grey',width:'50%',borderRadius:10, alignItems:'center'}}>
+              <View style={{position:'absolute', bottom:55, padding:5, backgroundColor: '#161632',width:'50%',borderRadius:10, alignItems:'center'}}>
                 <CustomText fontWeight='bold'>{selectedImage.description}</CustomText>
               </View>
-              <View style={{position:'absolute', bottom:20, marginBottom:20}}>
+              <View style={{position:'absolute', bottom:15, marginBottom:20}}>
                 <CustomText fontSize={14} fontWeight='bold' color='white'>by {selectedImage.username}</CustomText>
               </View>
             </>

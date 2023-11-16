@@ -7,11 +7,14 @@ import { connect } from 'react-redux';
 import { useEffect } from 'react';
 import { checkAuthenticated } from '../actions/auth';
 
+const darkmode = true
+
 const Drawer = createDrawerNavigator();
 
 const LogoutDrawerItem = ({logout}) => {
     return(
       <DrawerItem
+          labelStyle={{ color: 'white' }}
           label="Logout"
           onPress={() => {
             logout()
@@ -23,8 +26,9 @@ const ConnectedLogoutDrawerItem = connect(null, {logout})(LogoutDrawerItem)
 
 const CustomDrawerContent = (props) => {
     return (
-      <DrawerContentScrollView {...props}>
+      <DrawerContentScrollView {...props} style={{backgroundColor:'#161632'}}>
         <DrawerItem
+          labelStyle={{ color: 'white' }}
           label="Profile"
           onPress={() => props.navigation.navigate('Profile')}
         />
@@ -56,9 +60,10 @@ const DrawerNavigator = ({isAuthenticated}) => {
                 </TouchableOpacity>
             </View>
         ),
-        headerStyle: {backgroundColor: 'darkblue'},
+        headerStyle: {backgroundColor: darkmode ? '#000022' : 'darkblue'},
         drawerPosition: "right",
-        })} drawerContent={(props) => isAuthenticated ? <CustomDrawerContent {...props}/> : (props.navigation.closeDrawer())}>
+        })} 
+        drawerContent={(props) => isAuthenticated ? <CustomDrawerContent {...props}/> : (props.navigation.closeDrawer())}>
             <Drawer.Screen name="TabBar" component={TabBar}/>
         </Drawer.Navigator>
     );

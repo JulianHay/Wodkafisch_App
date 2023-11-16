@@ -40,6 +40,14 @@ const checkLocalData = async (newData,key:string) => {
       return !existingData.some((existingItem) => existingItem.id === newItem.id);
     });
 
+    Object.keys(existingData).forEach((key) => {
+      if (!newData.hasOwnProperty(key)) {
+        delete existingData[key];
+      }
+    });
+
+    await saveToLocal(key, existingData);
+
     return {existingData:existingData,newData:uniqueNewItems}
   } catch (error) {
     console.error('Error checking local data:', error);

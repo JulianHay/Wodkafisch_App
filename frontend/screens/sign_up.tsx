@@ -5,6 +5,9 @@ import CustomButton from '../components/custom_botton';
 import { useNavigation } from '@react-navigation/native';
 import client from '../actions/client';
 import { register } from '../actions/auth';
+import { CustomText } from '../components/text';
+
+const darkmode = true
 
 const SignUpScreen = () => {
 
@@ -36,9 +39,8 @@ const SignUpScreen = () => {
     }
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.screen}>            
-                <Text style={styles.title}>Sign Up</Text>
+                <CustomText fontSize={24} fontWeight='bold'>Sign Up</CustomText>
                 <CustomInput placeholder='Fisrt Name' value={firstName} setValue={setFirstName}/>
                 <CustomInput placeholder='Last Name' value={lastName} setValue={setLastName}/>
                 <CustomInput placeholder='Username' value={username} setValue={setUsername}/>
@@ -52,13 +54,15 @@ const SignUpScreen = () => {
                 
                 <CustomButton text="Have an account? Sign in" onPress={onSignInPressed} type='TERTIARY'/>
             </View>
-        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
     screen: {
         padding: 20,
+        backgroundColor: darkmode ? "#000022" : "darkblue",
+        flex:1,
+        width:'100%'
     },
     title: {
         fontSize: 24,
@@ -71,7 +75,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     link: {
-        color: '#FDB075'
+        color: '#206a43'
     }
 
 })

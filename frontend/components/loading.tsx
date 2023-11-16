@@ -1,6 +1,6 @@
 import React, {useEffect,useRef} from "react";
 import { View, StyleSheet, Image, Animated, Easing } from "react-native";
-
+const darkmode = true
 const FischLoading = () =>{
     const spinValue = useRef(new Animated.Value(0)).current;
 
@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: darkmode ? "#000022" : "darkblue"
     },
     image: {
         width: 20,

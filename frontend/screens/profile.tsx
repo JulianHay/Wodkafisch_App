@@ -6,7 +6,7 @@ import { CustomText } from '../components/text';
 import CustomButton from '../components/custom_botton';
 import { useNavigation } from '@react-navigation/native';
 
-
+const darkmode = true
 
 const ProfileScreen = () => {
 
@@ -40,7 +40,9 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
     screen: {
         padding: 20,
-        alignItems:'center'
+        alignItems:'center',
+        backgroundColor: darkmode ? "#000022" : "darkblue",
+        flex:1
     }
 })
 
