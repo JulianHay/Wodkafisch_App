@@ -35,20 +35,35 @@ const downloadData = async (url, localPath) => {
 const checkLocalData = async (newData,key:string) => {
   try {
     const existingData = await getFromLocal(key) || [];
-
     const uniqueNewItems = newData.filter((newItem) => {
       return !existingData.some((existingItem) => existingItem.id === newItem.id);
     });
 
-    Object.keys(existingData).forEach((key) => {
-      if (!newData.hasOwnProperty(key)) {
-        delete existingData[key];
-      }
-    });
+    const itemsToDelete = existingData.filter(
+      (existingItem) => !newData.some((newItem) => newItem.id === existingItem.id)
+    );
 
-    await saveToLocal(key, existingData);
+    await Promise.all(
+      itemsToDelete.map(async (item) => {
+        const localImagePath = `${FileSystem.documentDirectory}${item.id}.jpg`;
 
-    return {existingData:existingData,newData:uniqueNewItems}
+        const isImageExisting = await FileSystem.getInfoAsync(localImagePath);
+        if (isImageExisting.exists) {
+          await FileSystem.deleteAsync(localImagePath);
+        }
+      })
+    );
+
+    const filteredData = existingData.filter((item) => !itemsToDelete.some((deletedItem) => item.id === deletedItem.id));
+    
+    const updatedData = newData.map((item,index) => {
+      item.localPath = filteredData[index].localPath
+      return item
+    })
+
+    await saveToLocal(key, updatedData);
+
+    return {existingData:updatedData,newData:uniqueNewItems}
   } catch (error) {
     console.error('Error checking local data:', error);
   }
@@ -56,17 +71,10 @@ const checkLocalData = async (newData,key:string) => {
 
 const updateLocalData = async (newData,existingData,key:string,url:string) => {
   try {
-    
-    // const existingData = await getFromLocal(key) || [];
-
-    // const uniqueNewItems = newData.filter((newItem) => {
-    //   return !existingData.some((existingItem) => existingItem.id === newItem.id);
-    // });
-
     const newItems = await Promise.all(
       newData.map(async (newItem) => {
 
-        const localImagePath = `${FileSystem.documentDirectory}${newItem.id}.jpg`;
+        const localImagePath = `${FileSystem.documentDirectory}${newItem.id ? newItem.id :newItem.start }.jpg`;
 
         const isImageDownloaded = await FileSystem.getInfoAsync(localImagePath);
 
