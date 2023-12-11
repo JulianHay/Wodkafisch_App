@@ -25,7 +25,7 @@ const HomeScreen = ({navigation}) => {
     
     const [progress] = useState(new Animated.Value(0));
     const progressAnimation = loading ? null : Animated.timing(progress, {
-        toValue: sponsorData[0].season_score/seasonData[0].max_donation * 250, 
+        toValue: Math.min(sponsorData[0].season_score/(seasonItemData[seasonItemData.length-1].price) * 250,247), 
         duration: 2000, 
         useNativeDriver: false, 
       })
@@ -119,7 +119,7 @@ const HomeScreen = ({navigation}) => {
                             </TouchableOpacity>
                         </Modal>
 
-                        <TouchableContainer onPress= {() => navigation.navigate('Sponsors')}  title={'Sponsorhip'}> 
+                        <TouchableContainer onPress= {() => navigation.navigate('Sponsors')}  title={'Sponsorship'}> 
                             <View style={{margin:5, flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
                                 {sponsorData[0].diamond_sponsor>0 || 
                                 sponsorData[0].black_sponsor>0 || 
@@ -146,12 +146,16 @@ const HomeScreen = ({navigation}) => {
                                 },
                                 ]}/>
                             </View>
+                            {itemUlockAmount ? 
                             <View style={{marginTop:5,alignItems:'center',flexDirection:'row'}}>
                                 <CustomText fontSize={14} color='white'>Only {itemUlockAmount.price-sponsorData[0].season_score}</CustomText>
                                 <Image source={require('../assets/fisch_flakes.png')} 
                                     style={{width:12,height:12, marginLeft:1.5}}/>
                                 <CustomText fontSize={14} color='white'> left to unlock the next item!</CustomText>
-                            </View>
+                            </View> :
+                            <View style={{marginTop:5}}>
+                                <CustomText fontSize={14} color='white'>You already unlocked all items in this season!</CustomText>
+                            </View>}
                         </TouchableContainer>
                         
                         <TouchableContainer onPress= {() => navigation.navigate('Pictures',{id: pictureData[0].id})} title={'Fisch picture of the day'}>
