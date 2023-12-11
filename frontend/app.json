@@ -2,14 +2,14 @@
   "expo": {
     "name": "Wodkafisch",
     "slug": "frontend",
-    "version": "1.0.10",
+    "version": "1.0.12",
     "orientation": "portrait",
     "icon": "./assets/app_icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/app_splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000022"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -18,11 +18,17 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.wodkafisch.app",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "This app uses FaceID / TouchID for authentication."
+        "NSFaceIDUsageDescription": "This app uses FaceID / TouchID for authentication.",
+        "NSLocationAlwaysUsageDescription": "This app uses location data to place the captured images on the map.",
+        "NSLocationUsageDescription": "This app uses location data to place the captured images on the map.",
+        "NSLocationWhenInUseUsageDescription": "This app uses location data to place the captured images on the map.",
+        "NSCameraUsageDescription": "This app uses the camera to take new Fisch sticker pictures",
+        "NSPhotoLibraryUsageDescription": "This app uses the photo library to add new Fisch sticker pictures",
+        "NSPhotoLibraryAddUsageDescription": "Allow this app to save pictures to your local photo libraray."      
       },
       "config":{
         "googleMapsApiKey": "AIzaSyDdecQFweuYKopW_i5U5QwoVstW-GPZqk4"
-        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -34,9 +40,7 @@
         "googleMaps": {
           "apiKey": "AIzaSyDdecQFweuYKopW_i5U5QwoVstW-GPZqk4"
           }
-        },
-      "versionCode": 8,
-      "versionName": "1.0.10"  
+        }
     },
     "web": {
       "favicon": "./assets/fisch.png"
