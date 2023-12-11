@@ -29,6 +29,7 @@ urlpatterns = [
     path(r'pictures', PictureView.as_view(), name='pictures'),
     path(r'upload_picture', ImageUploadView.as_view(), name='upload_picture'),
     path(r'like_picture', PictureLikeView.as_view(), name='picture_like'),
+    path(r'report_content', ReportUser.as_view(), name='report_content'),
     path(r'password_change', change_password, name='change_password'),
     path(r'password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
 

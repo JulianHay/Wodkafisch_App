@@ -13,7 +13,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import get_template
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, send_mail
 from pages.tokens import account_activation_token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -79,7 +79,7 @@ class SignupView(APIView):
 
         username = data['username']
         password = data['password']
-        re_password  = data['re_password']
+        re_password = data['re_password']
         first_name = data['first_name']
         last_name = data['last_name']
         email = data['email']
@@ -92,8 +92,12 @@ class SignupView(APIView):
                     if len(password) < 6:
                         return Response({ 'error': 'Password must be at least 6 characters' })
                     else:
-                        user = User.objects.create_user(username=username, password=password)
-
+                        user = User.objects.create_user(username=username,
+                                                        password=password,
+                                                        email=email,
+                                                        first_name=first_name,
+                                                        last_name=last_name)
+                        user.refresh_from_db()
                         user.profile.first_name = first_name
                         user.profile.last_name = last_name
                         user.profile.email = email
@@ -126,7 +130,7 @@ class SignupView(APIView):
             else:
                 return Response({ 'error': 'Passwords do not match' })
         except:
-                return Response({ 'error': 'Something went wrong when registering account' })
+                return Response({ 'error': 'Something went wrong when registering the account' })
 
 # class LoginView(APIView):
 #     permission_classes = (permissions.AllowAny, )
@@ -301,3 +305,11 @@ class PictureView(APIView):
         return Response({
             'pictures': picture.values()
         })
+
+class ReportUser(APIView):
+
+    def post(self,request):
+        subject = 'Reported User / Content'
+        message = f'Dear Admins,\n The user {request.data["user"]} has been reported by {request.user.username} for posting the picture with id {request.data["picture_id"]}.\n Please review the content and act accordingly.'
+        send_mail(subject, message, 'reported_content@wodkafis.ch', ['reported_content@wodkafis.ch'])
+        return Response({'success: User / Content has been reported'})
