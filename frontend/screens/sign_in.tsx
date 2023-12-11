@@ -6,8 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import { login } from '../actions/auth';
 import { connect } from 'react-redux';
 import client from '../actions/client';
-import FischGame from '../components/game/game';
-import Modal from 'react-native-modal'
 import { CustomText } from '../components/text';
 
 const darkmode = true
@@ -62,12 +60,14 @@ const SignInScreen = ({login}) => {
     return (
             <View style={styles.screen}>
                 <CustomText fontSize={24} fontWeight='bold'>Sign In</CustomText>
-                <CustomInput placeholder='username' value={username} setValue={setUsername}/>
-                <CustomInput placeholder='password' value={password} setValue={setPassword} secureTextEntry/>
-                <CustomButton text='Sign In' onPress={onSignInPressed}/>
-                <CustomButton text='Forgot password?' onPress={onForgotPasswordPressed} type='TERTIARY'/>
-                <View style={{marginTop:-15}}>
-                    <CustomButton text="Don't have an account? Sign up" onPress={onSignUpPressed} type='TERTIARY'/>
+                <View style={{alignItems:'center'}}>
+                    <CustomInput placeholder='username' value={username} setValue={setUsername}/>
+                    <CustomInput placeholder='password' value={password} setValue={setPassword} secureTextEntry/>
+                    <CustomButton text='Sign In' onPress={onSignInPressed}/>
+                    <CustomButton text='Forgot password?' onPress={onForgotPasswordPressed} type='TERTIARY'/>
+                    <View style={{marginTop:-15}}>
+                        <CustomButton text="Don't have an account? Sign up" onPress={onSignUpPressed} type='TERTIARY'/>
+                    </View>
                 </View>
             </View>
     )
