@@ -122,7 +122,7 @@ const MapScreen = ({route,navigation}) => {
               marginTop:-2
         }} />
         <View style={{borderColor:'darkblue',width:size*2/3,height:size,position:'absolute',top:-2,right:8}}>
-          <CustomText fontSize={13} fontWeight='bold' color='darkblue'>{index}</CustomText>
+          <CustomText fontSize={13} fontWeight='bold' color='#2121b4'>{index}</CustomText>
         </View>
       </View>
   )}
@@ -381,7 +381,7 @@ const MapScreen = ({route,navigation}) => {
           {markerData.map((markerProps, index) => {
             return (
               <Marker {...markerProps} key={eventData[index].title} tappable={false} anchor={{ y: 0, x: 0.5 }}>
-                <Arrow color={"#000080"} size={15} index={index+1}/>
+                <Arrow color={"#2121b4"} size={15} index={index+1}/>
               </Marker>
             );
           })} 
