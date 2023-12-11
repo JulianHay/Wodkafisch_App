@@ -55,20 +55,9 @@ export const checkAuthenticated = () => async dispatch => {
     }
 };
 
-export const register = (first_name, last_name, username, email, password, re_password) => async dispatch => {
-    const config = {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        }
-    };
-
-    const body = JSON.stringify({ first_name, last_name, username, email, password, re_password });
-
-    try {
-        const res = await client.post('/register', body, config);
-
-        if (res.data.error) {
+export const register = (success:boolean) => async dispatch => {
+    
+        if (success) {
             dispatch({
                 type: REGISTER_FAIL
             });
@@ -77,11 +66,6 @@ export const register = (first_name, last_name, username, email, password, re_pa
                 type: REGISTER_SUCCESS
             });
         }
-    } catch (err) {
-        dispatch({
-            type: REGISTER_FAIL
-        });
-    }
 };
 
 export const logout = () => async dispatch => {
