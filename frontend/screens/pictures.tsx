@@ -15,6 +15,7 @@ import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
 import MapView,{ Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import { Container } from '../components/custom_container';
+import PictureMenuModal from '../components/modals/pictureMenuModal';
 
 let camera: Camera
 const darkmode = true
@@ -22,9 +23,10 @@ const darkmode = true
 const PictureScreen = ({route,navigation}) => {
 
     const flatListRef = useRef(null);
+    const [selectedContent, setselectedContent] = useState(null);
     const [selectedPicture, setSelectedPicture] = useState(null);
     const [isPictureModalVisible, setPictureModalVisible] = useState(false);
-    const [isPreviewModalVisible, setPreviewModalVisible] = useState(false);
+    const [isMenuModalVisible, setMenuModalVisible] = useState(false);
     const [pictureData,setPictureData] = useState([])
     const [loading, setLoading] = useState(true)
     const [isCameraModalVisible, setCameraModalVisible] = useState(false);
@@ -35,7 +37,7 @@ const PictureScreen = ({route,navigation}) => {
     const [location, setLocation] = useState({});
     const index = pictureData.length!==0 && route.params && route.params.id ? pictureData.findIndex(item => item.id === route.params.id) : 0;
     const [initialIndex, setInitialIndex] = useState(0);
-    
+
     useEffect(()=>{
       setInitialIndex(index)
     },[route.params])
@@ -174,8 +176,22 @@ const PictureScreen = ({route,navigation}) => {
     return pictureDataWithDistance
   }
 
+  const filterData = async (data) => {
+    let filteredPictureIds = await getFromLocal('filteredPictureIds')
+    let filteredUsers = await getFromLocal('filteredUsers')
+    let filteredPictures = data
+    if (Array.isArray(filteredPictureIds) && filteredPictureIds.length !== 0) {
+      filteredPictures = pictureData.filter((picture)=>!filteredPictureIds.includes(picture.id))
+    } 
+    if (Array.isArray(filteredUsers) && filteredUsers.length !== 0) {
+      filteredPictures = pictureData.filter((picture)=>!filteredUsers.includes(picture.username))
+    }               
+    return filteredPictures
+  }
+
   const fetchLocalStorage = async (data) => {
-    const res = await checkLocalData(data,'pictures')
+    const filteredData = await filterData(data)
+    const res = await checkLocalData(filteredData,'pictures')
     const newData = [...res?.existingData,...res?.newData]
     const pictureDataWithDistance = addDistance(newData)
     setPictureData(pictureDataWithDistance)
@@ -302,239 +318,18 @@ const PictureScreen = ({route,navigation}) => {
       }
     };
 
-    const mapStyle = [
-  {
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#1d2c4d"
-      }
-    ]
-  },
-  {
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#8ec3b9"
-      }
-    ]
-  },
-  {
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#1a3646"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative.country",
-    "elementType": "geometry.stroke",
-    "stylers": [
-      {
-        "color": "#4b6878"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative.land_parcel",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#64779e"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative.province",
-    "elementType": "geometry.stroke",
-    "stylers": [
-      {
-        "color": "#4b6878"
-      }
-    ]
-  },
-  {
-    "featureType": "landscape.man_made",
-    "elementType": "geometry.stroke",
-    "stylers": [
-      {
-        "color": "#334e87"
-      }
-    ]
-  },
-  {
-    "featureType": "landscape.natural",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#023e58"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#283d6a"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#6f9ba5"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#1d2c4d"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#023e58"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#3C7680"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#304a7d"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#98a5be"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#1d2c4d"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#2c6675"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "geometry.stroke",
-    "stylers": [
-      {
-        "color": "#255763"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#b0d5ce"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#023e58"
-      }
-    ]
-  },
-  {
-    "featureType": "transit",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#98a5be"
-      }
-    ]
-  },
-  {
-    "featureType": "transit",
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#1d2c4d"
-      }
-    ]
-  },
-  {
-    "featureType": "transit.line",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#283d6a"
-      }
-    ]
-  },
-  {
-    "featureType": "transit.station",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#3a4762"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#0e1626"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#4e6d70"
-      }
-    ]
-  }
-]
+    const reportContent = (user,picture_id) => {
+      const config = {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+      };
+
+      const body = JSON.stringify({ picture_id, user });
+      client.post('/report_content',body,config)
+    }
+
     const renderItem = ({ item,index }) => (
         // <TouchableOpacity style={styles.imageContainer} 
         <Container
@@ -572,7 +367,15 @@ const PictureScreen = ({route,navigation}) => {
                         style={{width:20,height:25}} 
                         resizeMode='contain'/>
                     </TouchableOpacity>
-                  </View>
+                    <TouchableOpacity style={{paddingRight:10, paddingLeft:5}} 
+                      onPress={()=>{
+                        setselectedContent(item)
+                        setMenuModalVisible(true)
+                      }}
+                    >
+                      <FontAwesome5 name="ellipsis-h" size={20} color="white" />
+                    </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </Container>
@@ -825,6 +628,47 @@ const PictureScreen = ({route,navigation}) => {
                         </View>
                     </View>
                 </Modal>
+
+
+                <PictureMenuModal 
+                modalVisible={isMenuModalVisible} 
+                setModalVisible={setMenuModalVisible}
+                hidePicture={async ()=>{
+                  let filteredPictureIds = await getFromLocal('filteredPictureIds')
+                  if (Array.isArray(filteredPictureIds)) {
+                    if (!filteredPictureIds.includes(selectedContent.id)) {
+                      filteredPictureIds.push(selectedContent.id);
+                    }
+                    await saveToLocal('filteredPictureIds',filteredPictureIds)
+                  } else {
+                    filteredPictureIds = [selectedContent.id]
+                    await saveToLocal('filteredPictureIds',[selectedContent.id])
+                  }
+                  onRefresh()
+                  setMenuModalVisible(false)
+                }}
+                reportPicture={()=>{
+                  reportContent(selectedContent.username, selectedContent.id)
+                  Alert.alert('Successfully reported picture')
+                  setMenuModalVisible(false)
+                }}
+                reportUser={async()=>{
+                  let filteredUsers = await getFromLocal('filteredUsers')
+                  if (Array.isArray(filteredUsers)) {
+                    if (!filteredUsers.includes(selectedContent.username)) {
+                      filteredUsers.push(selectedContent.username);
+                    }
+                    await saveToLocal('filteredUsers',filteredUsers)
+                  } else {
+                    filteredUsers = [selectedContent.username]
+                    await saveToLocal('filteredUsers',[selectedContent.username])
+                  }
+                  onRefresh()
+                  setMenuModalVisible(false)
+                  reportContent(selectedContent.username, selectedContent.id)
+                  Alert.alert('Successfully reported user')
+                }}
+                />
             </View>
         )
     )
@@ -855,26 +699,31 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
             style={{
               flex: 1,
               flexDirection: 'column',
-              padding: 15,
               justifyContent: 'flex-end',
-              alignItems:'center'
+              alignItems:'center',
             }}
           >
-            <View style={{margin:20,width:'80%',alignItems:'center'}}>
-              <CustomInput placeholder='description / location' value={description} setValue={setDescription}/>
-            </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}
-            >
-              <View style={{width: '35%', marginRight:40}}>
-                <CustomButton onPress={retakePicture} text='Re-take' bgColor='black' fgColor='white'/>
+            <View style={{backgroundColor:'black',
+              justifyContent: 'flex-end',
+              alignItems:'center',
+              width:'100%',
+              paddingBottom:20}}>
+              <View style={{padding:20,width:'80%',alignItems:'center'}}>
+                <CustomInput placeholder='description / location' value={description} setValue={setDescription}/>
               </View>
-              <View style={{width: '35%', marginLeft:40}}>
-                <CustomButton onPress={()=>{savePhoto(description)}} text='Save' bgColor='black' fgColor='white'/>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                }}
+              >
+                <View style={{width: '35%', marginRight:40}}>
+                  <CustomButton onPress={retakePicture} text='Re-take' bgColor='black' fgColor='white'/>
+                </View>
+                <View style={{width: '35%', marginLeft:40}}>
+                  <CustomButton onPress={()=>{savePhoto(description)}} text='Save' bgColor='black' fgColor='white'/>
+                </View>
               </View>
             </View>
           </View>
@@ -890,7 +739,239 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
     const handleMapPress = (event) => {
       setMarkerLocation(event.nativeEvent.coordinate);
     };
-
+    const mapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#8ec3b9"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1a3646"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#64779e"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.province",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.man_made",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#334e87"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#6f9ba5"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#3C7680"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#304a7d"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#2c6675"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#255763"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#b0d5ce"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#3a4762"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#0e1626"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#4e6d70"
+      }
+    ]
+  }
+]
     return (
       <KeyboardAvoidingView behavior="padding" style={{ backgroundColor: 'transparent', flex: 1, width: '100%', height: '100%', alignItems: 'center' }}>
         <View style={{ flex: 1, flexDirection: 'column', padding: 15, justifyContent: 'flex-end', alignItems: 'center',height: '100%', width: '100%', backgroundColor: 'black'}}>
@@ -946,7 +1027,6 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width * 0.87,
         height: Dimensions.get('window').width * 0.87,
         borderRadius: 10,
-        borderWidth: 3,
         marginTop:-5
       },
     imageContainer: {
