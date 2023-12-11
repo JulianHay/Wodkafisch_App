@@ -1,10 +1,31 @@
-import React from "react";
+import React, {useState} from "react";
 import { View, Text, StyleSheet, Pressable,TouchableOpacity } from "react-native";
 import { useFonts } from 'expo-font';
 import { CustomText } from "./text";
 import { FontAwesome } from '@expo/vector-icons';
 const darkmode = true
+
+const brightenColor = (color, factor = 1.2) => {
+  // Convert hex to RGB
+  const hexToRgb = (hex) =>
+    hex
+      .replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (m, r, g, b) => '#' + r + r + g + g + b + b)
+      .substring(1)
+      .match(/.{2}/g)
+      .map((x) => parseInt(x, 16));
+
+  // Convert RGB to hex
+  const rgbToHex = (r, g, b) => '#' + [r, g, b].map((x) => Math.round(x).toString(16).padStart(2, '0')).join('');
+
+  const rgbColor = hexToRgb(color);
+  const brightenedColor = rgbColor.map((channel) => Math.min(Math.round(channel * factor), 255));
+  return rgbToHex(...brightenedColor);
+};
+
 const CustomButton = ({onPress, text, type='PRIMARY',bgColor,fgColor,borderColor}) =>{
+    
+    const [isPressed, setIsPressed] = useState(false);
+
     const [loaded] = useFonts({
         ArialRounded: require('../assets/fonts/Arial-Rounded.ttf'),
         ArialRoundedBold: require('../assets/fonts/Arial-RoundedBold.ttf'),
@@ -16,17 +37,18 @@ const CustomButton = ({onPress, text, type='PRIMARY',bgColor,fgColor,borderColor
 
     return (
         <Pressable 
-        onPress={onPress} 
+        onPressIn={()=>{setIsPressed(!isPressed)}} 
+        onPressOut={()=>{onPress(); setIsPressed(!isPressed)}}
         style={[
             styles.container,
             styles[`container_${type}`],
-            bgColor ? {backgroundColor: bgColor} : {},
+            bgColor ? {backgroundColor: bgColor} : type==='PRIMARY' ? {backgroundColor: darkmode ? isPressed ? brightenColor("#161632"): "#161632" : "darkblue"}:{},
             borderColor ? {borderColor: borderColor, borderWidth:2} : {}
             ]}>
             <Text style={[
                 styles.text, 
                 styles[`text_${type}`],
-                fgColor ? {color:fgColor} : {}
+                fgColor ? {color:fgColor} : type==='TERTIARY' ? {color: darkmode ? isPressed ? brightenColor("#808080",1.8): "grey" : "darkblue"}:{}
                 ]}>
                     {text}
             </Text>
