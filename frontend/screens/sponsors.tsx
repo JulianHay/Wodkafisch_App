@@ -8,7 +8,7 @@ import CustomButton from '../components/custom_botton';
 import client from '../actions/client';
 import moment from 'moment'
 import FischLoading from '../components/loading';
-import { CustomContainer } from '../components/custom_container';
+import { Container, CustomContainer } from '../components/custom_container';
 
 const darkmode = true
 
@@ -39,7 +39,7 @@ const SponsorScreen = () => {
 
     const promoDate = !loading ? moment(promoData[0].date.split(' ')[0]) : moment()
     const isPromo = promoDate>= moment()
-
+    
     const renderSponsors = (item) => (
         <View key={item.username} style={{flexDirection: 'row', marginBottom:3,left:-15}}>
             <View style={{width:125,alignItems:'flex-end', marginRight:10}}>
@@ -105,7 +105,7 @@ const SponsorScreen = () => {
         !loading ?
         <View style={styles.container}> 
             <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh}/>}>
-                <CustomContainer title='Battle Pass'>
+                <Container title='Battle Pass'>
                 {/* <LinearGradient colors={['#007ae6', '#000ddd']} style={styles.battlepass}> */}
                     {/* Season */}
                     <LinearGradient colors={['#c59c34', '#9a690e']} style={styles.season}>
@@ -124,8 +124,14 @@ const SponsorScreen = () => {
                         <Battlepass itemData={seasonItemData} seasonData={seasonData} sponsorData={sponsorUserData}/>
                     </View>
                     {/* Promo */}
-                    {isPromo ? <View>                            <CustomText fontSize={10}>
-                            Until {promoDate.format('DD/MM/YYYY')} you will get {promoData[0].value*100}% more Fischflocken!
+                    {isPromo ? <View style={{marginTop:25,marginBottom:-10,flexDirection:'row'}}>                            
+                        <CustomText fontSize={12}>
+                            Get {promoData[0].value*100}% more 
+                        </CustomText>
+                        <Image source={require('../assets/fisch_flakes.png')} 
+                                    style={{width:12,height:12, marginLeft:3,marginRight:3,marginTop:1}}/>
+                        <CustomText fontSize={12}>
+                             for your donations until {promoDate.format('DD/MM/YYYY')}!
                         </CustomText>
                     </View> : null}
                     {/* Donation Button */}
@@ -135,30 +141,19 @@ const SponsorScreen = () => {
                             <Image source={require('../assets/fisch_flakes.png')} style={{width:35,height:35}}/>
                         </TouchableOpacity>
                     </View>
-                </CustomContainer>
+                </Container>
                 
-                <View style={{marginTop:40,alignItems:'center'}}>
-                    {/* <View style={{width:'100%',alignItems:'flex-start'}}>
-                        <CustomText fontWeight='bold'> Recent Donations</CustomText> */}
-                    <CustomContainer title='Recent Donations'>
+                <Container title='Recent Donations'>
                         {donationData.slice(0,5).map((item)=>(
                             renderDonations(item)
                         ))}
-                    </CustomContainer>
-                    {/* </View> */}
-                        
-                    {/* <View style={{alignItems:'center',justifyContent:'center',marginTop:40,marginBottom:40}}> */}
-                        {/* <View style={{marginBottom:10}}>
-                            <CustomText fontWeight='bold'> Sponsor List</CustomText>
-                        </View> */}
-                        <CustomContainer title='Sponsor List'>
+                </Container>
+                
+                <Container title='Sponsor List'>
                             {sponsorData.map((item)=>(
                             renderSponsors(item)
                         ))}
-                        </CustomContainer>
-                        
-                    {/* </View>  */}
-                </View>
+                </Container>
             </ScrollView>
         </View> : <FischLoading/>
     )
