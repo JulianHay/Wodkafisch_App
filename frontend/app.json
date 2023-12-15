@@ -27,7 +27,8 @@
         "NSPhotoLibraryAddUsageDescription": "Allow this app to save pictures to your local photo libraray."      
       },
       "config":{
-        "googleMapsApiKey": "AIzaSyDdecQFweuYKopW_i5U5QwoVstW-GPZqk4"
+        "googleMapsApiKey": "AIzaSyDdecQFweuYKopW_i5U5QwoVstW-GPZqk4",
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
