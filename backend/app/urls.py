@@ -28,6 +28,7 @@ urlpatterns = [
     path(r'sponsor', SponsorView.as_view(), name='sponsor'),
     path(r'pictures', PictureView.as_view(), name='pictures'),
     path(r'upload_picture', ImageUploadView.as_view(), name='upload_picture'),
+    path(r'edit_picture', ImageEditView.as_view(), name='edit_picture'),
     path(r'like_picture', PictureLikeView.as_view(), name='picture_like'),
     path(r'report_content', ReportUser.as_view(), name='report_content'),
     path(r'password_change', change_password, name='change_password'),

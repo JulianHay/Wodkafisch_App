@@ -279,6 +279,17 @@ class ImageUploadView(APIView):
         except:
             return Response({'error': 'something went wrong'})
 
+class ImageEditView(APIView):
+    def post(self,request):
+        try:
+            picture = FischPicture.objects.get(id=request.data['id'])
+            picture.description=request.data['description']
+            picture.lat=request.data['lat']
+            picture.long=request.data['long']
+            picture.save()
+            return Response({'success':'Image edited successfully'})
+        except:
+            return Response({'error': 'something went wrong'})
 class PictureLikeView(APIView):
     def post(self,request):
         user = Profile.objects.get(user_id=request.user.id)
