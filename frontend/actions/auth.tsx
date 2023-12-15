@@ -17,6 +17,7 @@ import {
 import client from './client';
 import {toast} from 'react-toastify'
 import { useNavigation } from '@react-navigation/native';
+import { deleteFromLocal, saveToLocal } from '../components/localStorage2';
 
 export const checkAuthenticated = () => async dispatch => {
     const config = {
@@ -84,6 +85,7 @@ export const logout = () => async dispatch => {
                 type: LOGOUT_SUCCESS
             });
             localStorage.removeItem('token')
+            deleteFromLocal('username')
         } else {
             dispatch({
                 type: LOGOUT_FAIL

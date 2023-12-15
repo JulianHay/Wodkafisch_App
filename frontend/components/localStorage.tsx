@@ -26,74 +26,53 @@ const getFromLocal = async (key) => {
   }
 };
 
-const downloadData = async (url, localPath) => {
-    const downloadURL = url.includes("wodkafisch") ? url : 'https:www.wodkafis.ch/media/' + url
-    const { uri } = await FileSystem.downloadAsync(downloadURL, localPath);
+const downloadData = async (url) => {
+    
+
+    const downloadURL = 'https:www.wodkafis.ch/media/' + url
+    const { uri } = await FileSystem.downloadAsync(downloadURL, FileSystem.documentDirectory+url.replace('/', '_'));
     return uri;
 };
 
-const checkLocalData = async (newData,key:string) => {
+const fileExists = async (filename) => {
   try {
-    const existingData = await getFromLocal(key) || [];
-    const uniqueNewItems = newData.filter((newItem) => {
-      return !existingData.some((existingItem) => existingItem.id === newItem.id);
-    });
+    const filePath = FileSystem.documentDirectory + filename;
 
-    const itemsToDelete = existingData.filter(
-      (existingItem) => !newData.some((newItem) => newItem.id === existingItem.id)
-    );
+    const fileInfo = await FileSystem.getInfoAsync(filePath);
 
-    await Promise.all(
-      itemsToDelete.map(async (item) => {
-        const localImagePath = `${FileSystem.documentDirectory}${item.id}.jpg`;
-
-        const isImageExisting = await FileSystem.getInfoAsync(localImagePath);
-        if (isImageExisting.exists) {
-          await FileSystem.deleteAsync(localImagePath);
-        }
-      })
-    );
-
-    const filteredData = existingData.filter((item) => !itemsToDelete.some((deletedItem) => item.id === deletedItem.id));
-    
-    const updatedData = newData.map((item,index) => {
-      item.localPath = filteredData[index].localPath
-      return item
-    })
-
-    await saveToLocal(key, updatedData);
-
-    return {existingData:updatedData,newData:uniqueNewItems}
+    if (fileInfo.exists) {
+      return true
+    } else {
+      return false
+    }
   } catch (error) {
-    console.error('Error checking local data:', error);
-  }
- }
-
-const updateLocalData = async (newData,existingData,key:string,url:string) => {
-  try {
-    const newItems = await Promise.all(
-      newData.map(async (newItem) => {
-
-        const localImagePath = `${FileSystem.documentDirectory}${newItem.id ? newItem.id :newItem.start }.jpg`;
-
-        const isImageDownloaded = await FileSystem.getInfoAsync(localImagePath);
-
-        if (!isImageDownloaded.exists) {
-          const localUri = await downloadData(newItem[url], localImagePath);
-          newItem.localPath = localUri;
-        } else {
-          newItem.localPath = `${localImagePath}`;
-        }
-        return newItem;
-      })
-    );
-
-    const updatedData = [...existingData, ...newItems];
-    await saveToLocal(key, updatedData);
-
-  } catch (error) {
-    console.error('Error updating local data:', error);
+    return false
   }
 };
 
-export {updateLocalData,saveToLocal,getFromLocal,checkLocalData}
+const clearStorage = async () => {
+  try {
+    const files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory);
+
+    for (const file of files) {
+      const filePath = FileSystem.documentDirectory + file;
+      await FileSystem.deleteAsync(filePath, { idempotent: true });
+    }
+
+    console.log('Entire storage cleared successfully.');
+
+  } catch (error) {
+    console.error('Error clearing storage:', error);
+  }
+};
+const deleteFromLocal = async (key) => {
+  try {
+    const path = FileSystem.documentDirectory + `${key}.json`;
+    await FileSystem.deleteAsync(path, { idempotent: true });
+    console.log(`Deleted ${key} cleared successfully.`);
+
+  } catch (error) {
+    console.error(`Error while deleting ${key}:`, error);
+  }
+}
+export {saveToLocal,getFromLocal,clearStorage,deleteFromLocal,fileExists,downloadData}
