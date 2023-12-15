@@ -7,6 +7,7 @@ import { login } from '../actions/auth';
 import { connect } from 'react-redux';
 import client from '../actions/client';
 import { CustomText } from '../components/text';
+import { getFromLocal, saveToLocal } from '../components/localStorage2';
 
 const darkmode = true
 
@@ -41,6 +42,10 @@ const SignInScreen = ({login}) => {
     
             if (res.data.success) {
                 login(res.data.token)
+                await saveToLocal('username',username)
+                console.log(username)
+                const user = await getFromLocal('username')
+                console.log('from storage',user)
             } 
         } catch(err) {
             Alert.alert(err.response.data["non_field_errors"][0])
