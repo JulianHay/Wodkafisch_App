@@ -21,6 +21,7 @@ from django.contrib.auth import update_session_auth_hash
 import random
 from django.db.models import Sum, Case, Value, When, Q, Exists, OuterRef
 from django.db.models.functions import Coalesce
+from utils.push_notifications import send_push_notifications
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
@@ -324,3 +325,23 @@ class ReportUser(APIView):
         message = f'Dear Admins,\n The user {request.data["user"]} has been reported by {request.user.username} for posting the picture with id {request.data["picture_id"]}.\n Please review the content and act accordingly.'
         send_mail(subject, message, 'reported_content@wodkafis.ch', ['reported_content@wodkafis.ch'])
         return Response({'success: User / Content has been reported'})
+
+class PushNotificationTokenView(APIView):
+    def post(self,request):
+        try:
+            profile = Profile.objects.get(user_id=request.user.id)
+            token = ExpoToken.objects.get(id=profile.expo_token_id)
+            token.token = request.data['token']
+            token.save()
+            return Response({'success':'Token saved successfully'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+class SendPushNotificationView(APIView):
+    def post(self, request):
+        try:
+            tokens = ExpoToken.objects.all()
+            send_push_notifications([token.token for token in tokens if token.token], request.data['title'], request.data['message'])
+            return Response({'success': 'Push Notification sent'})
+        except:
+            return Response({'error': 'something went wrong'})
