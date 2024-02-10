@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+class SeasonBadge(models.Model):
+    season_badge = models.CharField(max_length=100,null=True, blank=True)
 
 class Sponsor(models.Model):
     first_name = models.CharField(max_length=100,null=True, blank=True)
@@ -17,6 +19,7 @@ class Sponsor(models.Model):
     season_score = models.IntegerField(default=1000,null=True, blank=True)
     unlocked_items = models.IntegerField(default=0,null=True, blank=True)
     unlocked_items_animation = models.IntegerField(default=0, null=True, blank=True)
+    season_badges = models.ManyToManyField(SeasonBadge,related_name="sponsors")
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -80,6 +83,7 @@ class SeasonItem(models.Model):
     image = models.ImageField(null=True, blank=True, verbose_name='Pictures', upload_to='battlepass/')
     price = models.IntegerField(default=0)
     season = models.ForeignKey('Season', on_delete=models.CASCADE,default=None)
+
 class Season(models.Model):
     title = models.CharField(max_length=50, blank=True)
     image = models.ImageField(null=True, blank=True, verbose_name='Pictures', upload_to='battlepass/')
@@ -116,3 +120,7 @@ class ExpoToken(models.Model):
 
     def __str__(self):
         return self.token
+
+class AppInfo(models.Model):
+    version = models.CharField(max_length=50)
+    update = models.BooleanField(default=False)

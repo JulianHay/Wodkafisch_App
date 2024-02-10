@@ -16,7 +16,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.core.mail import EmailMultiAlternatives, send_mail
 from pages.tokens import account_activation_token
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth import update_session_auth_hash
 import random
 from django.db.models import Sum, Case, Value, When, Q, Exists, OuterRef
@@ -345,3 +345,111 @@ class SendPushNotificationView(APIView):
             return Response({'success': 'Push Notification sent'})
         except:
             return Response({'error': 'something went wrong'})
+
+class NewSeasonView(APIView):
+    # image upload
+    # push notification
+    # season badges
+    permission_classes = [IsAdminUser]
+
+    # def parse_form_lists(self,request):
+    #     """Parse nested form data from a POST request into a list of dicts"""
+    #     form_data = {}
+    #     for list_key, list_value in request.POST.lists():
+    #         if "[][" in list_key:
+    #             key, value = list_key.split("[][")
+    #             if not form_data.get(key):
+    #                 form_data[key] = []
+    #             value = value.rstrip("]")
+    #             for idx, val in enumerate(list_value):
+    #                 if len(form_data[key]) <= idx:
+    #                     form_data[key].append({})
+    #                 form_data[key][idx][value] = val
+    #     return form_data
+    def post(self, request):
+
+        try:
+            season_serializer = SeasonModelSerializer(data=request.data)
+            if season_serializer.is_valid():
+                season = season_serializer.save()
+
+            season_item_files = {key: value for key, value in request.FILES.items() if 'season_items' in key}
+            season_items_data = []
+            for key, value in season_item_files.items():
+                season_item_data = {
+                    'price': request.data[key.split('image')[0] + 'price]'],
+                    'image': value
+                }
+                season_items_data.append(season_item_data)
+            season_item_serializer = SeasonItemModelSerializer(data=season_items_data, many=True)
+            if season_item_serializer.is_valid():
+                season_item_serializer.save(season=season)
+            # title = request.data['title']
+            # image = request.data['image']
+            # max_donation = request.data['max_donation']
+            # season_items = request.data.get('season_items', [])
+            #
+            # season = Season.objects.create(
+            #     title=title,
+            #     image=image,
+            #     max_donation=max_donation
+            # )
+            #
+            # for season_item in season_items:
+            #     image = season_item['image']
+            #     price = season_item['price']
+            #     SeasonItem.objects.create(
+            #         image=image,
+            #         price=price,
+            #         season=season
+            #     )
+
+            sponsors = Sponsor.objects.all()
+            sponsors.update(season_score=0, unlocked_items=0, unlocked_items_animation=0)
+
+            tokens = ExpoToken.objects.all()
+            send_push_notifications([token.token for token in tokens if token.token], 'New Fisch Season',
+                                    'The ' + request.data['title'] + ' season has started!')
+
+            return Response({'success': 'new season created'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+class NewEventView(APIView):
+    # push notification
+
+    permission_classes = [IsAdminUser]
+    def post(self, request):
+        try:
+
+            Event.objects.create(
+                user=request.user,
+                title=request.data['title'],
+                worldmap_image=request.data['worldmap_image'],
+                hello=request.data['hello'],
+                message=request.data['message'],
+                location=request.data['location'],
+                additional_text=request.data['additional_text'],
+                bye=request.data['bye'],
+                start=request.data['start'],
+                end=request.data['end'],
+                image=request.data['image'],
+                lat=request.data['lat'],
+                long=request.data['long'],
+            )
+
+            tokens = ExpoToken.objects.all()
+            send_push_notifications([token.token for token in tokens if token.token],
+                                    'Next Fisch event announced',
+                                    request.data['title'] + 'on' + request.data['start'])
+
+            return Response({'success': 'new event created'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+# season badge info, done!
+# new event view
+# return is admin for navbar
+# donation: push notification, season badge
+# add donation view
+# login mail

@@ -13,7 +13,13 @@ class PictureModelSerializer(serializers.ModelSerializer):
         model = FischPicture
         fields = '__all__'
 
+class SeasonBadgeSerializer(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.season_badge
+
 class SponsorModelSerializer(serializers.ModelSerializer):
+    season_badges = SeasonBadgeSerializer(many=True, read_only=True)
+
     class Meta:
         model = Sponsor
         fields = '__all__'
