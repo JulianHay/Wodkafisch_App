@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.contrib.auth.models import User
-from pages.models import SeasonItem,Season, Profile, Sponsor
+from pages.models import SeasonItem,Season, Profile, Sponsor, ExpoToken, SeasonBadge
 from .models import Donation, Promo
 from datetime import datetime, timedelta
 import pytz
@@ -20,6 +20,7 @@ from django.http import HttpResponse
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 import quopri
+from utils.push_notifications import send_push_notifications
 
 def add_donation(first_name,last_name,donation):
     user = Profile.objects.get(first_name=first_name, last_name=last_name)
@@ -56,34 +57,67 @@ def add_donation(first_name,last_name,donation):
     # send mails if item is unlocked
     season = Season.objects.latest('id')
     items = SeasonItem.objects.filter(season=season)
+    notification_token = ExpoToken.objects.get(id=user.expo_token_id)
     for i, item in enumerate(items):
         if sponsor.season_score >= item.price and sponsor.unlocked_items < i + 1:
+            if notification_token:
+                send_push_notifications([notification_token.token],
+                                        'New Item Unlocked!',
+                                        f'Check your battle pass.')
+            else:
+                txt_template = get_template('mails/general_template.txt')
+                html_template = get_template('mails/general_template.html')
+                context = {'title': "New Item Unlocked!",
+                           'hello': 'Hi',
+                           'message': ['Congratulations!',
+                                       'You unlocked a new item!',
+                                       'Your Fisch Season Status is available here:',
+                                       'https://wodkafis.ch/sponsors'],
+                           'bye': 'Fisch',
+                           'user': User.objects.get(first_name=first_name, last_name=last_name),
+                           }
+                subject, from_email, to = 'New Item Unlocked', 'spenden@wodkafis.ch', [user.email]
+                text_content = txt_template.render(context)
+                html_content = html_template.render(context)
+                msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
 
+            subject = "New Item Unlocked"
+            message = "%s %s unlocked a new item worth %i Fischflocken." % (user.first_name, user.last_name, item.price)
+            send_mail(subject, message, 'spenden@wodkafis.ch', ['spenden@wodkafis.ch'])
+
+            sponsor.unlocked_items += 1
+            sponsor.save()
+    # add season badge if maximum donation is reached
+    if sponsor.season_score > items.order_by('-price').first().price:
+        season_badge = SeasonBadge.objects.latest('id')
+        sponsor.season_badges.add(season_badge)
+        sponsor.save()
+
+        if notification_token:
+            send_push_notifications([notification_token.token],
+                                    'Season Completed!',
+                                    f'You completed the battle pass and unlocked the season badge.')
+        else:
             txt_template = get_template('mails/general_template.txt')
             html_template = get_template('mails/general_template.html')
-            context = {'title': "New Item Unlocked!",
+            context = {'title': "Season Completed!",
                        'hello': 'Hi',
                        'message': ['Congratulations!',
-                                   'You unlocked a new item!',
+                                   'You completed the battle pass and unlocked the season badge.',
                                    'Your Fisch Season Status is available here:',
                                    'https://wodkafis.ch/sponsors'],
                        'bye': 'Fisch',
                        'user': User.objects.get(first_name=first_name, last_name=last_name),
                        }
-            subject, from_email, to = 'New Item Unlocked', 'spenden@wodkafis.ch', [user.email]
+            subject, from_email, to = 'Season Completed!', 'spenden@wodkafis.ch', [user.email]
             text_content = txt_template.render(context)
             html_content = html_template.render(context)
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
             msg.send()
-
-            subject = "New Item Unlocked"
-            message = "%s %s unlocked a new item worth %i Fischflocken." % (user.first_name, user.last_name, item.price)
-            send_mail(subject, message, 'spenden@wodkafis.ch', ['spenden@wodkafis.ch']) #
-
-            sponsor.unlocked_items += 1
-            sponsor.save()
-
+    return fischflocken
 @csrf_exempt
 def donation(request):
     msg = request.POST.get('mail')
@@ -105,27 +139,33 @@ def donation(request):
     #date = pytz.timezone('Europe/Berlin').localize(datetime.strptime(re.search('(?<=Datum: )[\s\d:\.]*(?= CEST)',msg)[0],'%d.%m.%Y %H:%M'))
     #if datetime.now(pytz.timezone('Europe/Berlin'))-date<timedelta(minutes=1):
     try:
-        add_donation(first_name, last_name, donation)
+        fischflocken = add_donation(first_name, last_name, donation)
+        profile = Profile.objects.get(first_name=first_name, last_name=last_name)
+        notification_token = ExpoToken.objects.get(id=profile.expo_token_id)
+        if notification_token:
+            send_push_notifications([notification_token.token],
+                                    'Donation successful!',
+                                    f'Check you season score: {fischflocken} Fischflocken donated.')
+        else:
+            user = User.objects.get(first_name=first_name, last_name=last_name)
+            txt_template = get_template('mails/general_template.txt')
+            html_template = get_template('mails/general_template.html')
 
-        user = User.objects.get(first_name=first_name, last_name=last_name)
-        txt_template = get_template('mails/general_template.txt')
-        html_template = get_template('mails/general_template.html')
+            context = {'title': "Your donation was successful!",
+                       'hello': 'Hi',
+                       'message': ['You just made a Fisch donation!',
+                                   'Please check your season score here:',
+                                   'https://wodkafis.ch/sponsors'],
+                       'bye': 'Fisch',
+                       'user': user,
+                       }
 
-        context = {'title': "Your donation was successful!",
-                   'hello': 'Hi',
-                   'message': ['You just made a Fisch donation!',
-                               'Please check your season score here:',
-                               'https://wodkafis.ch/sponsors'],
-                   'bye': 'Fisch',
-                   'user': user,
-                   }
-
-        subject, from_email, to = 'Donation Approval', 'spenden@wodkafis.ch', [user.email]
-        text_content = txt_template.render(context)
-        html_content = html_template.render(context)
-        msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-        msg.attach_alternative(html_content, "text/html")
-        msg.send()
+            subject, from_email, to = 'Donation Approval', 'spenden@wodkafis.ch', [user.email]
+            text_content = txt_template.render(context)
+            html_content = html_template.render(context)
+            msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
     except:
         subject = "Donation has been made - Please add sponsor"
         message = "%s %s made a donation of %i. An automatic assignment of the donation to the sponsor score failed.\n Please add the User and / or assign the donation." %(first_name, last_name, donation)

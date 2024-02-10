@@ -349,25 +349,7 @@ class SendPushNotificationView(APIView):
             return Response({'error': 'something went wrong'})
 
 class NewSeasonView(APIView):
-    # image upload
-    # push notification
-    # season badges
     permission_classes = [IsAdminUser]
-
-    # def parse_form_lists(self,request):
-    #     """Parse nested form data from a POST request into a list of dicts"""
-    #     form_data = {}
-    #     for list_key, list_value in request.POST.lists():
-    #         if "[][" in list_key:
-    #             key, value = list_key.split("[][")
-    #             if not form_data.get(key):
-    #                 form_data[key] = []
-    #             value = value.rstrip("]")
-    #             for idx, val in enumerate(list_value):
-    #                 if len(form_data[key]) <= idx:
-    #                     form_data[key].append({})
-    #                 form_data[key][idx][value] = val
-    #     return form_data
     def post(self, request):
 
         try:
@@ -386,6 +368,9 @@ class NewSeasonView(APIView):
             season_item_serializer = SeasonItemModelSerializer(data=season_items_data, many=True)
             if season_item_serializer.is_valid():
                 season_item_serializer.save(season=season)
+
+            season_badge = SeasonBadge.objects.create(season_badge=season.image)
+            season_badge.save()
 
             sponsors = Sponsor.objects.all()
             sponsors.update(season_score=0, unlocked_items=0, unlocked_items_animation=0)
@@ -422,6 +407,6 @@ class NewEventView(APIView):
 # season badge info, done!
 # new event view, done!
 # return is admin for navbar, done!
-# donation: push notification, season badge
+# donation: push notification, season badge, done!
 # add donation view
 # login mail
