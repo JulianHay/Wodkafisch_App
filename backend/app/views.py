@@ -180,9 +180,11 @@ class LoginView(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
+        is_admin = User.objects.get(username=user).is_superuser
         return Response({
             'success': 'token generated',
             'token': token.key,
+            'is_admin': is_admin
         })
 
 @api_view(['POST'])
@@ -229,16 +231,16 @@ class HomeView(APIView):
 
 class MapView(APIView):
     def get(self,request):
-        event = Event.objects.all()
+        events = Event.objects.exclude(country__isnull=True)
         user = Profile.objects.get(user_id=request.user.id)
-        picture = FischPicture.objects.annotate(likes=Coalesce(Sum('like__like'), 0),
+        pictures = FischPicture.objects.annotate(likes=Coalesce(Sum('like__like'), 0),
                                                 user_like=Exists(FischPicture.objects.filter(
                                                     like__user_id=user.id,
                                                     like__picture_id=OuterRef('pk'),
                                                     like__like=1))).order_by('-id')
         return Response({
-            'events': event.values('title','image','lat','long','country','start'),
-            'pictures': picture.values()
+            'events': events.values('title','image','lat','long','country','start'),
+            'pictures': pictures.values()
         })
 
 class SponsorView(APIView):
@@ -384,25 +386,6 @@ class NewSeasonView(APIView):
             season_item_serializer = SeasonItemModelSerializer(data=season_items_data, many=True)
             if season_item_serializer.is_valid():
                 season_item_serializer.save(season=season)
-            # title = request.data['title']
-            # image = request.data['image']
-            # max_donation = request.data['max_donation']
-            # season_items = request.data.get('season_items', [])
-            #
-            # season = Season.objects.create(
-            #     title=title,
-            #     image=image,
-            #     max_donation=max_donation
-            # )
-            #
-            # for season_item in season_items:
-            #     image = season_item['image']
-            #     price = season_item['price']
-            #     SeasonItem.objects.create(
-            #         image=image,
-            #         price=price,
-            #         season=season
-            #     )
 
             sponsors = Sponsor.objects.all()
             sponsors.update(season_score=0, unlocked_items=0, unlocked_items_animation=0)
@@ -420,36 +403,25 @@ class NewEventView(APIView):
 
     permission_classes = [IsAdminUser]
     def post(self, request):
-        try:
 
-            Event.objects.create(
-                user=request.user,
-                title=request.data['title'],
-                worldmap_image=request.data['worldmap_image'],
-                hello=request.data['hello'],
-                message=request.data['message'],
-                location=request.data['location'],
-                additional_text=request.data['additional_text'],
-                bye=request.data['bye'],
-                start=request.data['start'],
-                end=request.data['end'],
-                image=request.data['image'],
-                lat=request.data['lat'],
-                long=request.data['long'],
-            )
+        try:
+            event_serializer = EventModelSerializer(data=request.data)
+            print(event_serializer.is_valid())
+            if event_serializer.is_valid():
+                event_serializer.save()
 
             tokens = ExpoToken.objects.all()
             send_push_notifications([token.token for token in tokens if token.token],
                                     'Next Fisch event announced',
-                                    request.data['title'] + 'on' + request.data['start'])
+                                    request.data['title'] + ' on ' + request.data['start'])
 
             return Response({'success': 'new event created'})
         except:
             return Response({'error': 'something went wrong'})
 
 # season badge info, done!
-# new event view
-# return is admin for navbar
+# new event view, done!
+# return is admin for navbar, done!
 # donation: push notification, season badge
 # add donation view
 # login mail
