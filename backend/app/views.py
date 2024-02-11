@@ -294,15 +294,16 @@ class HomeView(APIView):
         date_seed = int(current_date.strftime("%Y%m%d"))
         random.seed(date_seed)
         latest_picture = random.sample(list(pictures), 1)[0]
-        serializer = PictureModelSerializer(latest_picture)
-        app_update = AppInfo.objects.last().update
+        picture_serializer = PictureModelSerializer(latest_picture)
+        app_info = AppInfo.objects.last()
+        app_info_serializer = AppInfoSerializer(app_info)
         return Response({
             'upcoming_event': event.values(),
             'sponsor': sponsor.values(),
             'season': season.values(),
             'season_items': season_items.values(),
-            'picture': [serializer.data],#picture.values()
-            'app_update': app_update
+            'picture': [picture_serializer.data],#picture.values()
+            'app_update': app_info_serializer.data
         })
 
 class MapView(APIView):
