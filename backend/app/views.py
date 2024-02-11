@@ -13,7 +13,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import get_template
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from django.core.mail import EmailMultiAlternatives, send_mail
+from django.core.mail import EmailMultiAlternatives
 from pages.tokens import account_activation_token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -22,6 +22,9 @@ import random
 from django.db.models import Sum, Case, Value, When, Q, Exists, OuterRef
 from django.db.models.functions import Coalesce
 from utils.push_notifications import send_push_notifications
+from paypal_payment.views import add_donation
+from utils.mail import send_mail, get_mail_connection
+import re
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
@@ -122,10 +125,15 @@ class SignupView(APIView):
 
                         text_content = txt_template.render(context)
                         html_content = html_template.render(context)
-                        msg = EmailMultiAlternatives(subject, text_content, 'no-reply@wodkafis.ch',
-                                                     [user.profile.email])
-                        msg.attach_alternative(html_content, "text/html")
-                        msg.send()
+                        with get_mail_connection(from_mail='no-reply@wodkafis.ch',
+                                                 password='Hoeh!en1urch') as connection:
+                            msg = EmailMultiAlternatives(subject,
+                                                         text_content,
+                                                         'no-reply@wodkafis.ch',
+                                                         [user.profile.email],
+                                                         connection=connection)
+                            msg.attach_alternative(html_content, "text/html")
+                            msg.send()
 
                         return Response({ 'success': 'User created successfully' })
             else:
@@ -325,7 +333,12 @@ class ReportUser(APIView):
     def post(self,request):
         subject = 'Reported User / Content'
         message = f'Dear Admins,\n The user {request.data["user"]} has been reported by {request.user.username} for posting the picture with id {request.data["picture_id"]}.\n Please review the content and act accordingly.'
-        send_mail(subject, message, 'reported_content@wodkafis.ch', ['reported_content@wodkafis.ch'])
+        send_mail(from_mail='no-reply@wodkafis.ch',
+                  password='Hoeh!en1urch',
+                  subject=subject,
+                  body=message,
+                  to=['reported_content@wodkafis.ch'])
+        #send_mail(subject, message, 'reported_content@wodkafis.ch', ['reported_content@wodkafis.ch'])
         return Response({'success: User / Content has been reported'})
 
 class PushNotificationTokenView(APIView):
@@ -388,25 +401,117 @@ class NewEventView(APIView):
 
     permission_classes = [IsAdminUser]
     def post(self, request):
-
         try:
             event_serializer = EventModelSerializer(data=request.data)
-            print(event_serializer.is_valid())
             if event_serializer.is_valid():
-                event_serializer.save()
+                event = event_serializer.save()
 
-            tokens = ExpoToken.objects.all()
-            send_push_notifications([token.token for token in tokens if token.token],
+            # check if users have activated push notifications
+            users_with_push_notifications = Profile.objects.exclude(expo_token__token='')
+            expo_tokens = [user.expo_token.token for user in users_with_push_notifications]
+            send_push_notifications(expo_tokens,
                                     'Next Fisch event announced',
                                     request.data['title'] + ' on ' + request.data['start'])
+
+            # send a mail to users without push notifications instead
+            users_without_push_notifications = Profile.objects.filter(expo_token__token='')
+            mailing_list = list(users_without_push_notifications.values_list("email", flat=True))
+            # include mailing list
+            mailing_list.extend(re.findall(r'\"?([\w\.-]+@[\w\.-]+)\"?', request.data['mailing_list']))
+            # remove duplicates
+            mailing_list = list(set(mailing_list))
+
+            txt_template = get_template('mails/event_template.txt')
+            html_template = get_template('mails/event_template.html')
+            context = {'title': request.data['title'],
+                       'n': Event.objects.count() - 1,
+                       'worldmap_image': event.worldmap_image,
+                       'hello': request.data['hello'],
+                       'message': request.data['message'],
+                       'location': request.data['location'],
+                       'additional_text': request.data['additional_text'],
+                       'bye': request.data['bye'],
+                       'image': event.image,
+                       'time': datetime.strftime(datetime.strptime(request.data['start'], '%Y-%m-%d %H:%M:%S'), '%d. %b, %H:%M'),
+                       }
+
+            subject, from_email, bcc = 'Fisch Event', 'events@wodkafis.ch', mailing_list
+            text_content = txt_template.render(context)
+            html_content = html_template.render(context)
+
+            with get_mail_connection(from_mail='events@wodkafis.ch',
+                                     password='Hoeh!en1urch') as connection:
+                msg = EmailMultiAlternatives(subject,
+                                             text_content,
+                                             from_email,
+                                             bcc=bcc,
+                                             connection=connection)
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
 
             return Response({'success': 'new event created'})
         except:
             return Response({'error': 'something went wrong'})
 
+class AddDonationView(APIView):
+
+    permission_classes = [IsAdminUser]
+    def post(self, request):
+
+        try:
+            first_name = request.data['first_name']
+            last_name = request.data['last_name']
+            donation = request.data['donation']
+            fischflocken = add_donation(first_name,last_name,donation)
+
+            profile = Profile.objects.get(first_name=first_name, last_name=last_name)
+            notification_token = ExpoToken.objects.get(id=profile.expo_token_id).token
+
+            if notification_token:
+                send_push_notifications([notification_token],
+                                        'Donation successful!',
+                                        f'Check you season score: {fischflocken} Fischflocken donated.')
+            else:
+                user = User.objects.get(first_name=first_name, last_name=last_name)
+                txt_template = get_template('mails/general_template.txt')
+                html_template = get_template('mails/general_template.html')
+
+                context = {'title': "Your donation was successful!",
+                           'hello': 'Hi',
+                           'message': ['You just made a Fisch donation!',
+                                       'Please check your season score here:',
+                                       'https://wodkafis.ch/sponsors'],
+                           'bye': 'Fisch',
+                           'user': user,
+                           }
+
+                subject, from_email, to = 'Donation Approval', 'spenden@wodkafis.ch', [user.email]
+                text_content = txt_template.render(context)
+                html_content = html_template.render(context)
+                with get_mail_connection(from_mail='spenden@wodkafis.ch',
+                                         password='Hoeh!en1urch') as connection:
+                    msg = EmailMultiAlternatives(subject,
+                                                 text_content,
+                                                 from_email,
+                                                 to,
+                                                 connection=connection)
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
+
+            return Response({'success': 'donation added successful'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+
 # season badge info, done!
 # new event view, done!
 # return is admin for navbar, done!
 # donation: push notification, season badge, done!
-# add donation view
+# add donation view, done!
 # login mail
+# new event check if users have activated push notifications and send a mail instead
+# include mailing list and remove duplicates
+# change password for spenden and events @wodkafis.ch -> no Umlaut
+
+# sing up confirmation views
+#

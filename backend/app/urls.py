@@ -33,6 +33,7 @@ urlpatterns = [
     path(r'send_push_notification', SendPushNotificationView.as_view(), name='send_push_notification'),
     path(r'new_season', NewSeasonView.as_view(), name='new_season'),
     path(r'new_event', NewEventView.as_view(), name='new_event'),
+    path(r'add_donation', AddDonationView.as_view(), name='add_donation'),
 
     path(r'like_picture', PictureLikeView.as_view(), name='picture_like'),
     path(r'report_content', ReportUser.as_view(), name='report_content'),

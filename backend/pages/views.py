@@ -15,7 +15,7 @@ from django.db import IntegrityError, transaction
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from django.core.mail import send_mail
+#from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
@@ -34,6 +34,7 @@ from paypal_payment.views import add_donation
 from django.db.models import Sum, Case, Value, When, Q, Exists, OuterRef
 from django.db.models.functions import Coalesce
 import json
+from utils.mail import get_mail_connection, send_mail
 
 def main(request,*args,**kwargs):
     if request.method == 'POST':
@@ -96,8 +97,12 @@ def contact(request,*args,**kwargs):
                 'message': form.cleaned_data['message'],
             }
             message = "\n".join(body.values())
-
-            send_mail(subject, message, 'contact@wodkafis.ch', ['contact@wodkafis.ch'])
+            send_mail(from_mail='no-reply@wodkafis.ch',
+                      password='Hoeh!en1urch',
+                      subject=subject,
+                      body=message,
+                      to=['contact@wodkafis.ch'])
+            #send_mail(subject, message, 'contact@wodkafis.ch', ['contact@wodkafis.ch'])
             return render(request,"pages/contact_success.html")
         else:
             return render(request, "pages/contact.html", {'form': form})
@@ -145,9 +150,15 @@ def signup(request):
 
             text_content = txt_template.render(context)
             html_content = html_template.render(context)
-            msg = EmailMultiAlternatives(subject, text_content, 'no-reply@wodkafis.ch', [user.profile.email])
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
+            with get_mail_connection(from_mail='no-reply@wodkafis.ch',
+                                     password='Hoeh!en1urch') as connection:
+                msg = EmailMultiAlternatives(subject,
+                                             text_content,
+                                             'no-reply@wodkafis.ch',
+                                             [user.profile.email],
+                                             connection=connection)
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
 
             return redirect('activation_sent')
     else:
@@ -179,10 +190,16 @@ def activate(request, uidb64, token):
                 # method will generate a hash value with user related data
                 'token': account_activation_token.make_token(user),
             })
-            send_mail(subject='User Sign Up Request Approval',
-                      message=message,
-                      from_email='contact@wodkafis.ch',
-                      recipient_list=['contact@wodkafis.ch'])
+
+            send_mail(from_mail='no-reply@wodkafis.ch',
+                      password='Hoeh!en1urch',
+                      subject='User Sign Up Request Approval',
+                      body=message,
+                      to=['contact@wodkafis.ch'])
+            # send_mail(subject='User Sign Up Request Approval',
+            #           message=message,
+            #           from_email='contact@wodkafis.ch',
+            #           recipient_list=['contact@wodkafis.ch'])
 
         return render(request, 'user/activation_successful.html')
     else:
@@ -212,9 +229,15 @@ def approve_user(request, uidb64, token):
         subject, from_email, to = 'Sign Up Completed', 'no-reply@wodkafis.ch', [user.profile.email]
         text_content = txt_template.render(context)
         html_content = html_template.render(context)
-        msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-        msg.attach_alternative(html_content, "text/html")
-        msg.send()
+        with get_mail_connection(from_mail='no-reply@wodkafis.ch',
+                                 password='Hoeh!en1urch') as connection:
+            msg = EmailMultiAlternatives(subject,
+                                         text_content,
+                                         from_email,
+                                         to,
+                                         connection=connection)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
 
         return render(request, 'user/user_approved.html',context=context)
     else:
@@ -310,12 +333,18 @@ def events(request):
                        'time': datetime.strftime(form.cleaned_data['start'],'%d. %b, %H:%M'),
                        }
 
-            subject, from_email, to = 'Fisch Event', 'events@wodkafis.ch', list(Profile.objects.values_list("email", flat=True))
+            subject, from_email, bcc = 'Fisch Event', 'events@wodkafis.ch', list(Profile.objects.values_list("email", flat=True))
             text_content = txt_template.render(context)
             html_content = html_template.render(context)
-            msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
+            with get_mail_connection(from_mail='events@wodkafis.ch',
+                                     password='Hoeh!en1urch') as connection:
+                msg = EmailMultiAlternatives(subject,
+                                             text_content,
+                                             from_email,
+                                             bcc = bcc,
+                                             connection=connection)
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
 
 
     events = Event.objects.all()
@@ -440,12 +469,18 @@ def battle_pass(request):
                            'bye': 'Fisch',
                            }
 
-                subject, from_email, to = 'New Fisch Season', 'spenden@wodkafis.ch', list(Profile.objects.values_list("email", flat=True))
+                subject, from_email, bcc = 'New Fisch Season', 'no-reply@wodkafis.ch', list(Profile.objects.values_list("email", flat=True))
                 text_content = txt_template.render(context)
                 html_content = html_template.render(context)
-                msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-                msg.attach_alternative(html_content, "text/html")
-                msg.send()
+                with get_mail_connection(from_mail='no-reply@wodkafis.ch',
+                                         password='Hoeh!en1urch') as connection:
+                    msg = EmailMultiAlternatives(subject,
+                                                 text_content,
+                                                 from_email,
+                                                 bcc = bcc,
+                                                 connection=connection)
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
 
         elif 'promo' in request.POST:
             promo_form = NewPromoForm(request.POST)

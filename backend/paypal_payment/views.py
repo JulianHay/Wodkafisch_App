@@ -4,12 +4,8 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 #from paypal.standard.forms import PayPalPaymentsForm
 from django.conf import settings
-#import uuid
-import email
 import re
-from django.core.mail import send_mail
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import get_template
+#from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from pages.models import SeasonItem,Season, Profile, Sponsor, ExpoToken, SeasonBadge
 from .models import Donation, Promo
@@ -21,6 +17,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 import quopri
 from utils.push_notifications import send_push_notifications
+from utils.mail import send_mail, get_mail_connection
 
 def add_donation(first_name,last_name,donation):
     user = Profile.objects.get(first_name=first_name, last_name=last_name)
@@ -79,13 +76,24 @@ def add_donation(first_name,last_name,donation):
                 subject, from_email, to = 'New Item Unlocked', 'spenden@wodkafis.ch', [user.email]
                 text_content = txt_template.render(context)
                 html_content = html_template.render(context)
-                msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-                msg.attach_alternative(html_content, "text/html")
-                msg.send()
+                with get_mail_connection(from_mail='spenden@wodkafis.ch',
+                                         password='Hoeh!en1urch') as connection:
+                    msg = EmailMultiAlternatives(subject,
+                                                 text_content,
+                                                 from_email,
+                                                 to,
+                                                 connection=connection)
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
 
             subject = "New Item Unlocked"
             message = "%s %s unlocked a new item worth %i Fischflocken." % (user.first_name, user.last_name, item.price)
-            send_mail(subject, message, 'spenden@wodkafis.ch', ['spenden@wodkafis.ch'])
+            send_mail(from_mail='no-reply@wodkafis.ch',
+                      password='Hoeh!en1urch',
+                      subject=subject,
+                      body=message,
+                      to=['spenden@wodkafis.ch'])
+            #send_mail(subject, message, 'spenden@wodkafis.ch', ['spenden@wodkafis.ch'])
 
             sponsor.unlocked_items += 1
             sponsor.save()
@@ -114,9 +122,15 @@ def add_donation(first_name,last_name,donation):
             subject, from_email, to = 'Season Completed!', 'spenden@wodkafis.ch', [user.email]
             text_content = txt_template.render(context)
             html_content = html_template.render(context)
-            msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
+            with get_mail_connection(from_mail='spenden@wodkafis.ch',
+                                     password='Hoeh!en1urch') as connection:
+                msg = EmailMultiAlternatives(subject,
+                                             text_content,
+                                             from_email,
+                                             to,
+                                             connection=connection)
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
     return fischflocken
 @csrf_exempt
 def donation(request):
@@ -134,7 +148,12 @@ def donation(request):
     except:
         subject = "Donation has been made - Please add sponsor"
         message = "A donation has been made. An automatic identification of donation and sponsor.\n Please add the User and / or assign the donation."
-        send_mail(subject, message, 'contact@wodkafis.ch', ['spenden@wodkafis.ch'])
+        send_mail(from_mail='no-reply@wodkafis.ch',
+                  password='Hoeh!en1urch',
+                  subject=subject,
+                  body=message,
+                  to=['spenden@wodkafis.ch'])
+        #send_mail(subject, message, 'contact@wodkafis.ch', ['spenden@wodkafis.ch'])
         return HttpResponse(' ')
     #date = pytz.timezone('Europe/Berlin').localize(datetime.strptime(re.search('(?<=Datum: )[\s\d:\.]*(?= CEST)',msg)[0],'%d.%m.%Y %H:%M'))
     #if datetime.now(pytz.timezone('Europe/Berlin'))-date<timedelta(minutes=1):
@@ -163,13 +182,24 @@ def donation(request):
             subject, from_email, to = 'Donation Approval', 'spenden@wodkafis.ch', [user.email]
             text_content = txt_template.render(context)
             html_content = html_template.render(context)
-            msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
+            with get_mail_connection(from_mail='spenden@wodkafis.ch',
+                                     password='Hoeh!en1urch') as connection:
+                msg = EmailMultiAlternatives(subject,
+                                             text_content,
+                                             from_email,
+                                             to,
+                                             connection=connection)
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
     except:
         subject = "Donation has been made - Please add sponsor"
         message = "%s %s made a donation of %i. An automatic assignment of the donation to the sponsor score failed.\n Please add the User and / or assign the donation." %(first_name, last_name, donation)
-        send_mail(subject, message, 'spenden@wodkafis.ch', ['spenden@wodkafis.ch'])
+        send_mail(from_mail='no-reply@wodkafis.ch',
+                  password='Hoeh!en1urch',
+                  subject=subject,
+                  body=message,
+                  to=['spenden@wodkafis.ch'])
+        #send_mail(subject, message, 'spenden@wodkafis.ch', ['spenden@wodkafis.ch'])
     # else:
     #     subject = "Donation has been made - Please check it"
     #     message = "%s %s made a donation of %i. The timestamp didn't match, please check it." %(first_name, last_name, donation)
