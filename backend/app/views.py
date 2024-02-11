@@ -336,7 +336,7 @@ class SponsorView(APIView):
 
         return Response({
             'sponsor_user': sponsor_user.values(),
-            'sponsor': [sponsor_serializer.data],
+            'sponsor': sponsor_serializer.data,
             'season': season.values(),
             'season_items': season_items.values(),
             'promo': promo.values(),
