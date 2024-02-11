@@ -295,12 +295,14 @@ class HomeView(APIView):
         random.seed(date_seed)
         latest_picture = random.sample(list(pictures), 1)[0]
         serializer = PictureModelSerializer(latest_picture)
+        app_update = AppInfo.objects.last().update
         return Response({
             'upcoming_event': event.values(),
             'sponsor': sponsor.values(),
             'season': season.values(),
             'season_items': season_items.values(),
-            'picture': [serializer.data]#picture.values()
+            'picture': [serializer.data],#picture.values()
+            'app_update': app_update
         })
 
 class MapView(APIView):
@@ -564,5 +566,15 @@ class AddDonationView(APIView):
                     msg.send()
 
             return Response({'success': 'donation added successful'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+class AddAppRelease(APIView):
+    permission_classes = [IsAdminUser]
+    def post(self, request):
+        try:
+            AppInfo.objects.create(version=request.data['version'],
+                                   update=request.data['update'])
+            return Response({'success': 'App release successful'})
         except:
             return Response({'error': 'something went wrong'})
