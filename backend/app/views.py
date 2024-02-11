@@ -279,8 +279,6 @@ def change_password(request):
             return Response({'error': 'Incorrect old password.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
 class HomeView(APIView):
 
     def get(self,request):
@@ -326,6 +324,7 @@ class SponsorView(APIView):
         profile = Profile.objects.get(user_id=request.user.id)
         sponsor_user = Sponsor.objects.filter(id=profile.sponsor_id)
         sponsors = Sponsor.objects.filter(sponsor_score__gt=0).order_by('-sponsor_score')
+        sponsor_serializer = SponsorModelSerializer(sponsors,many=True)
         season = Season.objects.all().order_by('-id')[:1]
         season_items = SeasonItem.objects.filter(season_id=season[0].id)
         promo = Promo.objects.all().order_by('-id')[:1]
@@ -337,7 +336,7 @@ class SponsorView(APIView):
 
         return Response({
             'sponsor_user': sponsor_user.values(),
-            'sponsor': sponsors.values(),
+            'sponsor': [sponsor_serializer.data],
             'season': season.values(),
             'season_items': season_items.values(),
             'promo': promo.values(),
