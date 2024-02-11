@@ -20,6 +20,9 @@ router.register(r'promo',PromoViewSet)
 urlpatterns = [
     path('',include(router.urls)),
     path(r'register',SignupView.as_view(),name='register'),
+    # path(r'activate_user',activate_user,name='activate_user'),
+    path(r'activate/<slug:uidb64>/<slug:token>/', activate_account, name='activate_account'),
+    path(r'approve_user/<slug:uidb64>/<slug:token>/', approve_user, name='approve_user'),
     path(r'login', LoginView.as_view(),name='login'),
     path(r'logout', LogoutView.as_view(),name='logout'),
     path(r'authenticated',CheckAuthenticatedView.as_view(),name='authenticated'),

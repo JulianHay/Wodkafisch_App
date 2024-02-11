@@ -16,7 +16,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.core.mail import EmailMultiAlternatives
 from pages.tokens import account_activation_token
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.contrib.auth import update_session_auth_hash
 import random
 from django.db.models import Sum, Case, Value, When, Q, Exists, OuterRef
@@ -25,6 +25,9 @@ from utils.push_notifications import send_push_notifications
 from paypal_payment.views import add_donation
 from utils.mail import send_mail, get_mail_connection
 import re
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+from django.template.loader import render_to_string
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
@@ -108,6 +111,12 @@ class SignupView(APIView):
                         user.is_active = False
                         user.save()
 
+                        token = ExpoToken.objects.create()
+                        profile = Profile.objects.get(first_name=first_name,
+                                                      last_name=last_name)
+                        profile.expo_token = token
+                        profile.save()
+
                         current_site = get_current_site(request)
                         subject = 'Please Activate Your Account'
 
@@ -118,7 +127,7 @@ class SignupView(APIView):
                                    'message': ['Please click the following link to confirm your registration:'],
                                    'bye': 'Fisch',
                                    'user': user,
-                                   'domain': current_site.domain,
+                                   'domain': current_site.domain + '/app',
                                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                                    'token': account_activation_token.make_token(user),
                                    }
@@ -141,23 +150,80 @@ class SignupView(APIView):
         except:
                 return Response({ 'error': 'Something went wrong when registering the account' })
 
-# class LoginView(APIView):
-#     permission_classes = (permissions.AllowAny, )
-#
-#     def post(self, request):
-#         data = self.request.data
-#         username = data['username']
-#         password = data['password']
-#
-#         try:
-#             user = auth.authenticate(username=username, password=password)
-#             if user is not None:
-#                 auth.login(request, user)
-#                 return Response({ 'success': 'User authenticated' })
-#             else:
-#                 return Response({ 'error': 'Error Authenticating' })
-#         except:
-#             return Response({ 'error': 'Something went wrong when logging in' })
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def activate_account(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    # checking if the user exists, if the token is valid.
+    if user is not None and account_activation_token.check_token(user, token):
+        if not user.is_active:
+            user.is_active = False
+            user.save()
+
+            # send approval request to admin
+            message = render_to_string('user/user_approval_request.html', {
+                'user': user,
+                'domain': get_current_site(request).domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                # generate a hash value with user related data
+                'token': account_activation_token.make_token(user),
+            })
+
+            send_mail(from_mail='no-reply@wodkafis.ch',
+                      password='Hoeh!en1urch',
+                      subject='User Sign Up Request Approval',
+                      body=message,
+                      to=['contact@wodkafis.ch'])
+
+        return Response({ 'success': 'Account activated successfully' })
+    else:
+        return Response({ 'error': 'Something went wrong when activating the account' })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def approve_user(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.profile.signup_confirmation = True
+        user.save()
+
+        txt_template = get_template('mails/general_template.txt')
+        html_template = get_template('mails/general_template.html')
+        context = {'title': "Sign Up Completed!",
+                   'hello': 'Hi',
+                   'message': ['your account is now active.',
+                               'Please use the following link to log in:',
+                               'https://wodkafis.ch/login'],
+                   'bye': 'Fisch',
+                   'user': user,
+                   }
+        subject, from_email, to = 'Sign Up Completed', 'no-reply@wodkafis.ch', [user.profile.email]
+        text_content = txt_template.render(context)
+        html_content = html_template.render(context)
+        with get_mail_connection(from_mail='no-reply@wodkafis.ch',
+                                 password='Hoeh!en1urch') as connection:
+            msg = EmailMultiAlternatives(subject,
+                                         text_content,
+                                         from_email,
+                                         to,
+                                         connection=connection)
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+
+        return Response({'success': 'Account approved successfully'})
+    else:
+        return Response({'error': 'Something went wrong when approving the account'})
 
 class LogoutView(APIView):
     def post(self, request):
@@ -397,7 +463,6 @@ class NewSeasonView(APIView):
             return Response({'error': 'something went wrong'})
 
 class NewEventView(APIView):
-    # push notification
 
     permission_classes = [IsAdminUser]
     def post(self, request):
@@ -501,17 +566,3 @@ class AddDonationView(APIView):
             return Response({'success': 'donation added successful'})
         except:
             return Response({'error': 'something went wrong'})
-
-
-# season badge info, done!
-# new event view, done!
-# return is admin for navbar, done!
-# donation: push notification, season badge, done!
-# add donation view, done!
-# login mail
-# new event check if users have activated push notifications and send a mail instead
-# include mailing list and remove duplicates
-# change password for spenden and events @wodkafis.ch -> no Umlaut
-
-# sing up confirmation views
-#
