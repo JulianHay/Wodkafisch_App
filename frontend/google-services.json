@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "262699000821",
+    "project_id": "wodkafisch-978b0",
+    "storage_bucket": "wodkafisch-978b0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262699000821:android:e23cc46285019d6ed176bc",
+        "android_client_info": {
+          "package_name": "com.wodkafisch.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6ZJC6GvLhdcMtIAt4AnDVbxFi2KJJw80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
