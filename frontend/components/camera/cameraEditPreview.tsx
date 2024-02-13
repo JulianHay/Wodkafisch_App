@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Alert,
   Dimensions,
   Image,
   KeyboardAvoidingView,
@@ -10,16 +11,53 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import mapStyle from "../../assets/mapStyle";
 import CustomInput from "../custom_input";
 import CustomButton from "../custom_botton";
+import client from "../../actions/client";
 
-const EditPreview = ({ visible, setVisible, photo }: any) => {
-  const [description, setDescription] = useState(photo.description);
+const EditPreview = ({ visible, setVisible, photo, onSave }: any) => {
+  const [description, setDescription] = useState("");
   const [markerLocation, setMarkerLocation] = useState({
-    longitude: parseFloat(photo.long),
-    latitude: parseFloat(photo.lat),
+    latitude: 48.746417,
+    longitude: 9.105801,
   });
+  useEffect(() => {
+    setDescription(photo.description);
+    setMarkerLocation({
+      longitude: parseFloat(photo.long),
+      latitude: parseFloat(photo.lat),
+    });
+  }, [photo]);
 
   const handleMapPress = (event) => {
     setMarkerLocation(event.nativeEvent.coordinate);
+  };
+
+  const savePhoto = async (id, description, location) => {
+    if (!description) {
+      Alert.alert("please enter a description");
+    } else if (!location) {
+      Alert.alert("please choose a location");
+    } else {
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const body = new FormData();
+
+      body.append("id", id);
+      body.append("lat", location.latitude);
+      body.append("long", location.longitude);
+      body.append("description", description);
+      try {
+        const res = await client.post("/edit_picture", body, config);
+        if (res.data.success) {
+          setVisible(false);
+          onSave();
+        }
+      } catch (err) {
+        Alert.alert(err);
+      }
+    }
   };
 
   return (
@@ -71,8 +109,8 @@ const EditPreview = ({ visible, setVisible, photo }: any) => {
                   marginTop: 20,
                 }}
                 initialRegion={{
-                  latitude: 48.746417,
-                  longitude: 9.105801,
+                  latitude: markerLocation.latitude,
+                  longitude: markerLocation.longitude,
                   latitudeDelta: 50,
                   longitudeDelta: 50,
                 }}
