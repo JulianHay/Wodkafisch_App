@@ -53,16 +53,37 @@ const PictureScreen = ({ route, navigation }) => {
   const [editPreviewVisible, setEditPreviewVisible] = useState(false);
   const [capturedImage, setCapturedImage] = useState<any>(null);
   const [location, setLocation] = useState({});
-  const index =
-    pictureData.length !== 0 && route.params && route.params.id
-      ? pictureData.findIndex((item) => item.id === route.params.id)
-      : 0;
+
   const [initialIndex, setInitialIndex] = useState(0);
 
   const [username, setUsername] = useState("");
   useEffect(() => {
-    setInitialIndex(index);
-  }, [route.params]);
+    if (pictureData.length > 0) {
+      const index = pictureData.findIndex(
+        (item) => item.id === route.params.id
+      );
+
+      setInitialIndex(index);
+      flatListRef.current?.scrollToIndex({
+        index: initialIndex,
+        animated: false,
+      });
+    } else {
+      client.get("/pictures").then(async (res) => {
+        const index =
+          route.params && route.params.id
+            ? res.data["pictures"].findIndex(
+                (item) => item.id === route.params.id
+              )
+            : 0;
+        setInitialIndex(index);
+        flatListRef.current?.scrollToIndex({
+          index: index,
+          animated: false,
+        });
+      });
+    }
+  }, [navigation, route.params]);
 
   const __startCamera = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
@@ -466,8 +487,8 @@ const PictureScreen = ({ route, navigation }) => {
         renderItem={renderItem}
         numColumns={1}
         getItemLayout={(data, index) => ({
-          length: Dimensions.get("window").width * 0.9 + 17,
-          offset: (Dimensions.get("window").width * 0.9 + 17) * index,
+          length: Dimensions.get("window").width * 0.87 + 112,
+          offset: (Dimensions.get("window").width * 0.87 + 112) * index,
           index,
         })}
         showsVerticalScrollIndicator={false}
@@ -482,9 +503,15 @@ const PictureScreen = ({ route, navigation }) => {
         }
         onScroll={handleScroll}
         initialNumToRender={5}
-        initialScrollIndex={initialIndex}
+        // initialScrollIndex={initialIndex}
         ListHeaderComponent={() => {
           return <View style={{ height: 80 }} />;
+        }}
+        onLayout={() => {
+          flatListRef.current?.scrollToIndex({
+            index: initialIndex,
+            animated: false,
+          });
         }}
       />
 
@@ -533,6 +560,13 @@ const PictureScreen = ({ route, navigation }) => {
           visible={editPreviewVisible}
           setVisible={setEditPreviewVisible}
           photo={selectedContent}
+          onSave={async () => {
+            await onRefresh();
+            const index = pictureData.findIndex(
+              (item) => item.id === selectedContent.id
+            );
+            setInitialIndex(index);
+          }}
         />
       ) : null}
 
