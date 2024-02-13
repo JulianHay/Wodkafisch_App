@@ -21,7 +21,8 @@ import { CustomText } from "../components/text";
 import { useFocusEffect } from "@react-navigation/native";
 import CustomButton, { CloseButton } from "../components/custom_botton";
 import * as Application from "expo-application";
-
+import { logout } from "../actions/auth";
+import { connect } from "react-redux";
 // import FischGame from '../components/game/game';
 // import { CloseButton } from '../components/custom_botton';
 // import { StatusBar } from 'expo-status-bar';
@@ -43,7 +44,7 @@ function compareAppVersions(version1, version2) {
   return parts1[2] - parts2[2] > 0 ? true : false;
 }
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ logout, navigation }) => {
   const [eventData, setEventData] = useState([]);
   const [pictureData, setPictureData] = useState([]);
   const [sponsorData, setSponsorData] = useState([]);
@@ -246,6 +247,7 @@ const HomeScreen = ({ navigation }) => {
                       text="Update Now"
                       borderColor={"white"}
                       onPress={() => {
+                        logout();
                         if (Platform.OS === "ios") {
                           Linking.openURL(
                             "https://apps.apple.com/de/app/wodkafisch/id6468836141"
@@ -422,4 +424,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default connect(null, { logout })(HomeScreen);
