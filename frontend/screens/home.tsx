@@ -28,6 +28,21 @@ import * as Application from "expo-application";
 
 const darkmode = true;
 
+function compareAppVersions(version1, version2) {
+  const parts1 = version1.split(".").map(Number);
+  const parts2 = version2.split(".").map(Number);
+  // Compare major version
+  if (parts1[0] !== parts2[0]) {
+    return parts1[0] - parts2[0] > 0 ? true : false;
+  }
+  // Compare minor version
+  if (parts1[1] !== parts2[1]) {
+    return parts1[1] - parts2[1] > 0 ? true : false;
+  }
+  // Compare patch version
+  return parts1[2] - parts2[2] > 0 ? true : false;
+}
+
 const HomeScreen = ({ navigation }) => {
   const [eventData, setEventData] = useState([]);
   const [pictureData, setPictureData] = useState([]);
@@ -65,7 +80,10 @@ const HomeScreen = ({ navigation }) => {
         setSeasonItemData(res.data.season_items);
         setIsUpdate(
           res.data.app_update.update &&
-            res.data.app_update.version > Application.nativeApplicationVersion
+            compareAppVersions(
+              res.data.app_update.version,
+              Application.nativeApplicationVersion
+            )
         );
       })
       .finally(() => setLoading(false));
