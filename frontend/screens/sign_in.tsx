@@ -14,7 +14,7 @@ import { login } from "../actions/auth";
 import { connect } from "react-redux";
 import client from "../actions/client";
 import { CustomText } from "../components/text";
-import { getFromLocal, saveToLocal } from "../components/localStorage2";
+import { getFromLocal, saveToLocal } from "../components/localStorage";
 import { registerForPushNotificationsAsync } from "../utils/usePushNotifications";
 
 const darkmode = true;
