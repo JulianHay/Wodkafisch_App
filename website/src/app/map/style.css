@@ -1,0 +1,10 @@
+.gm-style .gm-style-iw-c {
+
+    background-color: #20213cff !important;
+}
+.gm-style-iw-tc::after {
+    background: #20213cff !important;
+}
+.gm-ui-hover-effect {
+    display: none !important;
+}
