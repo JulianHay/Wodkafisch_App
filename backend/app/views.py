@@ -28,6 +28,7 @@ import re
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.template.loader import render_to_string
+from copy import deepcopy
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
@@ -322,7 +323,8 @@ class SponsorView(APIView):
 
     def get(self,request):
         profile = Profile.objects.get(user_id=request.user.id)
-        sponsor_user = Sponsor.objects.filter(id=profile.sponsor_id)
+        sponsor_user = Sponsor.objects.get(id=profile.sponsor_id)
+        sponsor_user_serializer = SponsorModelSerializer(deepcopy(sponsor_user))
         sponsors = Sponsor.objects.filter(sponsor_score__gt=0).order_by('-sponsor_score')
         sponsor_serializer = SponsorModelSerializer(sponsors,many=True)
         season = Season.objects.all().order_by('-id')[:1]
@@ -330,12 +332,12 @@ class SponsorView(APIView):
         promo = Promo.objects.all().order_by('-id')[:1]
         donations = Donation.objects.all().order_by('-id')[:5]
         for i, item in enumerate(season_items):
-            if sponsor_user[0].season_score >= item.price and sponsor_user[0].unlocked_items_animation < i + 1:
-                sponsor_user[0].unlocked_items_animation += 1
-                sponsor_user[0].save()
+            if sponsor_user.season_score >= item.price and sponsor_user.unlocked_items_animation < i + 1:
+                sponsor_user.unlocked_items_animation += 1
+                sponsor_user.save()
 
         return Response({
-            'sponsor_user': sponsor_user.values(),
+            'sponsor_user': [sponsor_user_serializer.data],
             'sponsor': sponsor_serializer.data,
             'season': season.values(),
             'season_items': season_items.values(),
