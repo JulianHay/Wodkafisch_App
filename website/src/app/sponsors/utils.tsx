@@ -3,16 +3,18 @@ import React, { useState, useEffect, useRef } from "react";
 import { Text } from "../../../components/text";
 
 interface ProgressBar {
-  duration: number;
   percentage: number;
   style: React.CSSProperties;
+  onAnimationStart?: () => void;
   onAnimationEnd?: () => void;
   startAnimation?: boolean;
+  progress?: number;
+  setProgress?: (progress: number) => void;
 }
 
 const Battlepass = ({ seasonData, sponsorData, itemData }) => {
   const ProgressBarRef = useRef(null);
-
+  const [progressBarValue, setProgressBarValue] = useState(0);
   const [progressBarWidth, setProgressBarWidth] = useState(0);
   const animatedItemWidths = useRef([]);
   const itemSize = 30;
@@ -21,6 +23,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
   //   // animatedItemWidths.current[index] = new Animated.Value(0);
 
   // });
+
   const [imagePaths, setImagePaths] = useState(
     itemData.map((data, index) => {
       return sponsorData[0].unlocked_items_animation < index + 1 ||
@@ -29,6 +32,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
         : "chest_open.png";
     })
   );
+
   const progressAudio = new Audio("bubbles.mp3");
   const unlockAudio = new Audio("hölkynkölkyn.mp3");
 
@@ -48,92 +52,97 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
       window.removeEventListener("resize", updateWidth);
     };
   }, []);
-  // useEffect(() => {
 
-  //   const unlockItem = itemData.map((item, index) =>
-  //     index > sponsorData[0].unlocked_items_animation &&
-  //     sponsorData[0].unlocked_items < index
-  //       ? true
-  //       : false
-  //   );
-  //   const animateItem = Array(itemData.length).fill(true);
-
-  //   window.onload = function () {
-  //     progressAudio.play();
-  //   };
-  //   // Cleanup function
-  //   return () => {
-  //     progressAudio.pause();
-  //     unlockAudio.pause();
-  //   };
-  // }, []);
-
-  console.log(progressBarWidth);
-  const animatedItems = itemData.map((animation, index) => (
-    <div
-      key={index}
-      style={{
-        width: itemSize,
-        height: itemSize,
-        borderRadius: 9,
-        position: "relative",
-        left:
-          (itemData[index].price / seasonData[0].max_donation) *
-            progressBarWidth -
-          itemSize * (index - 1),
-      }}
-    >
+  const animatedItems = itemData.map((item, index) => {
+    const [progress, setProgress] = useState(0);
+    return (
       <div
+        key={index}
         style={{
-          display: "flex",
-          flexDirection: "row",
-          position: "absolute",
-          top: -15,
-          width: 30,
-          justifyContent: "center",
+          width: itemSize,
+          height: itemSize,
+          borderRadius: 9,
+          position: "relative",
+          left:
+            (itemData[index].price / seasonData[0].max_donation) *
+              progressBarWidth -
+            itemSize * (index - 1),
+          transform: "translateX(-100%)",
         }}
       >
-        <Text fontSize={8} text={itemData[index].price} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            position: "absolute",
+            top: -15,
+            width: 30,
+            justifyContent: "center",
+          }}
+        >
+          <Text fontSize={8} text={itemData[index].price} />
+          <img
+            src="fisch_flakes.png"
+            style={{ width: 8, height: 8, marginLeft: 3, marginTop: 1.5 }}
+          />
+        </div>
+
+        <ProgressBar
+          style={{ width: itemSize, height: itemSize }}
+          percentage={100}
+          startAnimation={
+            progressBarValue >=
+            (itemData[index].price / seasonData[0].max_donation) * 100
+          }
+          progress={progress}
+          setProgress={setProgress}
+          onAnimationStart={() => {
+            // unlockAudio.play();
+
+            if (sponsorData[0].unlocked_items_animation >= index) {
+              setImagePaths(
+                imagePaths.map((image, i) => {
+                  return index == i ? "chest_open.png" : image;
+                })
+              );
+            }
+          }}
+        />
+
         <img
-          src="fisch_flakes.png"
-          style={{ width: 8, height: 8, marginLeft: 3 }}
+          src={imagePaths[index]}
+          style={{ width: 28, height: 28, top: 2, position: "absolute" }}
+        />
+
+        <img
+          src={"https://wodkafis.ch/media/" + itemData[index].image}
+          style={{
+            width: 28,
+            height: 30,
+            top: 32,
+            position: "absolute",
+            objectFit: "contain",
+          }}
         />
       </div>
-
-      <ProgressBar
-        duration={(50 / progressBarWidth) * itemSize}
-        style={{ width: itemSize, height: itemSize }}
-        percentage={100}
-        startAnimation={true}
-      />
-
-      <img
-        src={imagePaths[index]}
-        style={{ width: 28, height: 28, top: 2, position: "absolute" }}
-      />
-
-      <img
-        src={"https://wodkafis.ch/media/" + itemData[index].image}
-        style={{
-          width: 28,
-          height: 30,
-          top: 32,
-          position: "absolute",
-          objectFit: "contain",
-        }}
-      />
-    </div>
-  ));
-
+    );
+  });
   return (
     <div ref={ProgressBarRef} style={{ width: "100%" }}>
       <ProgressBar
-        duration={50}
         style={{ width: "100%", height: 20 }}
         percentage={
           (sponsorData[0].season_score / seasonData[0].max_donation) * 100
         }
         startAnimation={true}
+        onAnimationStart={() => {
+          // progressAudio.play();
+        }}
+        onAnimationEnd={() => {
+          // progressAudio.pause();
+        }}
+        progress={progressBarValue}
+        setProgress={setProgressBarValue}
       />
       <div
         style={{
@@ -150,24 +159,29 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
 };
 
 const ProgressBar = ({
-  duration,
   percentage,
+  onAnimationStart,
   onAnimationEnd,
   startAnimation,
   style,
+  progress,
+  setProgress,
 }: ProgressBar) => {
-  const [progress, setProgress] = useState(0);
-  const interval = duration;
+  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    const containerWidth = containerRef.current.offsetWidth;
+    const interval = 2;
+    const increment = (1 / containerWidth) * 100;
     let timer: NodeJS.Timeout;
     if (startAnimation && progress < percentage) {
       timer = setInterval(() => {
         setProgress((prevProgress) => {
-          const newProgress = prevProgress + 1;
+          const newProgress = prevProgress + increment;
           if (newProgress >= percentage) {
-            if (onAnimationEnd && typeof onAnimationEnd === "function") {
+            if (onAnimationEnd) {
               onAnimationEnd();
             }
+            clearInterval(timer);
           }
           return newProgress;
         });
@@ -177,10 +191,17 @@ const ProgressBar = ({
     return () => {
       clearInterval(timer);
     };
-  }, [progress, interval, percentage, onAnimationEnd, startAnimation]);
+  }, [progress, percentage, onAnimationStart, startAnimation]);
+
+  useEffect(() => {
+    if (onAnimationStart && startAnimation) {
+      onAnimationStart();
+    }
+  }, [startAnimation]);
 
   return (
     <div
+      ref={containerRef}
       style={{
         ...style,
         backgroundColor: "#292929",
@@ -195,7 +216,6 @@ const ProgressBar = ({
           background: "linear-gradient(to bottom, #047d7f, #004a3e)",
           boxShadow: "0 2px 2px #333",
           borderRadius: 10,
-          // transition: `width ${duration}ms linear`,
         }}
       ></div>
     </div>

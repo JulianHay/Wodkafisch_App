@@ -255,7 +255,7 @@ const Sponsors = () => {
                     />
                   </div>
                   {/* Progress Bar */}
-                  <div style={{ width: "95%" }}>
+                  <div style={{ width: "95%", paddingTop: 10 }}>
                     <Battlepass
                       itemData={seasonItemData}
                       seasonData={seasonData}
