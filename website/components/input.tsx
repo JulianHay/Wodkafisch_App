@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
 
-interface Input {
-  value: string;
-  setValue: (v: string) => void;
+interface Input<T> {
+  value: T;
+  setValue: (v: T) => void;
   placeholder?: string;
   type?: string;
 }
@@ -22,7 +22,12 @@ const Input = ({ value, setValue, placeholder = "", type = "text" }: Input) => {
         type={type}
         value={value}
         onChange={(e) => {
-          setValue(e.target.value);
+          if (type === "number") {
+            setValue(parseFloat(e.target.value));
+            return;
+          } else {
+            setValue(e.target.value);
+          }
         }}
         placeholder={placeholder}
         security=""
