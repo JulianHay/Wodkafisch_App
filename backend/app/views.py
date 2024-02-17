@@ -30,6 +30,12 @@ from django.utils.http import urlsafe_base64_decode
 from django.template.loader import render_to_string
 from copy import deepcopy
 
+
+class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminUser]
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventModelSerializer

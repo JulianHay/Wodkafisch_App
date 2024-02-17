@@ -34,10 +34,12 @@ urlpatterns = [
     path(r'edit_picture', ImageEditView.as_view(), name='edit_picture'),
     path(r'subscribe_push_notification', PushNotificationTokenView.as_view(), name='subscribe_push_notification'),
     path(r'send_push_notification', SendPushNotificationView.as_view(), name='send_push_notification'),
-    path(r'new_season', NewSeasonView.as_view(), name='new_season'),
-    path(r'new_event', NewEventView.as_view(), name='new_event'),
-    path(r'add_donation', AddDonationView.as_view(), name='add_donation'),
-    path(r'add_app_release', AddAppRelease.as_view(), name='add_app_release'),
+
+    path(r'admin/new_season', NewSeasonView.as_view(), name='new_season'),
+    path(r'admin/new_event', NewEventView.as_view(), name='new_event'),
+    path(r'admin/add_donation', AddDonationView.as_view(), name='add_donation'),
+    path(r'admin/add_app_release', AddAppRelease.as_view(), name='add_app_release'),
+    path(r'admin/user_list', UserViewSet.as_view({'get': 'list'}), name='user_list'),
 
     path(r'like_picture', PictureLikeView.as_view(), name='picture_like'),
     path(r'report_content', ReportUser.as_view(), name='report_content'),
