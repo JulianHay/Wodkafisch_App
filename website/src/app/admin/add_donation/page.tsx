@@ -14,7 +14,7 @@ import { ProtectedAdminRoute } from "../../../../utils/protectedRoute";
 import { ErrorMessage } from "../../../../components/messages";
 import { Button } from "../../../../components/buttons";
 import { useSelector } from "react-redux";
-import { Input } from "../../../../components/input";
+import { AutocompleteInput, Input } from "../../../../components/input";
 
 const AddDonation = () => {
   const { router } = useRouter();
@@ -24,7 +24,63 @@ const AddDonation = () => {
   const [donation, setDonation] = useState<number>();
   const [error, setError] = useState("");
   const [addedDonations, setAddedDonations] = useState([]);
-  console.log(addedDonations);
+
+  const [userFirstNames, setUserFirstNames] = useState([]);
+  const [userLastNames, setUserLastNames] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    client.get("/admin/user_list").then((res) => {
+      setUsers(
+        res.data.map((user) => {
+          return { firstName: user.first_name, lastName: user.last_name };
+        })
+      );
+      setUserFirstNames(res.data.map((user) => user.first_name));
+      setUserLastNames(res.data.map((user) => user.last_name));
+    });
+  }, []);
+
+  const handleFirstNameChange = (firstName: string) => {
+    if (firstName === "") {
+      setLastName("");
+      setUserFirstNames(users ? users.map((user) => user.firstName) : []);
+      setUserLastNames(users ? users.map((user) => user.lastName) : []);
+    } else {
+      const filteredSuggestions = users.filter((user) =>
+        user.firstName.toLowerCase().startsWith(firstName.toLowerCase())
+      );
+      setUserLastNames(filteredSuggestions.map((user) => user.lastName));
+      if (filteredSuggestions.length === 1) {
+        setLastName(filteredSuggestions[0].lastName);
+      }
+    }
+  };
+
+  useEffect(() => {
+    handleFirstNameChange(firstName);
+  }, [firstName]);
+
+  const handleLastNameChange = (lastName: string) => {
+    if (lastName === "" && firstName !== "") {
+      setUserLastNames(users ? users.map((user) => user.lastName) : []);
+    } else {
+      const filteredSuggestions = users.filter((user) =>
+        user.lastName.toLowerCase().startsWith(lastName.toLowerCase())
+      );
+      if (firstName === "") {
+        setUserFirstNames(filteredSuggestions.map((user) => user.firstName));
+      }
+      if (filteredSuggestions.length === 1) {
+        setFirstName(filteredSuggestions[0].firstName);
+      }
+    }
+  };
+
+  useEffect(() => {
+    handleLastNameChange(lastName);
+  }, [lastName]);
+
   const addDonation = async (
     firstName: string,
     lastName: string,
@@ -53,12 +109,15 @@ const AddDonation = () => {
       donation: donation,
     };
     try {
-      const res = await client.post("/add_donation", body, config);
+      const res = await client.post("/admin/add_donation", body, config);
       if (res.data.success) {
         setAddedDonations([
           ...addedDonations,
           { first_name: firstName, last_name: lastName, donation: donation },
         ]);
+        setFirstName("");
+        setLastName("");
+        setDonation(NaN);
       } else {
         setError(
           "An error occured while adding donation. Please check first and last name."
@@ -72,9 +131,12 @@ const AddDonation = () => {
   const addedDonaltionList = addedDonations.map((donation) => (
     <RowContainer
       key={donation.first_name + donation.last_name + donation.donation}
+      style={{ justifyContent: "flex-start" }}
     >
-      <Text text={donation.first_name + " " + donation.last_name + ":"} />
-      <Text text={donation.donation + "€"} style={{ marginLeft: 10 }} />
+      <RowContainer style={{ width: "70%", justifyContent: "space-between" }}>
+        <Text text={donation.first_name + " " + donation.last_name + ":"} />
+        <Text text={donation.donation + "€"} style={{ marginLeft: 10 }} />
+      </RowContainer>
     </RowContainer>
   ));
 
@@ -90,17 +152,22 @@ const AddDonation = () => {
       )}
       <Section>
         <RowContainer>
-          <ColumnContainer style={{ width: "40%", marginTop: 40 }}>
-            <Text text="Add Donation" />
-            <Input
+          <ColumnContainer style={{ width: "30%", marginTop: 40 }}>
+            <Text text="Add Donation" fontWeight="bold" fontSize={30} />
+            <AutocompleteInput
               value={firstName}
               setValue={setFirstName}
               placeholder="First Name"
+              options={userFirstNames}
             />
-            <Input
+            <AutocompleteInput
               value={lastName}
               setValue={setLastName}
               placeholder="Last Name"
+              options={userLastNames}
+              allowEmpty={
+                firstName !== "" && userFirstNames.includes(firstName)
+              }
             />
             <Input
               value={donation}
@@ -115,10 +182,12 @@ const AddDonation = () => {
               }}
             />
 
-            <ColumnContainer style={{ marginTop: 40 }}>
-              <Text text="Added Donations" />
-              {addedDonaltionList}
-            </ColumnContainer>
+            {addedDonations.length > 0 ? (
+              <ColumnContainer style={{ marginTop: 40 }}>
+                <Text text="Added Donations" fontWeight="bold" fontSize={30} />
+                {addedDonaltionList}
+              </ColumnContainer>
+            ) : null}
           </ColumnContainer>
         </RowContainer>
       </Section>
