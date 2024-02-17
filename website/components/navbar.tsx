@@ -30,7 +30,7 @@ const NavbarFisch = () => {
     >
       <Container>
         <Navbar.Brand href="/">
-          <img src="fisch.svg" style={{ height: 30, margin: 10 }} />
+          <img src="/fisch.svg" style={{ height: 30, margin: 10 }} />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse
