@@ -25,4 +25,21 @@ const ProtectedRoute = ({ router, children }: ProtectedRoute) => {
   return children;
 };
 
+const ProtectedAdminRoute = ({ router, children }: ProtectedRoute) => {
+  const { isAdmin } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      router.push("/");
+    }
+  }, []);
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  return children;
+};
+
 export default ProtectedRoute;
+export { ProtectedAdminRoute };

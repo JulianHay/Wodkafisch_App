@@ -54,13 +54,13 @@ const NavbarFisch = () => {
                 id="basic-nav-dropdown"
                 style={{ backgroundColor: "#000022ff" }}
               >
-                <NavDropdown.Item href="#action/3.1">
+                <NavDropdown.Item href="/admin/new_event">
                   New Event
                 </NavDropdown.Item>
-                <NavDropdown.Item href="#action/3.1">
+                <NavDropdown.Item href="/admin/add_donation">
                   Add Donation
                 </NavDropdown.Item>
-                <NavDropdown.Item href="#action/3.1">
+                <NavDropdown.Item href="/admin/new_season">
                   New Season
                 </NavDropdown.Item>
               </NavDropdown>
@@ -73,7 +73,7 @@ const NavbarFisch = () => {
                 id="basic-nav-dropdown"
                 style={{ backgroundColor: "#000022ff" }}
               >
-                <NavDropdown.Item href="#action/3.1">
+                <NavDropdown.Item href="/profile/change_password">
                   Change Password
                 </NavDropdown.Item>
                 <NavDropdown.Item
