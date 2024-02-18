@@ -6,17 +6,97 @@ interface Input<T> {
   setValue: (v: T) => void;
   placeholder?: string;
   type?: string;
+  accept?: string;
+  inputFieldRef?: React.RefObject<HTMLInputElement>;
 }
 
 interface AutocompleteInput extends Input<T> {
   options: string[];
   allowEmpty?: boolean;
 }
+interface MultilineInput extends Input<T> {
+  rows?: number;
+  cols?: number;
+}
 
-const Input = ({ value, setValue, placeholder = "", type = "text" }: Input) => {
+const Input = ({
+  value,
+  setValue,
+  placeholder = "",
+  type = "text",
+  accept,
+  inputFieldRef,
+}: Input) => {
   return (
     <div>
       <input
+        ref={inputFieldRef}
+        style={
+          type === "datetime-local"
+            ? {
+                color: value === "" ? "#a8afb9" : "black",
+                borderRadius: 3,
+                paddingLeft: 1,
+                width: "100%",
+                margin: 3,
+              }
+            : type === "file"
+            ? {
+                color: "white",
+                borderRadius: 3,
+                paddingLeft: 5,
+                width: "100%",
+                margin: 3,
+              }
+            : {
+                color: "black",
+                borderRadius: 3,
+                paddingLeft: 5,
+                width: "100%",
+                margin: 3,
+              }
+        }
+        type={type}
+        value={type === "file" ? undefined : value}
+        onChange={(e) => {
+          if (type === "number") {
+            setValue(parseFloat(e.target.value));
+            return;
+          } else if (type === "file") {
+            const file = inputFieldRef.current.files[0];
+
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                setValue(reader.result);
+              };
+              reader.onerror = (error) => {
+                console.error("File reading error:", error);
+              };
+              reader.readAsDataURL(file);
+            }
+          } else {
+            setValue(e.target.value);
+          }
+        }}
+        placeholder={placeholder}
+        security=""
+        accept={accept}
+      />
+    </div>
+  );
+};
+
+const MultilineInput = ({
+  value,
+  setValue,
+  placeholder = "",
+  rows = 5,
+  cols = 50,
+}: MultilineInput) => {
+  return (
+    <div>
+      <textarea
         style={{
           color: "black",
           borderRadius: 3,
@@ -24,18 +104,14 @@ const Input = ({ value, setValue, placeholder = "", type = "text" }: Input) => {
           width: "100%",
           margin: 3,
         }}
-        type={type}
         value={value}
         onChange={(e) => {
-          if (type === "number") {
-            setValue(parseFloat(e.target.value));
-            return;
-          } else {
-            setValue(e.target.value);
-          }
+          setValue(e.target.value);
         }}
         placeholder={placeholder}
         security=""
+        rows={rows}
+        cols={cols}
       />
     </div>
   );
@@ -64,7 +140,6 @@ const AutocompleteInput = ({
 
     setSelectedIndex(-1);
   };
-  console.log(suggestions);
   const handleSuggestionClick = (option) => {
     setValue(option);
     setSuggestions([]);
@@ -143,4 +218,4 @@ const AutocompleteInput = ({
   );
 };
 
-export { Input, AutocompleteInput };
+export { Input, AutocompleteInput, MultilineInput };
