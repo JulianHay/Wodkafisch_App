@@ -481,50 +481,52 @@ class NewEventView(APIView):
             if event_serializer.is_valid():
                 event = event_serializer.save()
 
-            # check if users have activated push notifications
-            users_with_push_notifications = Profile.objects.exclude(expo_token__token='')
-            expo_tokens = [user.expo_token.token for user in users_with_push_notifications]
-            send_push_notifications(expo_tokens,
-                                    'Next Fisch event announced',
-                                    request.data['title'] + ' on ' + request.data['start'])
+                # check if users have activated push notifications
+                users_with_push_notifications = Profile.objects.exclude(expo_token__token='')
+                expo_tokens = [user.expo_token.token for user in users_with_push_notifications]
+                send_push_notifications(expo_tokens,
+                                        'Next Fisch event announced',
+                                        request.data['title'] + ' on ' + request.data['start'])
 
-            # send a mail to users without push notifications instead
-            users_without_push_notifications = Profile.objects.filter(expo_token__token='')
-            mailing_list = list(users_without_push_notifications.values_list("email", flat=True))
-            # include mailing list
-            mailing_list.extend(re.findall(r'\"?([\w\.-]+@[\w\.-]+)\"?', request.data['mailing_list']))
-            # remove duplicates
-            mailing_list = list(set(mailing_list))
+                # send a mail to users without push notifications instead
+                users_without_push_notifications = Profile.objects.filter(expo_token__token='')
+                mailing_list = list(users_without_push_notifications.values_list("email", flat=True))
+                # include mailing list
+                mailing_list.extend(re.findall(r'\"?([\w\.-]+@[\w\.-]+)\"?', request.data['mailing_list']))
+                # remove duplicates
+                mailing_list = list(set(mailing_list))
 
-            txt_template = get_template('mails/event_template.txt')
-            html_template = get_template('mails/event_template.html')
-            context = {'title': request.data['title'],
-                       'n': Event.objects.count() - 1,
-                       'worldmap_image': event.worldmap_image,
-                       'hello': request.data['hello'],
-                       'message': request.data['message'],
-                       'location': request.data['location'],
-                       'additional_text': request.data['additional_text'],
-                       'bye': request.data['bye'],
-                       'image': event.image,
-                       'time': datetime.strftime(datetime.strptime(request.data['start'], '%Y-%m-%d %H:%M:%S'), '%d. %b, %H:%M'),
-                       }
+                txt_template = get_template('mails/event_template.txt')
+                html_template = get_template('mails/event_template.html')
+                context = {'title': request.data['title'],
+                           'n': Event.objects.count() - 1,
+                           'worldmap_image': event.worldmap_image,
+                           'hello': request.data['hello'],
+                           'message': request.data['message'],
+                           'location': request.data['location'],
+                           'additional_text': request.data['additional_text'],
+                           'bye': request.data['bye'],
+                           'image': event.image,
+                           'time': datetime.strftime(datetime.strptime(request.data['start'], '%Y-%m-%d %H:%M:%S'), '%d. %b, %H:%M'),
+                           }
 
-            subject, from_email, bcc = 'Fisch Event', 'events@wodkafis.ch', mailing_list
-            text_content = txt_template.render(context)
-            html_content = html_template.render(context)
+                subject, from_email, bcc = 'Fisch Event', 'events@wodkafis.ch', mailing_list
+                text_content = txt_template.render(context)
+                html_content = html_template.render(context)
 
-            with get_mail_connection(from_mail='events@wodkafis.ch',
-                                     password='Hoeh!en1urch') as connection:
-                msg = EmailMultiAlternatives(subject,
-                                             text_content,
-                                             from_email,
-                                             bcc=bcc,
-                                             connection=connection)
-                msg.attach_alternative(html_content, "text/html")
-                msg.send()
+                with get_mail_connection(from_mail='events@wodkafis.ch',
+                                         password='Hoeh!en1urch') as connection:
+                    msg = EmailMultiAlternatives(subject,
+                                                 text_content,
+                                                 from_email,
+                                                 bcc=bcc,
+                                                 connection=connection)
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
 
-            return Response({'success': 'new event created'})
+                return Response({'success': 'new event created'})
+            else:
+                return Response({'error': 'something went wrong'})
         except:
             return Response({'error': 'something went wrong'})
 
