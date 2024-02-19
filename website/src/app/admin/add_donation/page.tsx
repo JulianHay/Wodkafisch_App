@@ -171,7 +171,9 @@ const AddDonation = () => {
             />
             <Input
               value={donation}
-              setValue={setDonation}
+              setValue={(e) => {
+                setDonation(parseFloat(e.target.value));
+              }}
               placeholder="Donation Amount in €"
               type="number"
             />

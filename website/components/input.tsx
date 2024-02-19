@@ -8,6 +8,8 @@ interface Input<T> {
   type?: string;
   accept?: string;
   inputFieldRef?: React.RefObject<HTMLInputElement>;
+  name?: string;
+  style?: React.CSSProperties;
 }
 
 interface AutocompleteInput extends Input<T> {
@@ -26,9 +28,11 @@ const Input = ({
   type = "text",
   accept,
   inputFieldRef,
+  name,
+  style,
 }: Input) => {
   return (
-    <div>
+    <div style={style}>
       <input
         ref={inputFieldRef}
         style={
@@ -58,30 +62,11 @@ const Input = ({
         }
         type={type}
         value={type === "file" ? undefined : value}
-        onChange={(e) => {
-          if (type === "number") {
-            setValue(parseFloat(e.target.value));
-            return;
-          } else if (type === "file") {
-            const file = inputFieldRef.current.files[0];
-
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = () => {
-                setValue(reader.result);
-              };
-              reader.onerror = (error) => {
-                console.error("File reading error:", error);
-              };
-              reader.readAsDataURL(file);
-            }
-          } else {
-            setValue(e.target.value);
-          }
-        }}
+        onChange={setValue}
         placeholder={placeholder}
         security=""
         accept={accept}
+        name={name}
       />
     </div>
   );

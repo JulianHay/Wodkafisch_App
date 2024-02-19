@@ -201,13 +201,17 @@ const NewEvent = () => {
             <Text text="New Event" fontSize={30} fontWeight="bold" />
             <Input
               value={eventTitle}
-              setValue={setEventTitle}
+              setValue={(e) => {
+                setEventTitle(e.target.value);
+              }}
               placeholder="Event Title"
             />
 
             <Input
               value={mailGreeting}
-              setValue={setMailGreeting}
+              setValue={(e) => {
+                setMailGreeting(e.target.value);
+              }}
               placeholder="Greeting"
             />
             <MultilineInput
@@ -217,10 +221,11 @@ const NewEvent = () => {
             />
             <Input
               value={eventStart}
-              setValue={(v) => {
-                setEventStart(moment(v).format("YYYY-MM-DD HH:mm:ss"));
+              setValue={(e) => {
+                const date = e.target.value;
+                setEventStart(moment(date).format("YYYY-MM-DD HH:mm:ss"));
                 setEventEnd(
-                  moment(v)
+                  moment(date)
                     .set({ hour: 23, minute: 59, second: 59 })
                     .format("YYYY-MM-DD HH:mm:ss")
                 );
@@ -230,7 +235,9 @@ const NewEvent = () => {
             />
             <Input
               value={mailEventLocation}
-              setValue={setMailEventLocation}
+              setValue={(e) => {
+                setMailEventLocation(e.target.value);
+              }}
               placeholder="Event Location"
             />
             <MultilineInput
@@ -241,12 +248,16 @@ const NewEvent = () => {
             />
             <Input
               value={mailBye}
-              setValue={setMailBye}
+              setValue={(e) => {
+                setMailBye(e.target.value);
+              }}
               placeholder="Goodbye Text"
             />
             <Input
               value={eventCountry}
-              setValue={setEventCountry}
+              setValue={(e) => {
+                setEventCountry(e.target.value);
+              }}
               placeholder="Country"
             />
             <MultilineInput
@@ -275,7 +286,20 @@ const NewEvent = () => {
               <label htmlFor="worldmapImage">World Map Image:</label>
               <Input
                 value={eventWorldmapImage}
-                setValue={setEventWorldmapImage}
+                setValue={(e) => {
+                  const file = worldmapImageRef.current.files[0];
+
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setEventWorldmapImage(reader.result);
+                    };
+                    reader.onerror = (error) => {
+                      console.error("File reading error:", error);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
                 placeholder="Worldmap Image"
                 type="file"
                 accept="image/*"
@@ -292,7 +316,20 @@ const NewEvent = () => {
               <label htmlFor="eventImage">Event Fisch Image:</label>
               <Input
                 value={eventImage}
-                setValue={setEventImage}
+                setValue={(e) => {
+                  const file = eventImageRef.current.files[0];
+
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setEventImage(reader.result);
+                    };
+                    reader.onerror = (error) => {
+                      console.error("File reading error:", error);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
                 placeholder="Event Image"
                 type="file"
                 accept="image/*"
