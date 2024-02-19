@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 
 interface Input<T> {
   value: T;
@@ -19,6 +21,11 @@ interface AutocompleteInput extends Input<T> {
 interface MultilineInput extends Input<T> {
   rows?: number;
   cols?: number;
+}
+
+interface PasswordInput extends Input<T> {
+  isVisible: boolean;
+  setIsVisible: (isVisible: boolean) => void;
 }
 
 const Input = ({
@@ -203,4 +210,66 @@ const AutocompleteInput = ({
   );
 };
 
-export { Input, AutocompleteInput, MultilineInput };
+const PasswordInput = ({
+  value,
+  setValue,
+  placeholder = "",
+  style,
+  isVisible,
+  setIsVisible,
+}: PasswordInput) => {
+  return (
+    <div style={style}>
+      <input
+        style={{
+          color: "black",
+          borderRadius: 3,
+          paddingLeft: 5,
+          width: "100%",
+          margin: 3,
+        }}
+        type={isVisible ? "text" : "password"}
+        value={value}
+        onChange={setValue}
+        placeholder={placeholder}
+      />
+      <div
+        style={{
+          height: 0,
+          justifyContent: "flex-end",
+          width: "100%",
+          display: "flex",
+          transform: "translateY(-24px)",
+          paddingRight: 3,
+        }}
+        onClick={() => {
+          setIsVisible(!isVisible);
+        }}
+      >
+        {isVisible ? (
+          <FontAwesomeIcon
+            icon={faEyeSlash}
+            style={{
+              fontSize: 18,
+              cursor: "pointer",
+              color: "black",
+              ...style,
+            }}
+          />
+        ) : (
+          <FontAwesomeIcon
+            icon={faEye}
+            style={{
+              fontSize: 18,
+              cursor: "pointer",
+              color: "black",
+              ...style,
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export { Input, AutocompleteInput, MultilineInput, PasswordInput };
