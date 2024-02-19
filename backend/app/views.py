@@ -440,11 +440,8 @@ class SendPushNotificationView(APIView):
 class NewSeasonView(APIView):
     permission_classes = [IsAdminUser]
     def post(self, request):
-
         try:
             season_serializer = SeasonModelSerializer(data=request.data)
-            if season_serializer.is_valid():
-                season = season_serializer.save()
 
             season_item_files = {key: value for key, value in request.FILES.items() if 'season_items' in key}
             season_items_data = []
@@ -455,22 +452,31 @@ class NewSeasonView(APIView):
                 }
                 season_items_data.append(season_item_data)
             season_item_serializer = SeasonItemModelSerializer(data=season_items_data, many=True)
-            if season_item_serializer.is_valid():
-                season_item_serializer.save(season=season)
+            if season_serializer.is_valid():
+                if season_item_serializer.is_valid():
 
-            season_badge = SeasonBadge.objects.create(season_badge=season.image)
-            season_badge.save()
+                    season = season_serializer.save()
+                    season_item_serializer.save(season=season)
 
-            sponsors = Sponsor.objects.all()
-            sponsors.update(season_score=0, unlocked_items=0, unlocked_items_animation=0)
+                    season_badge = SeasonBadge.objects.create(season_badge=season.image)
+                    season_badge.save()
 
-            tokens = ExpoToken.objects.all()
-            send_push_notifications([token.token for token in tokens if token.token], 'New Fisch Season',
-                                    'The ' + request.data['title'] + ' season has started!')
+                    sponsors = Sponsor.objects.all()
+                    sponsors.update(season_score=0, unlocked_items=0, unlocked_items_animation=0)
 
-            return Response({'success': 'new season created'})
+                    tokens = ExpoToken.objects.all()
+                    send_push_notifications([token.token for token in tokens if token.token], 'New Fisch Season',
+                                            'The ' + request.data['title'] + ' season has started!')
+
+                    return Response({'success': 'new season created'})
+                else:
+                    print(season_item_serializer.errors)
+                    return Response({'error': 'An error occured while creating the season items. Please try again.'})
+            else:
+                print(season_serializer.errors)
+                return Response({'error': 'An error occured while creating the season instance. Please try again.'})
         except:
-            return Response({'error': 'something went wrong'})
+            return Response({'error': 'An error occured while creating a new season. Please try again.'})
 
 class NewEventView(APIView):
 
