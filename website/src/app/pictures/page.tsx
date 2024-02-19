@@ -373,7 +373,9 @@ const Pictures = () => {
               <div style={{ width: "30vw" }}>
                 <Input
                   value={description}
-                  setValue={setDescription}
+                  setValue={(e) => {
+                    setDescription(e.target.value);
+                  }}
                   placeholder="Description"
                 />
               </div>
