@@ -11,7 +11,7 @@ import {
 import { Text } from "../../../../components/text";
 import { useRouter } from "next/navigation";
 import { ProtectedAdminRoute } from "../../../../utils/protectedRoute";
-import { ErrorMessage } from "../../../../components/messages";
+import { ErrorMessage, Notification } from "../../../../components/messages";
 import { Button } from "../../../../components/buttons";
 import { useSelector } from "react-redux";
 import { AutocompleteInput, Input } from "../../../../components/input";
@@ -23,6 +23,7 @@ const AddDonation = () => {
   const [lastName, setLastName] = useState("");
   const [donation, setDonation] = useState<number>();
   const [error, setError] = useState("");
+  const [notification, setNotification] = useState("");
   const [addedDonations, setAddedDonations] = useState([]);
 
   const [userFirstNames, setUserFirstNames] = useState([]);
@@ -111,6 +112,9 @@ const AddDonation = () => {
     try {
       const res = await client.post("/admin/add_donation", body, config);
       if (res.data.success) {
+        setNotification(
+          `Successfully added a donation of ${donation}€ for ${firstName} ${lastName}`
+        );
         setAddedDonations([
           ...addedDonations,
           { first_name: firstName, last_name: lastName, donation: donation },
@@ -147,6 +151,14 @@ const AddDonation = () => {
           message={error}
           onClose={() => {
             setError("");
+          }}
+        />
+      )}
+      {notification && (
+        <Notification
+          message={notification}
+          onClose={() => {
+            setNotification("");
           }}
         />
       )}
