@@ -3,19 +3,18 @@
 import React, { useState } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
+import { faCircleXmark, faTrashCan } from "@fortawesome/free-regular-svg-icons";
 
 interface Button {
-  text: string;
   onPress: () => void;
-  type?: string;
   style?: React.CSSProperties;
 }
 
-interface CloseButton {
-  onPress: () => void;
-  style?: React.CSSProperties;
+interface CustomButton extends Button {
+  text: string;
+  type?: string;
 }
+
 const brightenColor = (color: String, factor = 1.2) => {
   // Convert hex to RGB
   const hexToRgb = (hex) =>
@@ -40,7 +39,7 @@ const brightenColor = (color: String, factor = 1.2) => {
   return rgbToHex(...brightenedColor);
 };
 
-const Button = ({ text, onPress, type = "primary", style }: Button) => {
+const Button = ({ text, onPress, type = "primary", style }: CustomButton) => {
   const [isActive, setIsActive] = useState(false);
 
   const handleMouseDown = () => {
@@ -95,7 +94,7 @@ const Button = ({ text, onPress, type = "primary", style }: Button) => {
   );
 };
 
-const CloseButton = ({ onPress, style }: CloseButton) => {
+const CloseButton = ({ onPress, style }: Button) => {
   return (
     <div onClick={onPress}>
       <FontAwesomeIcon
@@ -106,4 +105,15 @@ const CloseButton = ({ onPress, style }: CloseButton) => {
   );
 };
 
-export { Button, CloseButton };
+const RemoveButton = ({ onPress, style }: Button) => {
+  return (
+    <div onClick={onPress}>
+      <FontAwesomeIcon
+        icon={faTrashCan}
+        style={{ fontSize: 24, cursor: "pointer", ...style }}
+      />
+    </div>
+  );
+};
+
+export { Button, CloseButton, RemoveButton };
