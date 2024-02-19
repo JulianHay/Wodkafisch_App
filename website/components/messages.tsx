@@ -9,8 +9,8 @@ interface Message {
 }
 
 interface Notification extends Message {
-  backgroundColor: string;
-  textColor: string;
+  backgroundColor?: string;
+  textColor?: string;
 }
 
 const ErrorMessage = ({ message, onClose }: Message) => {
