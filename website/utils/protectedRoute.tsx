@@ -1,17 +1,18 @@
 "use client";
-import { useRouter } from "next/router";
+
 import { useEffect } from "react";
 import AuthService from "./auth";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
 interface ProtectedRoute {
   router: AppRouterInstance;
   children: React.ReactNode;
 }
-const ProtectedRoute = ({ router, children }: ProtectedRoute) => {
+const ProtectedRoute = ({ children }: ProtectedRoute) => {
   const { isSignedIn } = useSelector((state) => state.user);
-
+  const router = useRouter();
   useEffect(() => {
     if (!isSignedIn) {
       router.push("/");
@@ -25,9 +26,9 @@ const ProtectedRoute = ({ router, children }: ProtectedRoute) => {
   return children;
 };
 
-const ProtectedAdminRoute = ({ router, children }: ProtectedRoute) => {
+const ProtectedAdminRoute = ({ children }: ProtectedRoute) => {
   const { isAdmin } = useSelector((state) => state.user);
-
+  const router = useRouter();
   useEffect(() => {
     if (!isAdmin) {
       router.push("/");
