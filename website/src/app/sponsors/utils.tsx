@@ -28,8 +28,8 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
     itemData.map((data, index) => {
       return sponsorData[0].unlocked_items_animation < index + 1 ||
         sponsorData[0].unlocked_items < index + 1
-        ? "ChestClosed.png"
-        : "chest_open.png";
+        ? "/ChestClosed.png"
+        : "/chest_open.png";
     })
   );
 
@@ -82,7 +82,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
         >
           <Text fontSize={8} text={itemData[index].price} />
           <img
-            src="fisch_flakes.png"
+            src="/fisch_flakes.png"
             style={{ width: 8, height: 8, marginLeft: 3, marginTop: 1.5 }}
           />
         </div>
@@ -102,7 +102,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
             if (sponsorData[0].unlocked_items_animation >= index) {
               setImagePaths(
                 imagePaths.map((image, i) => {
-                  return index == i ? "chest_open.png" : image;
+                  return index == i ? "/chest_open.png" : image;
                 })
               );
             }

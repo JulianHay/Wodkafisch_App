@@ -241,7 +241,7 @@ const Sponsors = () => {
                   </div>
                   <div>
                     <img
-                      src="flussbarsch.png"
+                      src={seasonData[0].image}
                       style={{
                         position: "relative",
                         maxHeight: 60,
