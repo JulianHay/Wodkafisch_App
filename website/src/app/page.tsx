@@ -124,12 +124,16 @@ export default function Home() {
               <Text fontSize={24} text={"Sign In"} />
               <Input
                 value={username}
-                setValue={setUsername}
+                setValue={(e) => {
+                  setUsername(e.target.value);
+                }}
                 placeholder="Username"
               />
               <Input
                 value={password}
-                setValue={setPassword}
+                setValue={(e) => {
+                  setPassword(e.target.value);
+                }}
                 placeholder="Password"
                 type="password"
               />
@@ -141,13 +145,17 @@ export default function Home() {
               <Button
                 text="Don't have an account? Sign up!"
                 type="tertiary"
-                onPress={() => {}}
+                onPress={() => {
+                  router.push("/profile/signup");
+                }}
                 style={{}}
               />
               <Button
                 text="Forgot password?"
                 type="tertiary"
-                onPress={() => {}}
+                onPress={() => {
+                  router.push("/profile/password_reset");
+                }}
                 style={{}}
               />
             </ColumnContainer>
