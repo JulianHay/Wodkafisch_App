@@ -13,7 +13,7 @@ import {
 import { client } from "../../../components/client";
 import Countries from "../../../utils/countries";
 import ProtectedRoute from "../../../utils/protectedRoute";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ColumnContainer,
   RowContainer,
@@ -34,6 +34,10 @@ const MapPage = () => {
   const [selectedEvent, setSelectedEvent] = useState(-1);
   const [showRoute, setShowRoute] = useState(false);
   const router = useRouter();
+  const params = useSearchParams();
+  const lat = params.get("lat");
+  const lng = params.get("lng");
+  const zoom = params.get("zoom");
   const { isSignedIn } = useSelector((state) => state.user);
   useEffect(() => {
     if (isSignedIn) {
@@ -146,7 +150,7 @@ const MapPage = () => {
               position={position}
               onCloseClick={() => setSelectedMarker(-1)}
             >
-              <div>
+              <ColumnContainer style={{ alignItems: "center" }}>
                 <RowContainer
                   style={{ justifyContent: "flex-end", display: "flex" }}
                 >
@@ -163,28 +167,34 @@ const MapPage = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     display: "flex",
-                    paddingTop: 5,
-                    paddingBottom: 5,
+                    marginTop: 5,
+                    marginBottom: 5,
                     paddingLeft: -3,
                     paddingRight: -3,
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    router.push(`/pictures?index=${index}`);
                   }}
                 >
                   <img
-                    src={`http://127.0.0.1:8000/media/${pictureData[index].image}`}
+                    src={`https://www.wodkafis.ch/media/${pictureData[index].image}`}
                     alt={`${pictureData[index].description}`}
                     style={{
-                      width: 340,
-                      height: 255,
+                      maxWidth: 250,
+                      maxHeight: 185,
+                      width: "auto",
+                      height: "auto",
                       objectFit: "cover",
                       borderRadius: 10,
                     }}
                   />
                 </div>
-                <RowContainer style={{ justifyContent: "space-between" }}>
+                <ColumnContainer style={{ alignItems: "center" }}>
                   <Text text={pictureData[index].date} />
                   <Text text={`by ${pictureData[index].username}`} />
-                </RowContainer>
-              </div>
+                </ColumnContainer>
+              </ColumnContainer>
             </InfoWindow>
           )}
         </Fragment>
@@ -237,7 +247,7 @@ const MapPage = () => {
                   <Text text={eventData[index].title} />
                   <div style={{ margin: 10 }}>
                     <img
-                      src={`http://127.0.0.1:8000/media/${eventData[index].image}`}
+                      src={`https://www.wodkafis.ch/media/${eventData[index].image}`}
                       alt={`${pictureData[index].description}`}
                       style={{
                         maxWidth: "150px",
@@ -273,12 +283,13 @@ const MapPage = () => {
               mapContainerStyle={{
                 height: "80vh",
                 width: "80vw",
+                borderRadius: 10,
               }}
-              zoom={4}
+              zoom={parseFloat(zoom) || 4}
               onLoad={(map) => {
                 map.panTo({
-                  lat: 48.746417,
-                  lng: 9.105801,
+                  lat: parseFloat(lat) || 48.746417,
+                  lng: parseFloat(lng) || 9.105801,
                 });
               }}
               options={{
