@@ -5,5 +5,5 @@ Hi Admins,
 
 To approve the registration click the following link.
 
-http://{{ domain }}{% url 'approve_user' uidb64=uid token=token %}
+http://{{ domain }}/approve_user/{{ uid }}/{{ token }}
 {% endautoescape %}

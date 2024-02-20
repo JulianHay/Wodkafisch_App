@@ -29,7 +29,7 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.template.loader import render_to_string
 from copy import deepcopy
-
+from django.shortcuts import redirect
 
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
@@ -134,7 +134,7 @@ class SignupView(APIView):
                                    'message': ['Please click the following link to confirm your registration:'],
                                    'bye': 'Fisch',
                                    'user': user,
-                                   'domain': current_site.domain + '/app',
+                                   'domain': current_site.domain,
                                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                                    'token': account_activation_token.make_token(user),
                                    }
@@ -159,8 +159,11 @@ class SignupView(APIView):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def activate_account(request, uidb64, token):
+def activate_account(request):
+
     try:
+        uidb64 = request.data['uidb64']
+        token = request.data['token']
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
@@ -189,13 +192,17 @@ def activate_account(request, uidb64, token):
 
         return Response({ 'success': 'Account activated successfully' })
     else:
-        return Response({ 'error': 'Something went wrong when activating the account' })
+        return Response({ 'error': 'An error occured while activating your account.\n Please try again.' })
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def approve_user(request, uidb64, token):
+def approve_user(request):
+    print('post')
+    return Response({'success': 'Account approved successfully.'})
     try:
+        uidb64 = request.data["uidb64"]
+        token = request.data["token"]
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
@@ -228,9 +235,9 @@ def approve_user(request, uidb64, token):
             msg.attach_alternative(html_content, "text/html")
             msg.send()
 
-        return Response({'success': 'Account approved successfully'})
+        return Response({'success': 'Account approved successfully.'})
     else:
-        return Response({'error': 'Something went wrong when approving the account'})
+        return Response({'error': 'Something went wrong when approving the account.'})
 
 class LogoutView(APIView):
     def post(self, request):
