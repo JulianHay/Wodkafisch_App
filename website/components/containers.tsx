@@ -1,6 +1,10 @@
 "use client";
 import Link from "next/link";
 import React, { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPencil, faMapLocationDot } from "@fortawesome/free-solid-svg-icons";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
 interface Section {
   children: React.ReactNode;
@@ -25,6 +29,7 @@ interface ImageCard {
   image: Object;
   onImagePress: () => void;
   onLikePress: () => void;
+  onMenuPress: () => void;
   style?: React.CSSProperties;
 }
 
@@ -115,7 +120,14 @@ const TouchaleCard = ({ title, onPress, children }: TouchaleCard) => {
   );
 };
 
-const ImageCard = ({ image, onImagePress, onLikePress }: ImageCard) => {
+const ImageCard = ({
+  image,
+  onImagePress,
+  onLikePress,
+  onMenuPress,
+}: ImageCard) => {
+  const { username } = useSelector((state) => state.user);
+  const router = useRouter();
   return (
     <div style={{ margin: 15, width: 350, height: 374.6 }}>
       {image ? (
@@ -151,7 +163,7 @@ const ImageCard = ({ image, onImagePress, onLikePress }: ImageCard) => {
               }}
             >
               <img
-                src={`http://127.0.0.1:8000/media/${image.image}`} //{`www.wodkafis.ch/media/${image.image}`}
+                src={`https://www.wodkafis.ch/media/${image.image}`}
                 alt={`${image.description}`}
                 style={{ width: 340, height: 285, borderRadius: 10 }}
               />
@@ -166,11 +178,38 @@ const ImageCard = ({ image, onImagePress, onLikePress }: ImageCard) => {
                   maxWidth: "40%",
                   display: "flex",
                   flex: 1,
-                  alignItems: "flex-end",
-                  justifyContent: "center",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
                 }}
               >
-                <div style={{ display: "flex", flexDirection: "row" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                  }}
+                >
+                  {username === image.username && (
+                    <div onClick={onMenuPress} style={{ marginRight: 10 }}>
+                      <FontAwesomeIcon
+                        icon={faPencil}
+                        style={{ fontSize: 24, cursor: "pointer" }}
+                      />
+                    </div>
+                  )}
+                  <div
+                    onClick={() =>
+                      router.push(
+                        `/map?lat=${image.lat}&lng=${image.long}&zoom=13`
+                      )
+                    }
+                    style={{ marginRight: 10 }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faMapLocationDot}
+                      style={{ fontSize: 24, cursor: "pointer" }}
+                    />
+                  </div>
+
                   <h3 style={{ paddingTop: 3, paddingRight: 5 }}>
                     {image.likes}
                   </h3>
