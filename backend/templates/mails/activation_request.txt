@@ -6,7 +6,7 @@ Hi {{ user.username }},
 	{{ m }}
 {% endfor %}
 
-http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+http://{{ domain }}/profile/activate/{{ uid }}/{{ token }}
 
 {{ additional_text }}
 

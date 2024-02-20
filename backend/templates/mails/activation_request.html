@@ -136,7 +136,7 @@
                           <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:Nunito, Roboto, sans-serif;line-height:21px;color:#0F181A;font-size:14px"><br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:Nunito, Roboto, sans-serif;line-height:21px;color:#0F181A;font-size:14px">
                             {{ m }}
                             <br></p>
-                            http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+                            http://{{ domain }}/profile/activate/{{ uid }}/{{ token }}
                         </td>
                        </tr>
                      </table></td>
