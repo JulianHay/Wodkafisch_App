@@ -207,6 +207,7 @@ const ProgressBar = ({
         backgroundColor: "#292929",
         boxShadow: "0 -1px 1px #c0bfbc inset",
         borderRadius: 10,
+        overflow: "hidden",
       }}
     >
       <div
