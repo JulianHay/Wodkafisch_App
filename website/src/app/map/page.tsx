@@ -24,6 +24,7 @@ import mapStyle from "../../../utils/mapStyle";
 import { Button, CloseButton } from "../../../components/buttons";
 import "./style.css";
 import { Arrow, calculateRotation } from "./utils";
+import { useSelector } from "react-redux";
 
 const MapPage = () => {
   const [loading, setLoading] = useState(true);
@@ -33,14 +34,17 @@ const MapPage = () => {
   const [selectedEvent, setSelectedEvent] = useState(-1);
   const [showRoute, setShowRoute] = useState(false);
   const router = useRouter();
+  const { isSignedIn } = useSelector((state) => state.user);
   useEffect(() => {
-    client
-      .get("/map")
-      .then((res) => {
-        setPictureData(res.data.pictures);
-        setEventData(res.data.events.slice(1));
-      })
-      .finally(() => setLoading(false));
+    if (isSignedIn) {
+      client
+        .get("/map")
+        .then((res) => {
+          setPictureData(res.data.pictures);
+          setEventData(res.data.events.slice(1));
+        })
+        .finally(() => setLoading(false));
+    }
   }, []);
 
   const countries = eventData

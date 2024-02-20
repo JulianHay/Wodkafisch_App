@@ -26,6 +26,7 @@ import {
 } from "@react-google-maps/api";
 import mapStyle from "../../../../utils/mapStyle";
 import moment from "moment";
+import { useSelector } from "react-redux";
 
 const NewEvent = () => {
   const { router } = useRouter();
@@ -56,10 +57,13 @@ const NewEvent = () => {
     googleMapsApiKey: "AIzaSyC9Eyaa-KuEpt1j_94BmihOlLnEU8DgPnk",
   });
 
+  const { isAdmin } = useSelector((state) => state.user);
   useEffect(() => {
-    client.get("/home").then((res) => {
-      setEventID(res.data.upcoming_event[0].id);
-    });
+    if (isAdmin) {
+      client.get("/home").then((res) => {
+        setEventID(res.data.upcoming_event[0].id);
+      });
+    }
   }, []);
   const createNewEvent = async () => {
     const isValidEmail = (email) => {

@@ -26,7 +26,7 @@ const Sponsors = () => {
   const [loading, setLoading] = useState(true);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const { router } = useRouter();
-
+  const { isSignedIn } = useSelector((state) => state.user);
   const refresh = () => {
     setLoading(true);
     client
@@ -43,7 +43,9 @@ const Sponsors = () => {
   };
 
   useEffect(() => {
-    refresh();
+    if (isSignedIn) {
+      refresh();
+    }
   }, []);
 
   const promoDate = !loading

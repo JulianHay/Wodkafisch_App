@@ -85,7 +85,7 @@ export default function Home() {
         />
         <RowContainer>
           <ColumnContainer style={{ width: "50%", alignItems: "center" }}>
-            <img src="fisch.svg" />
+            <img src="/fisch.svg" />
 
             <Text
               fontSize={14}

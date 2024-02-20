@@ -29,17 +29,19 @@ const AddDonation = () => {
   const [userFirstNames, setUserFirstNames] = useState([]);
   const [userLastNames, setUserLastNames] = useState([]);
   const [users, setUsers] = useState([]);
-
+  const { isAdmin } = useSelector((state) => state.user);
   useEffect(() => {
-    client.get("/admin/user_list").then((res) => {
-      setUsers(
-        res.data.map((user) => {
-          return { firstName: user.first_name, lastName: user.last_name };
-        })
-      );
-      setUserFirstNames(res.data.map((user) => user.first_name));
-      setUserLastNames(res.data.map((user) => user.last_name));
-    });
+    if (isAdmin) {
+      client.get("/admin/user_list").then((res) => {
+        setUsers(
+          res.data.map((user) => {
+            return { firstName: user.first_name, lastName: user.last_name };
+          })
+        );
+        setUserFirstNames(res.data.map((user) => user.first_name));
+        setUserLastNames(res.data.map((user) => user.last_name));
+      });
+    }
   }, []);
 
   const handleFirstNameChange = (firstName: string) => {

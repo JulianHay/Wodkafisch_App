@@ -19,6 +19,7 @@ import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import mapStyle from "../../../utils/mapStyle";
 import { Input } from "../../../components/input";
 import { ErrorMessage } from "../../../components/messages";
+import { useSelector } from "react-redux";
 
 interface Item {
   data: Array<Object>;
@@ -47,7 +48,7 @@ const Pictures = () => {
   });
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const { router } = useRouter();
-
+  const { isSignedIn } = useSelector((state) => state.user);
   const refresh = () => {
     client
       .get("/pictures")
@@ -58,7 +59,9 @@ const Pictures = () => {
   };
 
   useEffect(() => {
-    refresh();
+    if (isSignedIn) {
+      refresh();
+    }
   }, []);
 
   const itemWidth = 380;
