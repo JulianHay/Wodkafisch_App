@@ -34,6 +34,7 @@ urlpatterns = [
     path(r'edit_picture', ImageEditView.as_view(), name='edit_picture'),
     path(r'subscribe_push_notification', PushNotificationTokenView.as_view(), name='subscribe_push_notification'),
     path(r'send_push_notification', SendPushNotificationView.as_view(), name='send_push_notification'),
+    path(r'contact', ContactView.as_view(), name='contact'),
 
     path(r'admin/new_season', NewSeasonView.as_view(), name='new_season'),
     path(r'admin/new_event', NewEventView.as_view(), name='new_event'),

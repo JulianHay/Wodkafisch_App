@@ -599,3 +599,23 @@ class AddAppRelease(APIView):
             return Response({'success': 'App release successful'})
         except:
             return Response({'error': 'something went wrong'})
+
+class ContactView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        try:
+            subject = "Wodkafisch Inquiry"
+            body = {
+                'name': request.data['name'],
+                'email': request.data['email'],
+                'message': request.data['message'],
+            }
+            message = "\n".join(body.values())
+            send_mail(from_mail='no-reply@wodkafis.ch',
+                      password='Hoeh!en1urch',
+                      subject=subject,
+                      body=message,
+                      to=['contact@wodkafis.ch'])
+            return Response({'success': 'Message sent'})
+        except:
+            return Response({'error': 'something went wrong'})
