@@ -198,8 +198,6 @@ def activate_account(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def approve_user(request):
-    print('post')
-    return Response({'success': 'Account approved successfully.'})
     try:
         uidb64 = request.data["uidb64"]
         token = request.data["token"]
@@ -218,7 +216,7 @@ def approve_user(request):
                    'hello': 'Hi',
                    'message': ['your account is now active.',
                                'Please use the following link to log in:',
-                               'https://wodkafis.ch/login'],
+                               'https://wodkafis.ch/'],
                    'bye': 'Fisch',
                    'user': user,
                    }
