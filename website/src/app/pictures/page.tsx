@@ -13,12 +13,12 @@ import { Button } from "../../../components/buttons";
 import Modal from "../../../components/modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ProtectedRoute from "../../../utils/protectedRoute";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import mapStyle from "../../../utils/mapStyle";
 import { Input } from "../../../components/input";
-import { ErrorMessage } from "../../../components/messages";
+import { ErrorMessage, Notification } from "../../../components/messages";
 import { useSelector } from "react-redux";
 
 interface Item {
@@ -46,9 +46,17 @@ const Pictures = () => {
     lat: 48.746417,
     lng: 9.105801,
   });
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const { router } = useRouter();
+  const [selectedPicture, setSelectedPicture] = useState(null);
+  const [isPictureEditModalVisible, setIsPictureEditModalVisible] =
+    useState(false);
+  const [notification, setNotification] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
   const { isSignedIn } = useSelector((state) => state.user);
+  const gridRef = useRef(null);
+  const params = useSearchParams();
+  const scrollToIndex = params.get("index");
+
   const refresh = () => {
     client
       .get("/pictures")
@@ -63,6 +71,19 @@ const Pictures = () => {
       refresh();
     }
   }, []);
+
+  useEffect(() => {
+    scrollToIndex && !loading && scrollTo(parseInt(scrollToIndex));
+  }, [scrollToIndex, loading, columnCount]);
+
+  const scrollTo = (index: number) => {
+    const positionToScroll = 265 + Math.floor(index / columnCount) * itemHeight;
+    console.log(index, rowCount, positionToScroll);
+    window.scrollTo({
+      top: positionToScroll,
+      behavior: "smooth",
+    });
+  };
 
   const itemWidth = 380;
   const itemHeight = 404;
@@ -92,6 +113,12 @@ const Pictures = () => {
           }}
           onLikePress={() => {
             pictureLikePressed(data[index].id, !data[index].user_like);
+          }}
+          onMenuPress={() => {
+            setDescription(data[index].description);
+            setImagePosition({ lat: data[index].lat, lng: data[index].long });
+            setSelectedPicture(data[index]);
+            setIsPictureEditModalVisible(true);
           }}
         />
       </div>
@@ -139,6 +166,7 @@ const Pictures = () => {
       const res = await client.post("/upload_picture", body, config);
       if (res.data.success) {
         setIsPictureUploadModalVisible(false);
+        setNotification("Successfully uploaded picture");
         setDescription(null);
         setImagePosition({
           lat: 48.746417,
@@ -146,9 +174,52 @@ const Pictures = () => {
         });
         setSelectedPictureForUpload(null);
         refresh();
+      } else {
+        setError(
+          "Something went wrong while uploading your picture. Please try again."
+        );
       }
     } catch (err) {
-      setShowErrorMessage(true);
+      setError(
+        "Something went wrong while uploading your picture. Please try again."
+      );
+    }
+  };
+
+  const editPicture = async () => {
+    const config = {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    };
+    const body = {
+      id: selectedPicture.id,
+      lat: imagePosition.lat,
+      long: imagePosition.lng,
+      description: description,
+    };
+    try {
+      const res = await client.post("/edit_picture", body, config);
+      if (res.data.success) {
+        setIsPictureEditModalVisible(false);
+        setNotification("Successfully updated picture");
+        setDescription(null);
+        setImagePosition({
+          lat: 48.746417,
+          lng: 9.105801,
+        });
+        setSelectedPicture(null);
+        refresh();
+      } else {
+        setError(
+          "Something went wrong while updating your picture. Please try again."
+        );
+      }
+    } catch (err) {
+      setError(
+        "Something went wrong while updating your picture. Please try again."
+      );
     }
   };
 
@@ -173,6 +244,7 @@ const Pictures = () => {
               onPress={() => onUploadPicturePressed()}
               style={{ width: 160, height: 50 }}
             />
+
             <input
               type="file"
               id="file"
@@ -219,6 +291,7 @@ const Pictures = () => {
                       width={itemWidth * columnCount}
                       style={{ overflowY: "hidden" }}
                       itemData={pictures}
+                      ref={gridRef}
                     >
                       {renderItem}
                     </Grid>
@@ -231,7 +304,7 @@ const Pictures = () => {
           <Modal
             isVisible={isPictureDetailModalVisible}
             onClose={() => setIsPictureDetailModalVisible(false)}
-            style={{ width: "90%", height: "90%" }}
+            style={{ width: "60%", height: "90%" }}
           >
             <div
               style={{
@@ -279,7 +352,7 @@ const Pictures = () => {
                   }}
                 >
                   <img
-                    src={`http://127.0.0.1:8000/media/${pictures[selectedPictureIndex].image}`}
+                    src={`https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`}
                     alt={`${pictures[selectedPictureIndex].description}`}
                     style={{
                       maxWidth: "100%",
@@ -290,7 +363,7 @@ const Pictures = () => {
                     }}
                     onClick={() => {
                       window.open(
-                        `http://127.0.0.1:8000/media/${pictures[selectedPictureIndex].image}`,
+                        `https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`,
                         "_blank"
                       );
                     }}
@@ -336,7 +409,7 @@ const Pictures = () => {
                   height: "30vh",
                   width: "30vw",
                   borderRadius: 10,
-                  objectFit: "cover",
+                  objectFit: "fill",
                 }}
               />
               {isLoaded ? (
@@ -390,12 +463,100 @@ const Pictures = () => {
               />
             </div>
           </Modal>
-          {showErrorMessage ? (
+
+          {selectedPicture && (
+            <Modal
+              isVisible={isPictureEditModalVisible && selectedPicture}
+              onClose={() => setIsPictureEditModalVisible(false)}
+              style={{ width: "40vw" }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <img
+                  src={`https://www.wodkafis.ch/media/${selectedPicture.image}`}
+                  style={{
+                    height: "30vh",
+                    width: "30vw",
+                    borderRadius: 10,
+                    objectFit: "fill",
+                  }}
+                />
+                {isLoaded ? (
+                  <GoogleMap
+                    mapContainerStyle={{
+                      height: "30vh",
+                      width: "30vw",
+                      margin: 10,
+                    }}
+                    zoom={4}
+                    onLoad={(map) => {
+                      map.panTo({
+                        lat: selectedPicture.lat,
+                        lng: selectedPicture.long,
+                      });
+                    }}
+                    options={{
+                      styles: mapStyle,
+                    }}
+                  >
+                    <Marker
+                      position={imagePosition}
+                      icon={{
+                        url: "maps_marker.svg",
+                      }}
+                      draggable={true}
+                      onDragEnd={(event) => {
+                        setImagePosition({
+                          lat: event.latLng.lat(),
+                          lng: event.latLng.lng(),
+                        });
+                      }}
+                      cursor="move"
+                    />
+                  </GoogleMap>
+                ) : null}
+                <div style={{ width: "30vw" }}>
+                  <Input
+                    value={description}
+                    setValue={(e) => {
+                      setDescription(e.target.value);
+                    }}
+                    placeholder="Description"
+                  />
+                </div>
+                <Button
+                  text="Save"
+                  onPress={editPicture}
+                  type="secondary"
+                  style={{ color: "white", borderColor: "white" }}
+                />
+              </div>
+            </Modal>
+          )}
+          {error && (
             <ErrorMessage
-              message="Upload failed, please try again"
-              onClose={() => {}}
+              message={error}
+              onClose={() => {
+                setError("");
+              }}
             />
-          ) : null}
+          )}
+          {notification && (
+            <Notification
+              message={notification}
+              onClose={() => {
+                setNotification("");
+              }}
+            />
+          )}
         </>
       )}
     </ProtectedRoute>
