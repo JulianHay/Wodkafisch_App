@@ -13,6 +13,7 @@ interface Section {
 }
 
 interface Container {
+  ContainerRef?: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
   style?: React.CSSProperties;
 }
@@ -33,9 +34,9 @@ interface ImageCard {
   style?: React.CSSProperties;
 }
 
-const Card = ({ title, children }: Card) => {
+const Card = ({ title, children, ContainerRef }: Card) => {
   return (
-    <div style={{ margin: 15, width: 350 }}>
+    <div ref={ContainerRef} style={{ margin: 15, width: 350 }}>
       <h2
         style={{
           color: "white",
@@ -62,9 +63,9 @@ const Card = ({ title, children }: Card) => {
   );
 };
 
-const FlexCard = ({ title, children, style }: Card) => {
+const FlexCard = ({ title, children, style, ContainerRef }: Card) => {
   return (
-    <div style={{ margin: 15, ...style }}>
+    <div ref={ContainerRef} style={{ margin: 15, ...style }}>
       <h2
         style={{
           color: "white",
@@ -89,9 +90,14 @@ const FlexCard = ({ title, children, style }: Card) => {
   );
 };
 
-const TouchaleCard = ({ title, onPress, children }: TouchaleCard) => {
+const TouchaleCard = ({
+  title,
+  onPress,
+  children,
+  ContainerRef,
+}: TouchaleCard) => {
   return (
-    <div style={{ margin: 15, width: 350 }}>
+    <div ref={ContainerRef} style={{ margin: 15, width: 350 }}>
       <h2
         style={{
           color: "white",
@@ -236,9 +242,10 @@ const ImageCard = ({
   );
 };
 
-const RowContainer = ({ children, style }: Container) => {
+const RowContainer = ({ children, style, ContainerRef }: Container) => {
   return (
     <div
+      ref={ContainerRef}
       style={{
         flexDirection: "row",
         display: "flex",
@@ -254,9 +261,10 @@ const RowContainer = ({ children, style }: Container) => {
   );
 };
 
-const ColumnContainer = ({ children, style }: Container) => {
+const ColumnContainer = ({ children, style, ContainerRef }: Container) => {
   return (
     <div
+      ref={ContainerRef}
       style={{
         flexDirection: "column",
         display: "flex",
