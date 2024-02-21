@@ -49,7 +49,8 @@ def add_donation(first_name,last_name,donation):
     sponsor.save()
 
     Donation.objects.create(value=fischflocken,
-                            date=datetime.now(pytz.timezone('Europe/Berlin')).strftime("%d/%m/%Y %H:%M"))
+                            date=datetime.now(pytz.timezone('Europe/Berlin')).strftime("%d/%m/%Y %H:%M"),
+                            username=User.objects.get(first_name=first_name, last_name=last_name).username)
 
     # send mails if item is unlocked
     season = Season.objects.latest('id')

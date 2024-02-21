@@ -4,6 +4,7 @@ from django.db import models
 class Donation(models.Model):
     value = models.IntegerField(default=0)
     date = models.CharField(max_length=50, null=True, blank=True)
+    username = models.CharField(max_length=100,null=True, blank=True)
 
 class Promo(models.Model):
     value = models.DecimalField(default=0,max_digits=5, decimal_places=2)

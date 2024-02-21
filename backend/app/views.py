@@ -8,7 +8,7 @@ from rest_framework import permissions, status
 from django.contrib import auth
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-from datetime import datetime
+from datetime import datetime, timezone
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import get_template
 from django.utils.encoding import force_bytes
@@ -30,60 +30,60 @@ from django.utils.http import urlsafe_base64_decode
 from django.template.loader import render_to_string
 from copy import deepcopy
 from django.shortcuts import redirect
-
+#
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-class EventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all()
-    serializer_class = EventModelSerializer
-
-class LatestEventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all().order_by('-id')[:1]
-    serializer_class = EventModelSerializer
-
-class PictureViewSet(viewsets.ModelViewSet):
-    queryset = FischPicture.objects.all().order_by('-id')
-    serializer_class = PictureModelSerializer
-
-class LatestPictureViewSet(viewsets.ModelViewSet):
-    queryset = FischPicture.objects.order_by('-id')[:1]
-    serializer_class = PictureModelSerializer
-
-class SponsorViewSet(viewsets.ModelViewSet):
-    queryset = Sponsor.objects.filter(sponsor_score__gt=0).order_by('-sponsor_score')
-    serializer_class = SponsorModelSerializer
-
-class SponsorUserViewSet(viewsets.ModelViewSet):
-    serializer_class = SponsorModelSerializer
-    queryset = Sponsor.objects.all()
-
-    def get_queryset(self):
-        profile = Profile.objects.get(user_id=self.request.user.id)
-        return Sponsor.objects.filter(id=profile.sponsor_id)
-
-class HighscoreViewSet(viewsets.ModelViewSet):
-    queryset = Highscore.objects.all()
-    serializer_class = HighscoreModelSerializer
-
-class SeasonViewSet(viewsets.ModelViewSet):
-    queryset = Season.objects.order_by('-id')[:1]
-    serializer_class = SeasonModelSerializer
-
-class SeasonItemViewSet(viewsets.ModelViewSet):
-    season = Season.objects.last()
-    queryset = SeasonItem.objects.filter(season_id=season.id)
-    serializer_class = SeasonItemModelSerializer
-
-class DonationViewSet(viewsets.ModelViewSet):
-    queryset = Donation.objects.all().order_by('-id')
-    serializer_class = DonationModelSerializer
-
-class PromoViewSet(viewsets.ModelViewSet):
-    queryset = Promo.objects.all().order_by('-id')
-    serializer_class = PromoModelSerializer
+#
+# class EventViewSet(viewsets.ModelViewSet):
+#     queryset = Event.objects.all()
+#     serializer_class = EventModelSerializer
+#
+# class LatestEventViewSet(viewsets.ModelViewSet):
+#     queryset = Event.objects.all().order_by('-id')[:1]
+#     serializer_class = EventModelSerializer
+#
+# class PictureViewSet(viewsets.ModelViewSet):
+#     queryset = FischPicture.objects.all().order_by('-id')
+#     serializer_class = PictureModelSerializer
+#
+# class LatestPictureViewSet(viewsets.ModelViewSet):
+#     queryset = FischPicture.objects.order_by('-id')[:1]
+#     serializer_class = PictureModelSerializer
+#
+# class SponsorViewSet(viewsets.ModelViewSet):
+#     queryset = Sponsor.objects.filter(sponsor_score__gt=0).order_by('-sponsor_score')
+#     serializer_class = SponsorModelSerializer
+#
+# class SponsorUserViewSet(viewsets.ModelViewSet):
+#     serializer_class = SponsorModelSerializer
+#     queryset = Sponsor.objects.all()
+#
+#     def get_queryset(self):
+#         profile = Profile.objects.get(user_id=self.request.user.id)
+#         return Sponsor.objects.filter(id=profile.sponsor_id)
+#
+# class HighscoreViewSet(viewsets.ModelViewSet):
+#     queryset = Highscore.objects.all()
+#     serializer_class = HighscoreModelSerializer
+#
+# class SeasonViewSet(viewsets.ModelViewSet):
+#     queryset = Season.objects.order_by('-id')[:1]
+#     serializer_class = SeasonModelSerializer
+#
+# class SeasonItemViewSet(viewsets.ModelViewSet):
+#     season = Season.objects.last()
+#     queryset = SeasonItem.objects.filter(season_id=season.id)
+#     serializer_class = SeasonItemModelSerializer
+#
+# class DonationViewSet(viewsets.ModelViewSet):
+#     queryset = Donation.objects.all().order_by('-id')
+#     serializer_class = DonationModelSerializer
+#
+# class PromoViewSet(viewsets.ModelViewSet):
+#     queryset = Promo.objects.all().order_by('-id')
+#     serializer_class = PromoModelSerializer
 
 class SignupView(APIView):
     permission_classes = (permissions.AllowAny, )
@@ -341,7 +341,19 @@ class SponsorView(APIView):
         season = Season.objects.all().order_by('-id')[:1]
         season_items = SeasonItem.objects.filter(season_id=season[0].id)
         promo = Promo.objects.all().order_by('-id')[:1]
-        donations = Donation.objects.all().order_by('-id')[:5]
+        donations = Donation.objects.all()
+        events = Event.objects.all()
+
+        user_donations = {}
+        for donation in donations:
+            if donation.username and datetime.strptime(donation.date,"%d/%m/%Y %H:%M").replace(tzinfo=timezone.utc)>=season[0].release_date:#datetime.strptime(donation.date,"%d/%m/%Y %H:%M") >= datetime.strptime(season[0].release_date,"%Y-%m-%d %H:%M:%S") :
+                if donation.username not in user_donations:
+                    user_donations[donation.username] = []
+                user_donations[donation.username].append({
+                    'date': donation.date,
+                    'value': donation.value
+            })
+
         for i, item in enumerate(season_items):
             if sponsor_user.season_score >= item.price and sponsor_user.unlocked_items_animation < i + 1:
                 sponsor_user.unlocked_items_animation += 1
@@ -353,7 +365,9 @@ class SponsorView(APIView):
             'season': season.values(),
             'season_items': season_items.values(),
             'promo': promo.values(),
-            'donations': donations.values()
+            'donations': donations.values('date','value'),
+            'user_donations': [donations for donations in user_donations.values()],
+            'events': events.order_by('-id').values('start','country')
         })
 
 class ImageUploadView(APIView):

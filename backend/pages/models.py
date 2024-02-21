@@ -88,6 +88,7 @@ class Season(models.Model):
     title = models.CharField(max_length=50, blank=True)
     image = models.ImageField(null=True, blank=True, verbose_name='Pictures', upload_to='battlepass/')
     max_donation = models.IntegerField(default=300)
+    release_date = models.DateTimeField(null=True, blank=True)
 
 class EventProposal(models.Model):
     location = models.CharField(max_length=50, blank=True)

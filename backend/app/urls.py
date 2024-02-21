@@ -5,17 +5,17 @@ from django.urls import path, include
 
 router = routers.DefaultRouter()
 
-router.register(r'events',EventViewSet)
-router.register(r'latest_event',LatestEventViewSet)
-#router.register(r'pictures',PictureViewSet)
-router.register(r'latest_picture',LatestPictureViewSet)
-router.register(r'sponsors',SponsorViewSet)
-router.register(r'sponsor_user_data',SponsorUserViewSet)
-router.register(r'highscore',HighscoreViewSet)
-router.register(r'season',SeasonViewSet)
-router.register(r'season_items',SeasonItemViewSet)
-router.register(r'donations',DonationViewSet)
-router.register(r'promo',PromoViewSet)
+# router.register(r'events',EventViewSet)
+# router.register(r'latest_event',LatestEventViewSet)
+# #router.register(r'pictures',PictureViewSet)
+# router.register(r'latest_picture',LatestPictureViewSet)
+# router.register(r'sponsors',SponsorViewSet)
+# router.register(r'sponsor_user_data',SponsorUserViewSet)
+# router.register(r'highscore',HighscoreViewSet)
+# router.register(r'season',SeasonViewSet)
+# router.register(r'season_items',SeasonItemViewSet)
+# router.register(r'donations',DonationViewSet)
+# router.register(r'promo',PromoViewSet)
 
 urlpatterns = [
     path('',include(router.urls)),
