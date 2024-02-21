@@ -16,13 +16,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
   const ProgressBarRef = useRef(null);
   const [progressBarValue, setProgressBarValue] = useState(0);
   const [progressBarWidth, setProgressBarWidth] = useState(0);
-  const animatedItemWidths = useRef([]);
   const itemSize = 30;
-  // const progressBarWidth = ProgressBarRef.current.offsetWidth;
-  // const itemAnimations = itemData.map((data, index) => {
-  //   // animatedItemWidths.current[index] = new Animated.Value(0);
-
-  // });
 
   const [imagePaths, setImagePaths] = useState(
     itemData.map((data, index) => {
@@ -35,7 +29,6 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
 
   const progressAudio = new Audio("bubbles.mp3");
   const unlockAudio = new Audio("hölkynkölkyn.mp3");
-
   useEffect(() => {
     const updateWidth = () => {
       if (ProgressBarRef.current) {
@@ -55,6 +48,11 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
 
   const animatedItems = itemData.map((item, index) => {
     const [progress, setProgress] = useState(0);
+    const percentage =
+      (sponsorData[0].season_score / seasonData[0].max_donation) * 100;
+    const itemStartPercentage =
+      (itemData[index].price / seasonData[0].max_donation) * 100 -
+      (itemSize / 2 / progressBarWidth) * 100;
     return (
       <div
         key={index}
@@ -67,7 +65,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
             (itemData[index].price / seasonData[0].max_donation) *
               progressBarWidth -
             itemSize * (index - 1),
-          transform: "translateX(-100%)",
+          transform: "translateX(-150%)",
         }}
       >
         <div
@@ -89,11 +87,15 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
 
         <ProgressBar
           style={{ width: itemSize, height: itemSize }}
-          percentage={100}
-          startAnimation={
-            progressBarValue >=
-            (itemData[index].price / seasonData[0].max_donation) * 100
+          percentage={
+            sponsorData[0].season_score - itemData[index].price < 0
+              ? ((((percentage - itemStartPercentage) / 100) *
+                  progressBarWidth) /
+                  itemSize) *
+                100
+              : 100
           }
+          startAnimation={progressBarValue >= itemStartPercentage}
           progress={progress}
           setProgress={setProgress}
           onAnimationStart={() => {
@@ -102,7 +104,10 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
             if (sponsorData[0].unlocked_items_animation >= index) {
               setImagePaths(
                 imagePaths.map((image, i) => {
-                  return index == i ? "/chest_open.png" : image;
+                  return index == i &&
+                    sponsorData[0].season_score >= itemData[index].price
+                    ? "/chest_open.png"
+                    : image;
                 })
               );
             }
@@ -173,7 +178,7 @@ const ProgressBar = ({
     const interval = 2;
     const increment = (1 / containerWidth) * 100;
     let timer: NodeJS.Timeout;
-    if (startAnimation && progress < percentage) {
+    if (startAnimation && progress <= percentage) {
       timer = setInterval(() => {
         setProgress((prevProgress) => {
           const newProgress = prevProgress + increment;
@@ -182,8 +187,10 @@ const ProgressBar = ({
               onAnimationEnd();
             }
             clearInterval(timer);
+            return percentage;
+          } else {
+            return newProgress;
           }
-          return newProgress;
         });
       }, interval);
     }
