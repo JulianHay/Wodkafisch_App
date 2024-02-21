@@ -27,6 +27,7 @@ const NewSeason = () => {
   const [season, setSeason] = useState({
     image: null,
     title: "",
+    release_date: "",
     maxDonationAmount: "",
     items: [{ price: "", image: null }],
   });
@@ -47,6 +48,14 @@ const NewSeason = () => {
     setSeason((prevSeason) => ({
       ...prevSeason,
       [name]: value,
+    }));
+  };
+
+  const handleReleaseDateChange = (e) => {
+    const { name, value } = e.target;
+    setSeason((prevSeason) => ({
+      ...prevSeason,
+      [name]: moment(value).format("YYYY-MM-DDTHH:mm:ss"),
     }));
   };
 
@@ -124,6 +133,9 @@ const NewSeason = () => {
     if (season.title === "") {
       setError("Please enter a title");
       isvalid = false;
+    } else if (season.release_date === "") {
+      setError("Please enter a release date");
+      isvalid = false;
     } else if (season.maxDonationAmount === "") {
       setError("Please enter a maximum donation amount for this season");
       isvalid = false;
@@ -151,7 +163,7 @@ const NewSeason = () => {
     );
     body.append("title", season.title);
     body.append("maxDonationAmount", season.maxDonationAmount);
-
+    body.append("release_date", season.release_date);
     season.items.forEach((item, index) => {
       body.append(`season_items[${index}][price]`, item.price);
       body.append(
@@ -169,6 +181,7 @@ const NewSeason = () => {
           image: null,
           title: "",
           maxDonationAmount: "",
+          release_date: "",
           items: [{ price: "", image: null }],
         });
         seasonImageRef.current.value = "";
@@ -214,6 +227,14 @@ const NewSeason = () => {
               setValue={handleSeasonChange}
               placeholder="Season Title"
               name="title"
+            />
+
+            <Input
+              value={season.release_date}
+              setValue={handleReleaseDateChange}
+              placeholder="Release Date"
+              type="datetime-local"
+              name="release_date"
             />
             <Input
               value={season.maxDonationAmount}
@@ -268,8 +289,18 @@ const NewSeason = () => {
                 <RemoveButton onPress={() => handleRemoveItem(index)} />
               </RowContainer>
             ))}
-            <Button text="Add Item" onPress={handleAddItem} />
-            <Button text="Submit" onPress={createNewSeason} />
+            <RowContainer style={{ justifyContent: "space-between" }}>
+              <Button
+                text="Add Item"
+                onPress={handleAddItem}
+                style={{ width: 150 }}
+              />
+              <Button
+                text="Submit"
+                onPress={createNewSeason}
+                style={{ width: 150 }}
+              />
+            </RowContainer>
           </ColumnContainer>
           <ColumnContainer
             style={{ width: "30%", marginTop: 80, alignItems: "center" }}
@@ -284,7 +315,7 @@ const NewSeason = () => {
                     display: "flex",
                     flexDirection: "column",
                     width: "100%",
-                    height: 150,
+                    height: 165,
                     alignItems: "center",
                   }}
                 >
@@ -364,7 +395,7 @@ const NewSeason = () => {
                           flexDirection: "row",
                           position: "relative",
                           top: -24.5,
-                          marginBottom: 10,
+                          marginBottom: 20,
                         }}
                       >
                         {season.items.map(
