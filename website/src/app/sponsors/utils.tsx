@@ -149,6 +149,15 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
         progress={progressBarValue}
         setProgress={setProgressBarValue}
       />
+      <Text
+        text={sponsorData[0].season_score}
+        style={{
+          fontSize: 12,
+          transform: "translateY(-19px) translateX(8px)",
+          marginBottom: -18,
+        }}
+      />
+
       <div
         style={{
           display: "flex",
