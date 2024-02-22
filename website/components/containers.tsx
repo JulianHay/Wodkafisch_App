@@ -16,6 +16,7 @@ interface Container {
   ContainerRef?: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
   style?: React.CSSProperties;
+  onClick?: () => void;
 }
 
 interface Card extends Container {
@@ -242,7 +243,12 @@ const ImageCard = ({
   );
 };
 
-const RowContainer = ({ children, style, ContainerRef }: Container) => {
+const RowContainer = ({
+  children,
+  style,
+  ContainerRef,
+  onClick,
+}: Container) => {
   return (
     <div
       ref={ContainerRef}
@@ -255,13 +261,19 @@ const RowContainer = ({ children, style, ContainerRef }: Container) => {
         alignItems: "flex-end",
         ...style,
       }}
+      onClick={onClick}
     >
       {children}
     </div>
   );
 };
 
-const ColumnContainer = ({ children, style, ContainerRef }: Container) => {
+const ColumnContainer = ({
+  children,
+  style,
+  ContainerRef,
+  onClick,
+}: Container) => {
   return (
     <div
       ref={ContainerRef}
@@ -270,6 +282,7 @@ const ColumnContainer = ({ children, style, ContainerRef }: Container) => {
         display: "flex",
         ...style,
       }}
+      onClick={onClick}
     >
       {children}
     </div>
