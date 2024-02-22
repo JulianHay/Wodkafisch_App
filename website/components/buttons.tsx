@@ -8,6 +8,7 @@ import { faCircleXmark, faTrashCan } from "@fortawesome/free-regular-svg-icons";
 interface Button {
   onPress: () => void;
   style?: React.CSSProperties;
+  innerRef?: React.RefObject<HTMLButtonElement>;
 }
 
 interface CustomButton extends Button {
@@ -39,7 +40,13 @@ const brightenColor = (color: String, factor = 1.2) => {
   return rgbToHex(...brightenedColor);
 };
 
-const Button = ({ text, onPress, type = "primary", style }: CustomButton) => {
+const Button = ({
+  text,
+  onPress,
+  type = "primary",
+  style,
+  innerRef,
+}: CustomButton) => {
   const [isActive, setIsActive] = useState(false);
 
   const handleMouseDown = () => {
@@ -58,6 +65,7 @@ const Button = ({ text, onPress, type = "primary", style }: CustomButton) => {
   };
   return (
     <button
+      ref={innerRef}
       style={
         type === "primary"
           ? {
