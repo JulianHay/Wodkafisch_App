@@ -12,7 +12,12 @@ import { Text } from "../../../components/text";
 import { Button } from "../../../components/buttons";
 import Modal from "../../../components/modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAngleLeft,
+  faAngleRight,
+  faSquare,
+  faSquareCheck,
+} from "@fortawesome/free-solid-svg-icons";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProtectedRoute from "../../../utils/protectedRoute";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
@@ -56,7 +61,12 @@ const Pictures = () => {
   const gridRef = useRef(null);
   const params = useSearchParams();
   const scrollToIndex = params.get("index");
-
+  const [location, setLocation] = useState({ lat: 0, lng: 0 });
+  const [isLocationAvailable, setIsLocationAvailable] = useState(false);
+  const [sortBy, setSortBy] = useState("date");
+  const [isSortOptionModalVisible, setIsSortOptionModalVisible] =
+    useState(false);
+  const sortButtonRef = useRef(null);
   const refresh = () => {
     client
       .get("/pictures")
@@ -73,16 +83,76 @@ const Pictures = () => {
   }, []);
 
   useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ lat: latitude, lng: longitude });
+          const pictureDataWithDistance = addDistance(pictures);
+          setPictures(pictureDataWithDistance);
+          setIsLocationAvailable(true);
+        },
+        (error) => {
+          console.error("Error getting geolocation:", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+    sortPictures(sortBy);
+  }, [loading]);
+
+  useEffect(() => {
     scrollToIndex && !loading && scrollTo(parseInt(scrollToIndex));
   }, [scrollToIndex, loading, columnCount]);
 
   const scrollTo = (index: number) => {
     const positionToScroll = 265 + Math.floor(index / columnCount) * itemHeight;
-    console.log(index, rowCount, positionToScroll);
     window.scrollTo({
       top: positionToScroll,
       behavior: "smooth",
     });
+  };
+
+  const sortPictures = (type: string) => {
+    const key =
+      type === "date" ? "id" : type === "likes" ? "likes" : "distance";
+    const sortedData = [...pictures].sort((a, b) => b[key] - a[key]);
+    setPictures(sortedData);
+    setSortBy(type);
+    setIsSortOptionModalVisible(false);
+  };
+
+  const haversine = (lat1, lon1, lat2, lon2) => {
+    const r = 6371; // km
+    const p = Math.PI / 180;
+
+    const a =
+      0.5 -
+      Math.cos((lat2 - lat1) * p) / 2 +
+      (Math.cos(lat1 * p) *
+        Math.cos(lat2 * p) *
+        (1 - Math.cos((lon2 - lon1) * p))) /
+        2;
+
+    const distance = 2 * r * Math.asin(Math.sqrt(a));
+    return distance;
+  };
+
+  const addDistance = (data) => {
+    const pictureDataWithDistance = data.map((picture) => {
+      const distance = haversine(
+        location.lat,
+        location.lng,
+        picture.lat,
+        picture.long
+      );
+      return {
+        ...picture,
+        distance: distance,
+      };
+    });
+    return pictureDataWithDistance;
   };
 
   const itemWidth = 380;
@@ -239,11 +309,24 @@ const Pictures = () => {
               style={{ margin: 30 }}
               text="Picture Gallery"
             />
-            <Button
-              text="Upload Picture"
-              onPress={() => onUploadPicturePressed()}
-              style={{ width: 160, height: 50 }}
-            />
+            <RowContainer
+              style={{ width: "60%", justifyContent: "space-between" }}
+            >
+              <div style={{ width: 160, height: 50 }} />
+              <Button
+                text="Upload Picture"
+                onPress={() => onUploadPicturePressed()}
+                style={{ width: 160, height: 50 }}
+              />
+
+              <Button
+                innerRef={sortButtonRef}
+                text="Sort By ⏷"
+                type="tertiary"
+                onPress={() => setIsSortOptionModalVisible(true)}
+                style={{ width: 160, height: 50, color: "white", fontSize: 16 }}
+              />
+            </RowContainer>
 
             <input
               type="file"
@@ -541,6 +624,92 @@ const Pictures = () => {
               </div>
             </Modal>
           )}
+
+          {isSortOptionModalVisible && (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                top: 0,
+                left: 0,
+              }}
+              onClick={() => {
+                setIsSortOptionModalVisible(false);
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: sortButtonRef.current?.offsetTop + 40 || 0,
+                  left: sortButtonRef.current?.offsetLeft || 0,
+                  backgroundColor: "#20213c",
+                  borderRadius: 10,
+                  zIndex: 1,
+                  padding: 10,
+                  justifyContent: "flex-start",
+                }}
+              >
+                <RowContainer
+                  style={{
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setSortBy("date");
+                    sortPictures("date");
+                    setIsSortOptionModalVisible(false);
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={sortBy === "date" ? faSquareCheck : faSquare}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text text="date" />
+                </RowContainer>
+                <RowContainer
+                  style={{
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setSortBy("likes");
+                    sortPictures("likes");
+                    setIsSortOptionModalVisible(false);
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={sortBy === "likes" ? faSquareCheck : faSquare}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text text="likes" />
+                </RowContainer>
+                {isLocationAvailable && (
+                  <RowContainer
+                    style={{
+                      justifyContent: "flex-start",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setSortBy("distance");
+                      sortPictures("distance");
+                      setIsSortOptionModalVisible(false);
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={sortBy === "distance" ? faSquareCheck : faSquare}
+                      style={{ marginRight: 5 }}
+                    />
+                    <Text text="distance" />
+                  </RowContainer>
+                )}
+              </div>
+            </div>
+          )}
+
           {error && (
             <ErrorMessage
               message={error}
