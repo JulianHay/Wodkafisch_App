@@ -679,3 +679,22 @@ class HighscoreView(APIView):
         return Response({
             "highscores":HighscoreModelSerializer(highscores,many=True).data
         })
+
+
+class AddFischFlockenBonusView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        try:
+            Promo.objects.create(value=request.data['value'],
+                                 date=datetime.strftime(datetime.strptime(request.data['date'], '%Y-%m-%dT%H:%M'), '%Y-%m-%d %H:%M:00+00:00'))
+            tokens = ExpoToken.objects.all()
+            send_push_notifications(
+                [token.token for token in tokens if token.token],
+                "New Fischflocken Bonus",
+                f"Until {datetime.strftime(datetime.strptime(request.data['date'], '%Y-%m-%dT%H:%M'), '%d.%m.')} your donations will have {int(request.data['value']*100)}% more Fischflocken value."
+            )
+
+            return Response({'success': 'Promo created successfully'})
+        except:
+            return Response({'error': 'something went wrong'})

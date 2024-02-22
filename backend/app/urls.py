@@ -40,6 +40,7 @@ urlpatterns = [
     path(r'admin/new_season', NewSeasonView.as_view(), name='new_season'),
     path(r'admin/new_event', NewEventView.as_view(), name='new_event'),
     path(r'admin/add_donation', AddDonationView.as_view(), name='add_donation'),
+    path(r'admin/add_bonus', AddFischFlockenBonusView.as_view(), name='add_bonus'),
     path(r'admin/add_app_release', AddAppRelease.as_view(), name='add_app_release'),
     path(r'admin/user_list', UserViewSet.as_view({'get': 'list'}), name='user_list'),
 

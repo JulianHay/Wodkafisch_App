@@ -59,6 +59,9 @@ const NavbarFisch = () => {
                 <NavDropdown.Item href="/admin/add_donation">
                   Add Donation
                 </NavDropdown.Item>
+                <NavDropdown.Item href="/admin/add_bonus">
+                  Add Bonus
+                </NavDropdown.Item>
                 <NavDropdown.Item href="/admin/new_season">
                   New Season
                 </NavDropdown.Item>
