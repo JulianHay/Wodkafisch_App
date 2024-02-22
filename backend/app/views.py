@@ -633,3 +633,49 @@ class ContactView(APIView):
             return Response({'success': 'Message sent'})
         except:
             return Response({'error': 'something went wrong'})
+
+
+class HighscoreView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        try:
+            score = request.data["score"]
+            name = request.data["name"]
+            highscore1 = Highscore.objects.get(id=1)
+            highscore2 = Highscore.objects.get(id=2)
+            highscore3 = Highscore.objects.get(id=3)
+            if score > highscore3.score and score <= highscore2.score:
+                highscore3.score = score
+                highscore3.name = name
+                highscore3.save()
+            elif score > highscore2.score and score <= highscore1.score:
+                highscore2_prev = deepcopy(highscore2)
+                highscore2.score = score
+                highscore2.name = name
+                highscore2.save()
+                highscore3.score = highscore2_prev.score
+                highscore3.name = highscore2_prev.name
+                highscore3.save()
+            elif score > highscore1.score:
+                highscore1_prev = deepcopy(highscore1)
+                highscore2_prev = deepcopy(highscore2)
+                highscore1.score = score
+                highscore1.name = name
+                highscore1.save()
+                highscore2.score = highscore1_prev.score
+                highscore2.name = highscore1_prev.name
+                highscore2.save()
+                highscore3.score = highscore2_prev.score
+                highscore3.name = highscore2_prev.name
+                highscore3.save()
+            return Response({'success': 'Highscore set successfully'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+    def get(self,request):
+        highscores = Highscore.objects.all()
+
+        return Response({
+            "highscores":HighscoreModelSerializer(highscores,many=True).data
+        })
