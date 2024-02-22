@@ -365,7 +365,7 @@ class SponsorView(APIView):
             'season': season.values(),
             'season_items': season_items.values(),
             'promo': promo.values(),
-            'donations': donations.values('date','value'),
+            'donations': donations.order_by('-id').values('date','value'),
             'user_donations': [donations for donations in user_donations.values()],
             'events': events.order_by('-id').values('start','country')
         })
