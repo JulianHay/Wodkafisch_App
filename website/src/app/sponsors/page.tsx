@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { client } from "../../../components/client";
 import {
   Card,
+  ColumnContainer,
   FlexCard,
   RowContainer,
   Section,
@@ -15,16 +16,12 @@ import moment from "moment";
 import { Button } from "../../../components/buttons";
 import Battlepass, { ProgressBar } from "./utils";
 import { useSelector } from "react-redux";
+import { CumulativeDonationChart, SponsorDonationChart } from "./plots";
 
 const Sponsors = () => {
-  const [seasonData, setSeasonData] = useState([]);
-  const [seasonItemData, setSeasonItemData] = useState([]);
-  const [sponsorData, setSponsorData] = useState([]);
-  const [sponsorUserData, setUserSponsorData] = useState([]);
-  const [donationData, setDonationData] = useState([]);
-  const [promoData, setPromoData] = useState([]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const sponsorListRef = useRef(null);
   const { router } = useRouter();
   const { isSignedIn } = useSelector((state) => state.user);
   const refresh = () => {
@@ -32,12 +29,7 @@ const Sponsors = () => {
     client
       .get("/sponsor")
       .then((res) => {
-        setSponsorData(res.data.sponsor);
-        setSeasonData(res.data.season);
-        setSeasonItemData(res.data.season_items);
-        setUserSponsorData(res.data.sponsor_user);
-        setDonationData(res.data.donations);
-        setPromoData(res.data.promo);
+        setData(res.data);
       })
       .finally(() => setLoading(false));
   };
@@ -49,7 +41,7 @@ const Sponsors = () => {
   }, []);
 
   const promoDate = !loading
-    ? moment(promoData[0].date.split(" ")[0])
+    ? moment(data.promo[0].date.split(" ")[0])
     : moment();
   const isPromo = promoDate >= moment();
 
@@ -59,26 +51,54 @@ const Sponsors = () => {
       style={{
         display: "flex",
         flexDirection: "row",
-        marginBottom: 3,
-        left: -15,
+        margin: 10,
+        marginRight: 15,
+        // left: -15,
       }}
     >
-      <div style={{ width: 125, alignItems: "flex-end", marginRight: 10 }}>
-        <Text style={{ left: 0 }} text={`${item.username}:`} />
+      <div style={{ width: 140, alignItems: "flex-end" }}>
+        <Text
+          style={{ left: 0, textAlign: "right" }}
+          text={`${item.username}:`}
+        />
       </div>
+
+      <div
+        style={{
+          width: 40 * data.season[0].id,
+          display: "flex",
+          justifyContent: "flex-start",
+          alignItems: "center",
+        }}
+      >
+        {item.season_badges.map((badge) => (
+          <div style={styles.badgeImageContainer}>
+            <img
+              src={`https://wodkafis.ch/media/${badge}`}
+              style={styles.badgeImage}
+            />
+          </div>
+        ))}
+      </div>
+      {/*           
+//     width: 15,
+//     height: 15,
+//     marginLeft: 2, */}
       <div style={styles.badgeImageContainer}>
         {item.diamond_sponsor !== 0 ? (
-          <div style={{ flexDirection: "row" }}>
+          <div style={{ display: "flex", flexDirection: "row" }}>
             <img src="diamond_badge.svg" style={styles.badgeImage} />
             <div
               style={{
-                justifyContent: "flex-end",
+                display: "flex",
+                alignItems: "flex-end",
                 marginBottom: -2,
                 marginLeft: -2,
               }}
             >
               <Text
-                fontSize={8}
+                fontSize={10}
+                fontWeight="bold"
                 text={`${item.diamond_sponsor > 1 ? item.diamond_sponsor : ""}`}
               />
             </div>
@@ -87,17 +107,19 @@ const Sponsors = () => {
       </div>
       <div style={styles.badgeImageContainer}>
         {item.black_sponsor !== 0 ? (
-          <div style={{ flexDirection: "row" }}>
+          <div style={{ display: "flex", flexDirection: "row" }}>
             <img src="black_badge.svg" style={styles.badgeImage} />
             <div
               style={{
-                justifyContent: "flex-end",
+                display: "flex",
+                alignItems: "flex-end",
                 marginBottom: -2,
                 marginLeft: -2,
               }}
             >
               <Text
-                fontSize={8}
+                fontSize={10}
+                fontWeight="bold"
                 text={`${item.black_sponsor > 1 ? item.black_sponsor : ""}`}
               />
             </div>
@@ -106,17 +128,19 @@ const Sponsors = () => {
       </div>
       <div style={styles.badgeImageContainer}>
         {item.gold_sponsor !== 0 ? (
-          <div style={{ flexDirection: "row" }}>
+          <div style={{ display: "flex", flexDirection: "row" }}>
             <img src="gold_badge.svg" style={styles.badgeImage} />
             <div
               style={{
-                justifyContent: "flex-end",
+                display: "flex",
+                alignItems: "flex-end",
                 marginBottom: -2,
                 marginLeft: -2,
               }}
             >
               <Text
-                fontSize={8}
+                fontSize={10}
+                fontWeight="bold"
                 text={`${item.gold_sponsor > 1 ? item.gold_sponsor : ""}`}
               />
             </div>
@@ -125,17 +149,19 @@ const Sponsors = () => {
       </div>
       <div style={styles.badgeImageContainer}>
         {item.silver_sponsor !== 0 ? (
-          <div style={{ flexDirection: "row" }}>
+          <div style={{ display: "flex", flexDirection: "row" }}>
             <img src="silver_badge.svg" style={styles.badgeImage} />
             <div
               style={{
-                justifyContent: "flex-end",
+                display: "flex",
+                alignItems: "flex-end",
                 marginBottom: -2,
                 marginLeft: -2,
               }}
             >
               <Text
-                fontSize={8}
+                fontSize={10}
+                fontWeight="bold"
                 text={`${item.silver_sponsor > 1 ? item.silver_sponsor : ""}`}
               />
             </div>
@@ -144,17 +170,19 @@ const Sponsors = () => {
       </div>
       <div style={styles.badgeImageContainer}>
         {item.bronze_sponsor !== 0 ? (
-          <div style={{ flexDirection: "row" }}>
+          <div style={{ display: "flex", flexDirection: "row" }}>
             <img src="bronze_badge.svg" style={styles.badgeImage} />
             <div
               style={{
-                justifyContent: "flex-end",
+                display: "flex",
+                alignItems: "flex-end",
                 marginBottom: -2,
                 marginLeft: -2,
               }}
             >
               <Text
-                fontSize={8}
+                fontSize={10}
+                fontWeight="bold"
                 text={`${item.bronze_sponsor > 1 ? item.bronze_sponsor : ""}`}
               />
             </div>
@@ -172,14 +200,24 @@ const Sponsors = () => {
         flexDirection: "row",
         justifyContent: "flex-start",
         alignItems: "center",
-        margin: 5,
+        margin: 2,
       }}
     >
-      <Text text={`${item.date.split(" ")[0]}: ${item.value} `} />
-      <img
-        src="fisch_flakes.png"
-        style={{ width: 15, height: 15, top: -1, marginLeft: 5 }}
+      <Text
+        text={`${moment(item.date, "DD/MM/YYYY HH:mm").format(
+          "DD.MM.YYYY HH:mm"
+        )}: `}
+        style={{ width: 165, marginRight: 5 }}
       />
+      <RowContainer
+        style={{ width: 80, justifyContent: "flex-end", alignItems: "center" }}
+      >
+        <Text text={`${item.value}`} />
+        <img
+          src="/fisch_flakes.png"
+          style={{ width: 15, height: 15, top: -1, marginLeft: 5 }}
+        />
+      </RowContainer>
     </div>
   );
 
@@ -188,7 +226,7 @@ const Sponsors = () => {
       {loading ? null : (
         <>
           <Section>
-            <RowContainer style={{ width: "80%" }}>
+            <RowContainer style={{ width: "71.5%" }}>
               <FlexCard
                 title="Battle Pass"
                 style={{ width: "100%", minWidth: 400 }}
@@ -227,7 +265,7 @@ const Sponsors = () => {
                           color: "#fff",
                           fontWeight: "bold",
                         }}
-                        text={`Season ${seasonData[0].id}`}
+                        text={`Season ${data.season[0].id}`}
                       />
                     </div>
                     <div style={{ alignItems: "flex-end" }}>
@@ -237,13 +275,13 @@ const Sponsors = () => {
                           color: "#fff",
                           fontWeight: "bold",
                         }}
-                        text={seasonData[0].title}
+                        text={data.season[0].title}
                       />
                     </div>
                   </div>
                   <div>
                     <img
-                      src={seasonData[0].image}
+                      src={`https://wodkafis.ch/media/${data.season[0].image}`}
                       style={{
                         position: "relative",
                         maxHeight: 60,
@@ -257,20 +295,13 @@ const Sponsors = () => {
                     />
                   </div>
                   {/* Progress Bar */}
-                  <div style={{ width: "95%", paddingTop: 10 }}>
+                  <div style={{ width: "95%", paddingTop: 20 }}>
                     <Battlepass
-                      itemData={seasonItemData}
-                      seasonData={seasonData}
-                      sponsorData={sponsorUserData}
+                      itemData={data.season_items}
+                      seasonData={data.season}
+                      sponsorData={data.sponsor_user}
                     />
                   </div>
-                  {/* <ProgressBar
-                    duration={50}
-                    containerWidth="95%"
-                    maxPercentage={100}
-                    startAnimation={true}
-                    onAnimationEnd={() => {}}
-                  /> */}
                   {/* Promo */}
                   {isPromo ? (
                     <div
@@ -283,7 +314,7 @@ const Sponsors = () => {
                     >
                       <Text
                         fontSize={12}
-                        text={`Get ${promoData[0].value * 100}% more`}
+                        text={`Get ${data.promo[0].value * 100}% more`}
                       />
                       <img
                         src="fisch_flakes.png"
@@ -346,24 +377,88 @@ const Sponsors = () => {
           <Section>
             <RowContainer
               style={{
-                justifyContent: "space-between",
+                justifyContent: "center",
                 alignItems: "flex-start",
-                width: "80%",
+                width: "71.5%",
               }}
             >
               <FlexCard
+                ContainerRef={sponsorListRef}
                 title="Sponsor List"
-                style={{ width: "65%", minWidth: 300 }}
+                style={{ width: 450 }}
               >
-                {sponsorData.map((item) => renderSponsors(item))}
+                {data.sponsor.map((item) => renderSponsors(item))}
               </FlexCard>
 
-              <FlexCard
-                title="Recent Donations"
-                style={{ width: "25%", minWidth: 195 }}
+              <ColumnContainer
+                style={{
+                  height: sponsorListRef.current?.offsetHeight || "100%",
+                  width: 375,
+                  margin: 15,
+                  justifyContent: "space-between",
+                }}
               >
-                {donationData.slice(0, 5).map((item) => renderDonations(item))}
-              </FlexCard>
+                <FlexCard
+                  title="Recent Donations"
+                  style={{ width: "100%", minWidth: 195, margin: 0 }}
+                >
+                  <ColumnContainer
+                    style={{
+                      width: "100%",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      padding: 10,
+                    }}
+                  >
+                    <ColumnContainer style={{ justifyContent: "flex-start" }}>
+                      {data.donations
+                        .slice(0, 7)
+                        .map((item) => renderDonations(item))}
+                    </ColumnContainer>
+                  </ColumnContainer>
+                </FlexCard>
+
+                <FlexCard
+                  title="Fisch Balance"
+                  style={{
+                    width: "100%",
+                    minWidth: 195,
+                    margin: 0,
+                  }}
+                >
+                  <RowContainer
+                    style={{
+                      width: "100%",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <CumulativeDonationChart
+                      donations={data.donations.slice().reverse()}
+                      events={data.events}
+                    />
+                  </RowContainer>
+                </FlexCard>
+
+                <FlexCard
+                  title="Season Scores"
+                  style={{ width: "100%", minWidth: 195, margin: 0 }}
+                >
+                  <RowContainer
+                    style={{
+                      width: "100%",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <SponsorDonationChart
+                      donations={data.user_donations}
+                      items={data.season_items}
+                      season={data.season[0]}
+                    />
+                  </RowContainer>
+                </FlexCard>
+              </ColumnContainer>
             </RowContainer>
           </Section>
         </>
@@ -378,10 +473,12 @@ const styles = {
     alignItems: "center",
     justifyContent: "flex-start",
     flexDirection: "row",
+    display: "flex",
+    marginLeft: 15,
   },
   badgeImage: {
-    width: 15,
-    height: 15,
+    maxWidth: 25,
+    maxHeight: 25,
     marginLeft: 2,
   },
 };
