@@ -70,12 +70,17 @@ const Footer = () => {
         }}
       >
         <div>
-          <p>Copyright © Wodkafisch 2023 </p>
+          <p>Copyright © Wodkafisch 2024 </p>
         </div>
 
         <div>
-          <a href="/privacy-policy">Privacy Policy</a> |{" "}
-          <a href="/terms-and-conditions">Terms and Conditions</a>
+          <a className="footer-link" href="/privacy-policy">
+            Privacy Policy
+          </a>{" "}
+          |{" "}
+          <a className="footer-link" href="/terms-and-conditions">
+            Terms and Conditions
+          </a>
         </div>
       </div>
     </footer>

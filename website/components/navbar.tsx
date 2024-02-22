@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "@/lib/reducers/userSlice";
 // import "../public/scss/styles.scss";
+import "./styles.css";
 
 const NavbarFisch = () => {
   const router = useRouter();
