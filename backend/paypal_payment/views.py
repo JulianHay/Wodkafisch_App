@@ -139,8 +139,11 @@ def donation(request):
     #if '    ---------- Urspr=C3=BCngliche Nachricht ----------\n   </div>=20\n   <div>\n    Von: "service@paypal.de"' in msg:
 
     try:
-        last_name = re.search('[\w\d\=]*(?=\shat Ihnen)',msg)[0]
-        first_name = re.search('[\w\d\=]*(?=\s%s)'%last_name,msg)[0]
+        name = re.search('[\w\d,\-\s\=]*(?=\shat Ihnen)', msg)[0]
+        if "," in name:
+            [first_name, last_name] = re.split('\s', re.split(',', name)[0])
+        else:
+            [first_name, last_name] = re.split('\s', name)
         if '=' in last_name:
             last_name = quopri.decodestring(last_name).decode('utf-8')
         if '=' in first_name:
