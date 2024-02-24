@@ -106,50 +106,52 @@ class SignupView(APIView):
                     if len(password) < 6:
                         return Response({ 'error': 'Password must be at least 6 characters' })
                     else:
-                        user = User.objects.create_user(username=username,
-                                                        password=password,
-                                                        email=email,
-                                                        first_name=first_name,
-                                                        last_name=last_name)
-                        user.refresh_from_db()
-                        user.profile.first_name = first_name
-                        user.profile.last_name = last_name
-                        user.profile.email = email
-                        user.is_active = False
-                        user.save()
+                        
+                        if first_name != last_name:
+                            user = User.objects.create_user(username=username,
+                                                            password=password,
+                                                            email=email,
+                                                            first_name=first_name,
+                                                            last_name=last_name)
+                            user.refresh_from_db()
+                            user.profile.first_name = first_name
+                            user.profile.last_name = last_name
+                            user.profile.email = email
+                            user.is_active = False
+                            user.save()
 
-                        token = ExpoToken.objects.create()
-                        profile = Profile.objects.get(first_name=first_name,
-                                                      last_name=last_name)
-                        profile.expo_token = token
-                        profile.save()
+                            token = ExpoToken.objects.create()
+                            profile = Profile.objects.get(first_name=first_name,
+                                                          last_name=last_name)
+                            profile.expo_token = token
+                            profile.save()
 
-                        current_site = get_current_site(request)
-                        subject = 'Please Activate Your Account'
+                            current_site = get_current_site(request)
+                            subject = 'Please Activate Your Account'
 
-                        txt_template = get_template('mails/activation_request.txt')
-                        html_template = get_template('mails/activation_request.html')
+                            txt_template = get_template('mails/activation_request.txt')
+                            html_template = get_template('mails/activation_request.html')
 
-                        context = {'title': 'Please Activate Your Account!',
-                                   'message': ['Please click the following link to confirm your registration:'],
-                                   'bye': 'Fisch',
-                                   'user': user,
-                                   'domain': current_site.domain,
-                                   'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                                   'token': account_activation_token.make_token(user),
-                                   }
+                            context = {'title': 'Please Activate Your Account!',
+                                       'message': ['Please click the following link to confirm your registration:'],
+                                       'bye': 'Fisch',
+                                       'user': user,
+                                       'domain': current_site.domain,
+                                       'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                                       'token': account_activation_token.make_token(user),
+                                       }
 
-                        text_content = txt_template.render(context)
-                        html_content = html_template.render(context)
-                        with get_mail_connection(from_mail='no-reply@wodkafis.ch',
-                                                 password='Hoeh!en1urch') as connection:
-                            msg = EmailMultiAlternatives(subject,
-                                                         text_content,
-                                                         'no-reply@wodkafis.ch',
-                                                         [user.profile.email],
-                                                         connection=connection)
-                            msg.attach_alternative(html_content, "text/html")
-                            msg.send()
+                            text_content = txt_template.render(context)
+                            html_content = html_template.render(context)
+                            with get_mail_connection(from_mail='no-reply@wodkafis.ch',
+                                                     password='Hoeh!en1urch') as connection:
+                                msg = EmailMultiAlternatives(subject,
+                                                             text_content,
+                                                             'no-reply@wodkafis.ch',
+                                                             [user.profile.email],
+                                                             connection=connection)
+                                msg.attach_alternative(html_content, "text/html")
+                                msg.send()
 
                         return Response({ 'success': 'User created successfully' })
             else:

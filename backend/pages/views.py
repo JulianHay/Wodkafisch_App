@@ -123,42 +123,43 @@ def signup(request):
     if request.method  == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            user.refresh_from_db()
-            user.profile.first_name = form.cleaned_data.get('first_name')
-            user.profile.last_name = form.cleaned_data.get('last_name')
-            user.profile.email = form.cleaned_data.get('email')
-            user.profile.image = form.cleaned_data.get('image')
-            # user can't login until link confirmed
-            user.is_active = False
-            user.save()
+            if request.POST['first_name'] != request.POST['last_name']:
+                user = form.save()
+                user.refresh_from_db()
+                user.profile.first_name = form.cleaned_data.get('first_name')
+                user.profile.last_name = form.cleaned_data.get('last_name')
+                user.profile.email = form.cleaned_data.get('email')
+                user.profile.image = form.cleaned_data.get('image')
+                # user can't login until link confirmed
+                user.is_active = False
+                user.save()
 
-            current_site = get_current_site(request)
-            subject = 'Please Activate Your Account'
+                current_site = get_current_site(request)
+                subject = 'Please Activate Your Account'
 
-            txt_template = get_template('mails/activation_request.txt')
-            html_template = get_template('mails/activation_request.html')
+                txt_template = get_template('mails/activation_request.txt')
+                html_template = get_template('mails/activation_request.html')
 
-            context = {'title': 'Please Activate Your Account!',
-                       'message': ['Please click the following link to confirm your registration:'],
-                       'bye': 'Fisch',
-                       'user': user,
-                       'domain': current_site.domain,
-                       'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                       'token': account_activation_token.make_token(user),
-                       }
+                context = {'title': 'Please Activate Your Account!',
+                           'message': ['Please click the following link to confirm your registration:'],
+                           'bye': 'Fisch',
+                           'user': user,
+                           'domain': current_site.domain,
+                           'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                           'token': account_activation_token.make_token(user),
+                           }
 
-            text_content = txt_template.render(context)
-            html_content = html_template.render(context)
-            with get_mail_connection(from_mail='no-reply@wodkafis.ch',
-                                     password='Hoeh!en1urch') as connection:
-                msg = EmailMultiAlternatives(subject,
-                                             text_content,
-                                             'no-reply@wodkafis.ch',
-                                             [user.profile.email],
-                                             connection=connection)
-                msg.attach_alternative(html_content, "text/html")
-                msg.send()
+                text_content = txt_template.render(context)
+                html_content = html_template.render(context)
+                with get_mail_connection(from_mail='no-reply@wodkafis.ch',
+                                         password='Hoeh!en1urch') as connection:
+                    msg = EmailMultiAlternatives(subject,
+                                                 text_content,
+                                                 'no-reply@wodkafis.ch',
+                                                 [user.profile.email],
+                                                 connection=connection)
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
 
             return redirect('activation_sent')
     else:
