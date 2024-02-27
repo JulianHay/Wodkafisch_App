@@ -29,7 +29,7 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.template.loader import render_to_string
 from copy import deepcopy
-from django.shortcuts import redirect
+import quopri
 #
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
@@ -106,7 +106,7 @@ class SignupView(APIView):
                     if len(password) < 6:
                         return Response({ 'error': 'Password must be at least 6 characters' })
                     else:
-                        
+
                         if first_name != last_name:
                             user = User.objects.create_user(username=username,
                                                             password=password,
@@ -700,3 +700,86 @@ class AddFischFlockenBonusView(APIView):
             return Response({'success': 'Promo created successfully'})
         except:
             return Response({'error': 'something went wrong'})
+
+class AddDonaitionMailView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        try:
+            msg = request.data['mail']
+            token = request.data['token']
+            if token == "82u973m17a829sb238g289k051x827sj2q19r7w0":
+                try:
+                    name = re.search('[\w\d,\-\s\=]*(?=\shat Ihnen)', msg)[0]
+                    if "," in name:
+                        [first_name, last_name] = re.split('\s', re.split(',', name)[0])
+                    else:
+                        [first_name, last_name] = re.split('\s', name)
+                    if '=' in last_name:
+                        last_name = quopri.decodestring(last_name).decode('utf-8')
+                    if '=' in first_name:
+                        first_name = quopri.decodestring(first_name).decode('utf-8')
+                    donation = float(re.sub(',', '.', re.search('(?<=hat Ihnen\s)[\d,]*', msg)[0]))
+                except:
+                    subject = "Donation has been made - Please add sponsor"
+                    message = "A donation has been made. An automatic identification of donation and sponsor.\n Please add the User and / or assign the donation."
+                    send_mail(from_mail='no-reply@wodkafis.ch',
+                              password='Hoeh!en1urch',
+                              subject=subject,
+                              body=message,
+                              to=['spenden@wodkafis.ch'])
+                    # send_mail(subject, message, 'contact@wodkafis.ch', ['spenden@wodkafis.ch'])
+                    return Response({'error': 'something went wrong'})
+                # date = pytz.timezone('Europe/Berlin').localize(datetime.strptime(re.search('(?<=Datum: )[\s\d:\.]*(?= CEST)',msg)[0],'%d.%m.%Y %H:%M'))
+                # if datetime.now(pytz.timezone('Europe/Berlin'))-date<timedelta(minutes=1):
+                try:
+                    fischflocken = add_donation(first_name, last_name, donation)
+                    profile = Profile.objects.get(first_name=first_name, last_name=last_name)
+                    notification_token = ExpoToken.objects.get(id=profile.expo_token_id)
+                    if notification_token:
+                        send_push_notifications([notification_token.token],
+                                                'Donation successful!',
+                                                f'Check you season score: {fischflocken} Fischflocken donated.')
+                    else:
+                        user = User.objects.get(first_name=first_name, last_name=last_name)
+                        txt_template = get_template('mails/general_template.txt')
+                        html_template = get_template('mails/general_template.html')
+
+                        context = {'title': "Your donation was successful!",
+                                   'hello': 'Hi',
+                                   'message': ['You just made a Fisch donation!',
+                                               'Please check your season score here:',
+                                               'https://wodkafis.ch/sponsors'],
+                                   'bye': 'Fisch',
+                                   'user': user,
+                                   }
+
+                        subject, from_email, to = 'Donation Approval', 'spenden@wodkafis.ch', [user.email]
+                        text_content = txt_template.render(context)
+                        html_content = html_template.render(context)
+                        with get_mail_connection(from_mail='spenden@wodkafis.ch',
+                                                 password='Hoeh!en1urch') as connection:
+                            msg = EmailMultiAlternatives(subject,
+                                                         text_content,
+                                                         from_email,
+                                                         to,
+                                                         connection=connection)
+                            msg.attach_alternative(html_content, "text/html")
+                            msg.send()
+
+                    return Response({'success': 'Donation added successfully'})
+                except:
+                    subject = "Donation has been made - Please add sponsor"
+                    message = "%s %s made a donation of %i. An automated assignment of the donation to the sponsor score failed.\n Please add the User and / or assign the donation." % (
+                    first_name, last_name, donation)
+                    send_mail(from_mail='no-reply@wodkafis.ch',
+                              password='Hoeh!en1urch',
+                              subject=subject,
+                              body=message,
+                              to=['spenden@wodkafis.ch'])
+
+                    return Response({'error': 'Automated assignment of donation failed.'})
+            else:
+                return Response({'error': 'something went wrong'})
+        except:
+            return Response({'error': 'something went wrong'})
+
