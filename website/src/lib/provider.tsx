@@ -4,7 +4,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import store, { persistor } from "./store";
 import { injectStore } from "../../components/client";
 
-export function StateProvider({ children }) {
+export function StateProvider({ children }: { children: React.ReactNode }) {
   injectStore(store);
   return (
     <Provider store={store}>

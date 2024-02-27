@@ -11,7 +11,11 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "./webStorage";
-import userReducer from "./reducers/userSlice";
+import userReducer, { UserState } from "./reducers/userSlice";
+
+export interface RootState {
+  user: UserState;
+}
 
 const persistConfig = {
   key: "root",

@@ -17,13 +17,88 @@ import { Button } from "../../../components/buttons";
 import Battlepass, { ProgressBar } from "./utils";
 import { useSelector } from "react-redux";
 import { CumulativeDonationChart, SponsorDonationChart } from "./plots";
+import Image from "next/image";
+import { RootState } from "../../lib/store";
+
+interface Sponsor {
+  id: number;
+  first_name: string;
+  last_name: string;
+  username: string;
+  sponsor_score: number;
+  season_score: number;
+  bronze_sponsor: number;
+  silver_sponsor: number;
+  gold_sponsor: number;
+  black_sponsor: number;
+  diamond_sponsor: number;
+  unlocked_items: number;
+  unlocked_items_animation: number;
+  season_badges: string[];
+}
+interface Season {
+  id: number;
+  title: string;
+  max_donation: number;
+  image: string;
+  release_date: string;
+}
+
+interface Item {
+  price: number;
+  image: string;
+}
+
+interface Donation {
+  date: string;
+  value: number;
+}
+
+interface Event {
+  start: string;
+  country: string;
+}
+
+interface Promo {
+  date: string;
+  value: number;
+}
+interface Data {
+  sponsor: Sponsor[];
+  sponsor_user: Sponsor[];
+  donations: Donation[];
+  season_items: Item[];
+  season: Season[]; // Adjusted here to indicate that it's an array of Season objects
+  promo: Promo[];
+  user_donations: Donation[][];
+  events: Event[];
+}
 
 const Sponsors = () => {
-  const [data, setData] = useState([]);
+  // const [data, setData] = useState({
+  //   sponsor: [[] as Sponsor[]],
+  //   sponsor_user: [[] as Sponsor[]],
+  //   donations: [[] as Donation[]],
+  //   season_items: [[] as Item[]],
+  //   season: [[] as Season[]],
+  //   promo: [{} as Promo],
+  //   user_donations: [[] as Donation[][]],
+  //   events: [[] as Event[]],
+  // });
+  const [data, setData] = useState<Data>({
+    sponsor: [],
+    sponsor_user: [],
+    donations: [],
+    season_items: [],
+    season: [],
+    promo: [],
+    user_donations: [[]],
+    events: [],
+  });
   const [loading, setLoading] = useState(true);
-  const sponsorListRef = useRef(null);
-  const { router } = useRouter();
-  const { isSignedIn } = useSelector((state) => state.user);
+  const sponsorListRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { isSignedIn } = useSelector((state: RootState) => state.user);
   const refresh = () => {
     setLoading(true);
     client
@@ -38,14 +113,14 @@ const Sponsors = () => {
     if (isSignedIn) {
       refresh();
     }
-  }, []);
+  }, [isSignedIn]);
 
   const promoDate = !loading
     ? moment(data.promo[0].date.split(" ")[0])
     : moment();
   const isPromo = promoDate >= moment();
 
-  const renderSponsors = (item) => (
+  const renderSponsors = (item: Sponsor) => (
     <div
       key={item.username}
       style={{
@@ -71,28 +146,33 @@ const Sponsors = () => {
           alignItems: "center",
         }}
       >
-        {item.season_badges.map((badge) => (
-          <div style={styles.badgeImageContainer}>
-            <img
-              src={`https://wodkafis.ch/media/${badge}`}
+        {item.season_badges.map((badge, index) => (
+          <div key={`badge_${index}`} style={styles.badgeImageContainer}>
+            <Image
+              src={`https://www.wodkafis.ch/media/${badge}`}
+              alt="season badge"
+              width={25}
+              height={25}
               style={styles.badgeImage}
             />
           </div>
         ))}
       </div>
-      {/*           
-//     width: 15,
-//     height: 15,
-//     marginLeft: 2, */}
       <div style={styles.badgeImageContainer}>
         {item.diamond_sponsor !== 0 ? (
           <div style={{ display: "flex", flexDirection: "row" }}>
-            <img src="diamond_badge.svg" style={styles.badgeImage} />
+            <Image
+              src="/diamond_badge.svg"
+              alt="diamond badge"
+              width={25}
+              height={25}
+              style={styles.badgeImage}
+            />
             <div
               style={{
                 display: "flex",
                 alignItems: "flex-end",
-                marginBottom: -2,
+                marginBottom: -3,
                 marginLeft: -2,
               }}
             >
@@ -108,12 +188,18 @@ const Sponsors = () => {
       <div style={styles.badgeImageContainer}>
         {item.black_sponsor !== 0 ? (
           <div style={{ display: "flex", flexDirection: "row" }}>
-            <img src="black_badge.svg" style={styles.badgeImage} />
+            <Image
+              src="/black_badge.svg"
+              alt="black badge"
+              width={25}
+              height={25}
+              style={styles.badgeImage}
+            />
             <div
               style={{
                 display: "flex",
                 alignItems: "flex-end",
-                marginBottom: -2,
+                marginBottom: -3,
                 marginLeft: -2,
               }}
             >
@@ -129,12 +215,18 @@ const Sponsors = () => {
       <div style={styles.badgeImageContainer}>
         {item.gold_sponsor !== 0 ? (
           <div style={{ display: "flex", flexDirection: "row" }}>
-            <img src="gold_badge.svg" style={styles.badgeImage} />
+            <Image
+              src="/gold_badge.svg"
+              alt="gold badge"
+              width={25}
+              height={25}
+              style={styles.badgeImage}
+            />
             <div
               style={{
                 display: "flex",
                 alignItems: "flex-end",
-                marginBottom: -2,
+                marginBottom: -3,
                 marginLeft: -2,
               }}
             >
@@ -150,12 +242,18 @@ const Sponsors = () => {
       <div style={styles.badgeImageContainer}>
         {item.silver_sponsor !== 0 ? (
           <div style={{ display: "flex", flexDirection: "row" }}>
-            <img src="silver_badge.svg" style={styles.badgeImage} />
+            <Image
+              src="/silver_badge.svg"
+              alt="silver badge"
+              width={25}
+              height={25}
+              style={styles.badgeImage}
+            />
             <div
               style={{
                 display: "flex",
                 alignItems: "flex-end",
-                marginBottom: -2,
+                marginBottom: -3,
                 marginLeft: -2,
               }}
             >
@@ -171,12 +269,18 @@ const Sponsors = () => {
       <div style={styles.badgeImageContainer}>
         {item.bronze_sponsor !== 0 ? (
           <div style={{ display: "flex", flexDirection: "row" }}>
-            <img src="bronze_badge.svg" style={styles.badgeImage} />
+            <Image
+              src="/bronze_badge.svg"
+              alt="bronze badge"
+              width={25}
+              height={25}
+              style={styles.badgeImage}
+            />
             <div
               style={{
                 display: "flex",
                 alignItems: "flex-end",
-                marginBottom: -2,
+                marginBottom: -3,
                 marginLeft: -2,
               }}
             >
@@ -192,9 +296,9 @@ const Sponsors = () => {
     </div>
   );
 
-  const renderDonations = (item) => (
+  const renderDonations = (item: Donation, index: number) => (
     <div
-      key={item.date + item.value + item.username}
+      key={`donation${index}-${item.date}-${item.value}`}
       style={{
         display: "flex",
         flexDirection: "row",
@@ -213,8 +317,11 @@ const Sponsors = () => {
         style={{ width: 80, justifyContent: "flex-end", alignItems: "center" }}
       >
         <Text text={`${item.value}`} />
-        <img
+        <Image
           src="/fisch_flakes.png"
+          alt="fisch flakes"
+          width={15}
+          height={15}
           style={{ width: 15, height: 15, top: -1, marginLeft: 5 }}
         />
       </RowContainer>
@@ -280,8 +387,11 @@ const Sponsors = () => {
                     </div>
                   </div>
                   <div>
-                    <img
-                      src={`https://wodkafis.ch/media/${data.season[0].image}`}
+                    <Image
+                      src={`https://www.wodkafis.ch/media/${data.season[0].image}`}
+                      alt="season image"
+                      width={180}
+                      height={180}
                       style={{
                         position: "relative",
                         maxHeight: 60,
@@ -316,8 +426,11 @@ const Sponsors = () => {
                         fontSize={12}
                         text={`Get ${data.promo[0].value * 100}% more`}
                       />
-                      <img
-                        src="fisch_flakes.png"
+                      <Image
+                        src="/fisch_flakes.png"
+                        alt="fisch flakes"
+                        width={12}
+                        height={12}
                         style={{
                           width: 12,
                           height: 12,
@@ -356,8 +469,11 @@ const Sponsors = () => {
                       }}
                       style={{ top: -48, left: -13, marginBottom: -30 }}
                     >
-                      <img
-                        src="fisch_flakes.png"
+                      <Image
+                        src="/fisch_flakes.png"
+                        alt="fisch flakes"
+                        width={35}
+                        height={35}
                         style={{
                           width: 35,
                           height: 35,
@@ -395,6 +511,7 @@ const Sponsors = () => {
                   height: sponsorListRef.current?.offsetHeight || "100%",
                   width: 375,
                   margin: 15,
+                  display: "flex",
                   justifyContent: "space-between",
                 }}
               >
@@ -413,7 +530,7 @@ const Sponsors = () => {
                     <ColumnContainer style={{ justifyContent: "flex-start" }}>
                       {data.donations
                         .slice(0, 7)
-                        .map((item) => renderDonations(item))}
+                        .map((item, index) => renderDonations(item, index))}
                     </ColumnContainer>
                   </ColumnContainer>
                 </FlexCard>
@@ -467,7 +584,12 @@ const Sponsors = () => {
   );
 };
 
-const styles = {
+interface Styles {
+  badgeImageContainer: React.CSSProperties;
+  badgeImage: React.CSSProperties;
+}
+
+const styles: Styles = {
   badgeImageContainer: {
     width: 25,
     alignItems: "center",

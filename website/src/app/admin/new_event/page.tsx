@@ -27,46 +27,46 @@ import {
 import mapStyle from "../../../../utils/mapStyle";
 import moment from "moment";
 import { useSelector } from "react-redux";
+import Image from "next/image";
+import { RootState } from "@/lib/store";
 
 const NewEvent = () => {
-  const { router } = useRouter();
+  const router = useRouter();
   const [eventID, setEventID] = useState(0);
   const [eventTitle, setEventTitle] = useState("");
   const [eventStart, setEventStart] = useState("");
   const [eventEnd, setEventEnd] = useState("");
-  const [eventWorldmapImage, setEventWorldmapImage] = useState(undefined);
+  const [eventWorldmapImage, setEventWorldmapImage] = useState<FileList>();
   const [mailGreeting, setMailGreeting] = useState("");
   const [mailMessage, setMailMessage] = useState("");
   const [mailEventLocation, setMailEventLocation] = useState("");
   const [mailAdditionalText, setMailAdditionalText] = useState("");
   const [mailBye, setMailBye] = useState("");
-  const [eventImage, setEventImage] = useState(undefined);
+  const [eventImage, setEventImage] = useState<FileList>();
   const [eventCountry, setEventCountry] = useState("");
   const [mailingList, setMailingList] = useState("");
-  const [invalidEmails, setInvalidEmails] = useState([]);
+  const [invalidEmails, setInvalidEmails] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
   const [markerPosition, setMarkerPosition] = useState({
     lat: 48.746417,
     lng: 9.105801,
   });
-  const worldmapImageRef = useRef(null);
-  const eventImageRef = useRef(null);
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: "AIzaSyC9Eyaa-KuEpt1j_94BmihOlLnEU8DgPnk",
   });
 
-  const { isAdmin } = useSelector((state) => state.user);
+  const { isAdmin } = useSelector((state: RootState) => state.user);
   useEffect(() => {
     if (isAdmin) {
-      client.get("/home").then((res) => {
-        setEventID(res.data.upcoming_event[0].id);
+      client.get("/map").then((res) => {
+        setEventID(res.data.events.length + 1);
       });
     }
-  }, []);
+  }, [isAdmin, setEventID]);
   const createNewEvent = async () => {
-    const isValidEmail = (email) => {
+    const isValidEmail = (email: string) => {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailPattern.test(email);
     };
@@ -129,14 +129,10 @@ const NewEvent = () => {
     body.append("country", eventCountry);
     body.append("lat", parseFloat(markerPosition.lat.toFixed(9)).toString());
     body.append("long", parseFloat(markerPosition.lng.toFixed(9)).toString());
-    body.append(
-      "image",
-      eventImageRef.current.files[0],
-      `${eventTitle}_fisch.png`
-    );
+    body.append("image", eventImage[0], `${eventTitle}_fisch.png`);
     body.append(
       "worldmap_image",
-      worldmapImageRef.current.files[0],
+      eventWorldmapImage[0],
       `${eventTitle}_worldmap.png`
     );
     body.append("hello", mailGreeting);
@@ -167,8 +163,6 @@ const NewEvent = () => {
         setEventWorldmapImage(undefined);
         setMailingList("");
         setInvalidEmails([]);
-        eventImageRef.current.value = "";
-        worldmapImageRef.current.value = "";
       } else {
         setError(
           "An error occured while creating a new event. Please try again."
@@ -205,31 +199,34 @@ const NewEvent = () => {
             <Text text="New Event" fontSize={30} fontWeight="bold" />
             <Input
               value={eventTitle}
-              setValue={(e) => {
-                setEventTitle(e.target.value);
+              onChange={(e) => {
+                setEventTitle(e.target.value as string);
               }}
               placeholder="Event Title"
             />
 
             <Input
               value={mailGreeting}
-              setValue={(e) => {
-                setMailGreeting(e.target.value);
+              onChange={(e) => {
+                setMailGreeting(e.target.value as string);
               }}
               placeholder="Greeting"
             />
             <MultilineInput
               value={mailMessage}
-              setValue={setMailMessage}
+              onChange={(e) => {
+                setMailMessage(e as string);
+              }}
               placeholder="Message"
             />
             <Input
               value={eventStart}
-              setValue={(e) => {
-                const date = e.target.value;
-                setEventStart(moment(date).format("YYYY-MM-DD HH:mm:ss"));
+              onChange={(e) => {
+                setEventStart(
+                  moment(e.target.value as string).format("YYYY-MM-DD HH:mm:ss")
+                );
                 setEventEnd(
-                  moment(date)
+                  moment(e.target.value as string)
                     .set({ hour: 23, minute: 59, second: 59 })
                     .format("YYYY-MM-DD HH:mm:ss")
                 );
@@ -239,34 +236,38 @@ const NewEvent = () => {
             />
             <Input
               value={mailEventLocation}
-              setValue={(e) => {
-                setMailEventLocation(e.target.value);
+              onChange={(e) => {
+                setMailEventLocation(e.target.value as string);
               }}
               placeholder="Event Location"
             />
             <MultilineInput
               value={mailAdditionalText}
-              setValue={setMailAdditionalText}
+              onChange={(e) => {
+                setMailAdditionalText(e as string);
+              }}
               placeholder="Additional Text"
               rows={1}
             />
             <Input
               value={mailBye}
-              setValue={(e) => {
-                setMailBye(e.target.value);
+              onChange={(e) => {
+                setMailBye(e.target.value as string);
               }}
               placeholder="Goodbye Text"
             />
             <Input
               value={eventCountry}
-              setValue={(e) => {
-                setEventCountry(e.target.value);
+              onChange={(e) => {
+                setEventCountry(e.target.value as string);
               }}
               placeholder="Country"
             />
             <MultilineInput
               value={mailingList}
-              setValue={setMailingList}
+              onChange={(e) => {
+                setMailingList(e as string);
+              }}
               placeholder="Mailing List, separated by commas, semicolons, or spaces"
               rows={1}
             />
@@ -289,25 +290,13 @@ const NewEvent = () => {
             >
               <label htmlFor="worldmapImage">World Map Image:</label>
               <Input
-                value={eventWorldmapImage}
-                setValue={(e) => {
-                  const file = worldmapImageRef.current.files[0];
-
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setEventWorldmapImage(reader.result);
-                    };
-                    reader.onerror = (error) => {
-                      console.error("File reading error:", error);
-                    };
-                    reader.readAsDataURL(file);
-                  }
+                value={eventWorldmapImage as FileList}
+                onChange={(e) => {
+                  setEventWorldmapImage(e.target.files as FileList);
                 }}
                 placeholder="Worldmap Image"
                 type="file"
                 accept="image/*"
-                inputFieldRef={worldmapImageRef}
               />
             </RowContainer>
             <RowContainer
@@ -319,25 +308,13 @@ const NewEvent = () => {
             >
               <label htmlFor="eventImage">Event Fisch Image:</label>
               <Input
-                value={eventImage}
-                setValue={(e) => {
-                  const file = eventImageRef.current.files[0];
-
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setEventImage(reader.result);
-                    };
-                    reader.onerror = (error) => {
-                      console.error("File reading error:", error);
-                    };
-                    reader.readAsDataURL(file);
-                  }
+                value={eventImage as FileList}
+                onChange={(e) => {
+                  setEventImage(e.target.files as FileList);
                 }}
                 placeholder="Event Image"
                 type="file"
                 accept="image/*"
-                inputFieldRef={eventImageRef}
               />
             </RowContainer>
             {isLoaded ? (
@@ -368,8 +345,8 @@ const NewEvent = () => {
                     draggable={true}
                     onDragEnd={(event) => {
                       setMarkerPosition({
-                        lat: event.latLng.lat(),
-                        lng: event.latLng.lng(),
+                        lat: (event && event.latLng && event.latLng.lat()) || 0,
+                        lng: (event && event.latLng && event.latLng.lng()) || 0,
                       });
                     }}
                     cursor="move"
@@ -401,8 +378,11 @@ const NewEvent = () => {
                   }}
                 >
                   {eventWorldmapImage ? (
-                    <img
-                      src={eventWorldmapImage}
+                    <Image
+                      src={URL.createObjectURL(eventWorldmapImage[0])}
+                      alt="World Map Image"
+                      height={80}
+                      width={200}
                       style={{ width: "90%", height: 80, borderRadius: 10 }}
                     />
                   ) : null}
@@ -436,6 +416,7 @@ const NewEvent = () => {
                     ) : null}
                     {mailMessage.split("\n").map((line, index) => (
                       <Text
+                        key={index}
                         text={line}
                         fontSize={8}
                         style={{ color: "black" }}
@@ -463,6 +444,7 @@ const NewEvent = () => {
                     ) : null}
                     {mailAdditionalText.split("\n").map((line, index) => (
                       <Text
+                        key={index}
                         text={line}
                         fontSize={8}
                         style={{ color: "black" }}
@@ -488,7 +470,13 @@ const NewEvent = () => {
                     ) : null}
                   </ColumnContainer>
                   {eventImage ? (
-                    <img src={eventImage} style={{ width: "40%" }} />
+                    <Image
+                      src={URL.createObjectURL(eventImage[0])}
+                      alt="Event Image"
+                      width={100}
+                      height={100}
+                      style={{ width: "40%" }}
+                    />
                   ) : null}
                 </ColumnContainer>
               </>

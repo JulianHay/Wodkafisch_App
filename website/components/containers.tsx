@@ -5,16 +5,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencil, faMapLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { RootState } from "@/lib/store";
 
 interface Section {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   style?: React.CSSProperties;
   type?: "light" | "dark";
 }
 
 interface Container {
   ContainerRef?: React.RefObject<HTMLDivElement>;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   style?: React.CSSProperties;
   onClick?: () => void;
 }
@@ -27,8 +29,19 @@ interface TouchaleCard extends Card {
   onPress: () => void;
 }
 
+interface CardImage {
+  description: string;
+  image: string;
+  date: string;
+  username: string;
+  lat: number;
+  long: number;
+  likes: number;
+  user_like: boolean;
+}
+
 interface ImageCard {
-  image: Object;
+  image: CardImage;
   onImagePress: () => void;
   onLikePress: () => void;
   onMenuPress: () => void;
@@ -133,7 +146,7 @@ const ImageCard = ({
   onLikePress,
   onMenuPress,
 }: ImageCard) => {
-  const { username } = useSelector((state) => state.user);
+  const { username } = useSelector((state: RootState) => state.user);
   const router = useRouter();
   return (
     <div style={{ margin: 15, width: 350, height: 374.6 }}>
@@ -169,10 +182,20 @@ const ImageCard = ({
                 cursor: "pointer",
               }}
             >
-              <img
+              <Image
                 src={`https://www.wodkafis.ch/media/${image.image}`}
                 alt={`${image.description}`}
-                style={{ width: 340, height: 285, borderRadius: 10 }}
+                width={340}
+                height={285}
+                // layout="fixed"
+                quality={100}
+                // priority
+                style={{
+                  borderRadius: 10,
+                  width: 340,
+                  height: 285,
+                  objectFit: "cover",
+                }}
               />
             </div>
             <div style={{ display: "flex", flexDirection: "row", padding: 10 }}>
@@ -226,8 +249,11 @@ const ImageCard = ({
                       cursor: "pointer",
                     }}
                   >
-                    <img
-                      src={image.user_like ? "like_on.png" : "like_off.png"}
+                    <Image
+                      src={image.user_like ? "/like_on.png" : "/like_off.png"}
+                      alt={image.user_like ? "/like_on" : "/like_off"}
+                      width={20}
+                      height={25}
                       style={{ width: 20, height: 25 }}
                     />
                   </div>

@@ -21,125 +21,131 @@ import moment from "moment";
 import { create } from "domain";
 import Battlepass from "@/app/sponsors/utils";
 import { ProgressBar } from "react-bootstrap";
+import Image from "next/image";
+
+interface Item {
+  price: string;
+  image: FileList | undefined;
+}
+
+interface Season {
+  image: FileList | undefined;
+  title: string;
+  release_date: string;
+  maxDonationAmount: string;
+  items: Item[];
+}
 
 const NewSeason = () => {
-  const { router } = useRouter();
-  const [season, setSeason] = useState({
-    image: null,
+  const router = useRouter();
+  const [season, setSeason] = useState<Season>({
+    image: undefined,
     title: "",
     release_date: "",
     maxDonationAmount: "",
-    items: [{ price: "", image: null }],
+    items: [{ price: "", image: undefined }],
   });
+
   const seasonImageRef = useRef(null);
   const itemImageRefs = useRef([]);
 
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
   const seasonItemSize = 30;
-  const progressBarRef = useRef(null);
-  const progressBarWidth = progressBarRef
-    ? progressBarRef.current
-      ? progressBarRef.current.offsetWidth
-      : 300
-    : 300;
-  const handleSeasonChange = (e) => {
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const progressBarWidth = progressBarRef.current?.offsetWidth || 300;
+  const handleSeasonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setSeason((prevSeason) => ({
-      ...prevSeason,
+      ...(prevSeason as Season),
       [name]: value,
     }));
   };
 
-  const handleReleaseDateChange = (e) => {
+  const handleReleaseDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setSeason((prevSeason) => ({
-      ...prevSeason,
+      ...(prevSeason as Season),
       [name]: moment(value).format("YYYY-MM-DDTHH:mm:ss"),
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSeason((prevSeason) => ({
-        ...prevSeason,
-        image: reader.result,
-      }));
-    };
-
-    reader.onerror = (error) => {
-      console.error("File reading error:", error);
-    };
-    reader.readAsDataURL(file);
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSeason((prevSeason) => ({
+      ...(prevSeason as Season),
+      image: e.target.files || undefined,
+    }));
   };
 
-  const handleItemChange = (e, index) => {
+  const handleItemChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const { name, value } = e.target;
-    const updatedItems = [...season.items];
-    updatedItems[index][name] = value;
+    const updatedItems = season ? [...season.items] : [];
+    updatedItems[index]["price"] = value;
     setSeason((prevSeason) => ({
-      ...prevSeason,
+      ...(prevSeason as Season),
       items: updatedItems,
     }));
   };
 
-  const handleItemChangeImage = (e, index) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      const imageData = reader.result;
-      const updatedItems = [...season.items];
-      updatedItems[index].image = imageData;
-      setSeason((prevSeason) => ({
-        ...prevSeason,
-        items: updatedItems,
-      }));
-    };
-    reader.onerror = (error) => {
-      console.error("File reading error:", error);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleAddItem = () => {
+  const handleItemChangeImage = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const updatedItems = season ? [...season.items] : [];
+    updatedItems[index].image = e.target.files || undefined;
     setSeason((prevSeason) => ({
-      ...prevSeason,
-      items: [...prevSeason.items, { price: "", image: null }],
+      ...(prevSeason as Season),
+      items: updatedItems,
     }));
   };
 
-  const handleRemoveItem = (index) => {
-    const updatedItems = [...season.items];
+  const handleAddItem = () => {
+    setSeason((prevSeason) => {
+      const newItem = { price: "", image: undefined };
+      const updatedItems = prevSeason
+        ? [...prevSeason.items, newItem]
+        : [newItem];
+      return {
+        ...(prevSeason as Season),
+        items: updatedItems,
+      };
+    });
+  };
+
+  const handleRemoveItem = (index: number) => {
+    const updatedItems = season ? [...season.items] : [];
     updatedItems.splice(index, 1);
     setSeason((prevSeason) => ({
-      ...prevSeason,
+      ...(prevSeason as Season),
       items: updatedItems,
     }));
   };
 
   const createNewSeason = async () => {
     let isvalid = true;
-    season.items.forEach((item, index) => {
-      if (item.price === "") {
-        setError(`Please enter a price for item ${index + 1}`);
-        isvalid = false;
-      } else if (item.image === "") {
-        setError(`Please select an image for item ${index + 1}`);
-        isvalid = false;
-      }
-    });
-    if (season.title === "") {
+    season &&
+      season.items.forEach((item, index) => {
+        if (item.price === "") {
+          setError(`Please enter a price for item ${index + 1}`);
+          isvalid = false;
+        } else if (!item.image || item.image[0] === undefined) {
+          setError(`Please select an image for item ${index + 1}`);
+          isvalid = false;
+        }
+      });
+    if (season && season.title === "") {
       setError("Please enter a title");
       isvalid = false;
-    } else if (season.release_date === "") {
+    } else if (season && season.release_date === "") {
       setError("Please enter a release date");
       isvalid = false;
-    } else if (season.maxDonationAmount === "") {
+    } else if (season && season.maxDonationAmount === "") {
       setError("Please enter a maximum donation amount for this season");
       isvalid = false;
-    } else if (season.image === "") {
+    } else if (!season.image || season.image[0] === undefined) {
       setError("Please select an event Fisch image");
       isvalid = false;
     }
@@ -155,38 +161,31 @@ const NewSeason = () => {
     };
 
     const body = new FormData();
-
-    body.append(
-      "image",
-      seasonImageRef.current.files[0],
-      `${season.title}_season.png`
-    );
-    body.append("title", season.title);
-    body.append("maxDonationAmount", season.maxDonationAmount);
-    body.append("release_date", season.release_date);
-    season.items.forEach((item, index) => {
-      body.append(`season_items[${index}][price]`, item.price);
-      body.append(
-        `season_items[${index}][image]`,
-        itemImageRefs.current[index].files[0],
-        `${season.title}_season_item_${index + 1}.png`
-      );
-    });
+    if (season && season.image) {
+      body.append("image", season.image[0], `${season.title}_season.png`);
+      body.append("title", season.title);
+      body.append("maxDonationAmount", season.maxDonationAmount);
+      body.append("release_date", season.release_date);
+      season.items.forEach((item, index) => {
+        body.append(`season_items[${index}][price]`, item.price);
+        body.append(
+          `season_items[${index}][image]`,
+          season.items[index].image![0],
+          `${season.title}_season_item_${index + 1}.png`
+        );
+      });
+    }
 
     try {
       const res = await client.post("/admin/new_season", body, config);
       if (res.data.success) {
         setNotification("Season created successfully!");
         setSeason({
-          image: null,
+          image: undefined,
           title: "",
           maxDonationAmount: "",
           release_date: "",
-          items: [{ price: "", image: null }],
-        });
-        seasonImageRef.current.value = "";
-        itemImageRefs.current.forEach((ref) => {
-          ref.value = "";
+          items: [{ price: "", image: undefined }],
         });
       } else {
         setError(res.data.error);
@@ -224,21 +223,29 @@ const NewSeason = () => {
 
             <Input
               value={season.title}
-              setValue={handleSeasonChange}
+              onChange={(e) =>
+                handleSeasonChange(e as React.ChangeEvent<HTMLInputElement>)
+              }
               placeholder="Season Title"
               name="title"
             />
 
             <Input
               value={season.release_date}
-              setValue={handleReleaseDateChange}
+              onChange={(e) =>
+                handleReleaseDateChange(
+                  e as React.ChangeEvent<HTMLInputElement>
+                )
+              }
               placeholder="Release Date"
               type="datetime-local"
               name="release_date"
             />
             <Input
               value={season.maxDonationAmount}
-              setValue={handleSeasonChange}
+              onChange={(e) =>
+                handleSeasonChange(e as React.ChangeEvent<HTMLInputElement>)
+              }
               placeholder="Max Donation Amount (in Fischflocken)"
               type="number"
               name="maxDonationAmount"
@@ -252,8 +259,10 @@ const NewSeason = () => {
             >
               <label htmlFor="eventImage">Event Fisch Image:</label>
               <Input
-                value={season.image}
-                setValue={handleImageChange}
+                value={season.image!}
+                onChange={(e) =>
+                  handleImageChange(e as React.ChangeEvent<HTMLInputElement>)
+                }
                 placeholder="Event Image"
                 type="file"
                 accept="image/*"
@@ -270,19 +279,29 @@ const NewSeason = () => {
                 <Text text={`Item ${index + 1}:`} />
                 <Input
                   value={item.price}
-                  setValue={(e) => handleItemChange(e, index)}
+                  onChange={(e) =>
+                    handleItemChange(
+                      e as React.ChangeEvent<HTMLInputElement>,
+                      index
+                    )
+                  }
                   placeholder="Item Price"
                   type="number"
                   name="price"
                   style={{ width: 100, marginLeft: 10 }}
                 />
                 <Input
-                  value={item.image}
-                  setValue={(e) => handleItemChangeImage(e, index)}
+                  value={item.image!}
+                  onChange={(e) =>
+                    handleItemChangeImage(
+                      e as React.ChangeEvent<HTMLInputElement>,
+                      index
+                    )
+                  }
                   placeholder="Item Image"
                   type="file"
                   accept="image/*"
-                  inputFieldRef={(ref) => (itemImageRefs.current[index] = ref)}
+                  // inputFieldRef={(ref) => (itemImageRefs.current[index] = ref)}
                   name="image"
                   style={{ width: 280, marginLeft: 10 }}
                 />
@@ -359,22 +378,27 @@ const NewSeason = () => {
                     </div>
                   </div>
                   <div>
-                    <img
-                      src={season.image}
-                      style={{
-                        position: "relative",
-                        maxHeight: 60,
-                        maxWidth: 80,
-                        left: "50%",
-                        transform: "translateX(-50%) translateY(-100%)",
-                        top: -18,
-                        marginBottom: -30,
-                        objectFit: "contain",
-                      }}
-                    />
+                    {season.image && (
+                      <Image
+                        src={URL.createObjectURL(season.image[0])}
+                        alt="Season Image"
+                        width={80}
+                        height={40}
+                        style={{
+                          position: "relative",
+                          width: 80,
+                          height: 40,
+                          left: "50%",
+                          transform: "translateX(-50%) translateY(-100%)",
+                          top: -18,
+                          marginBottom: -30,
+                          objectFit: "contain",
+                        }}
+                      />
+                    )}
                   </div>
                   {/* Progress Bar */}
-                  {season.maxDonationAmount > 0 ? (
+                  {parseFloat(season.maxDonationAmount) > 0 ? (
                     <div style={{ width: "95%", height: 20 }}>
                       <div
                         ref={progressBarRef}
@@ -400,7 +424,7 @@ const NewSeason = () => {
                       >
                         {season.items.map(
                           (item, index) =>
-                            item.price > 0 && (
+                            parseFloat(item.price) > 0 && (
                               <div
                                 key={index}
                                 style={{
@@ -409,7 +433,8 @@ const NewSeason = () => {
                                   borderRadius: 9,
                                   position: "relative",
                                   left:
-                                    (item.price / season.maxDonationAmount) *
+                                    (parseFloat(item.price) /
+                                      parseFloat(season.maxDonationAmount)) *
                                       progressBarWidth -
                                     seasonItemSize * (index - 1) -
                                     seasonItemSize / 2,
@@ -430,8 +455,11 @@ const NewSeason = () => {
                                     fontSize={8}
                                     text={season.items[index].price}
                                   />
-                                  <img
+                                  <Image
                                     src="/fisch_flakes.png"
+                                    alt="Fisch Flakes"
+                                    width={8}
+                                    height={8}
                                     style={{
                                       width: 8,
                                       height: 8,
@@ -450,8 +478,11 @@ const NewSeason = () => {
                                     borderRadius: 10,
                                   }}
                                 />
-                                <img
+                                <Image
                                   src={"/Chest_open.png"}
+                                  alt="Chest Open"
+                                  width={28}
+                                  height={28}
                                   style={{
                                     width: 28,
                                     height: 28,
@@ -460,8 +491,13 @@ const NewSeason = () => {
                                   }}
                                 />
                                 {season.items[index].image ? (
-                                  <img
-                                    src={season.items[index].image}
+                                  <Image
+                                    src={URL.createObjectURL(
+                                      season.items[index].image![0]
+                                    )}
+                                    alt={`Item ${index + 1}`}
+                                    width={28}
+                                    height={30}
                                     style={{
                                       width: 28,
                                       height: 30,

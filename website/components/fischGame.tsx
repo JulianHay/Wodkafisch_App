@@ -8,6 +8,12 @@ import { client } from "./client";
 import { ColumnContainer, RowContainer } from "./containers";
 import { Text } from "./text";
 
+interface Highscore {
+  name: string;
+  score: number;
+  id: number;
+}
+
 const FischGame = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [scoreData, setScoreData] = useState({
@@ -18,8 +24,8 @@ const FischGame = () => {
   const [startButtonVisible, setStartButtonVisible] = useState(true);
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
-  const [highscores, setHighscores] = useState([]);
-
+  const [highscores, setHighscores] = useState<Highscore[]>([]);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     client.get("/highscore").then((res) => {
       setHighscores(res.data.highscores);
@@ -61,8 +67,17 @@ const FischGame = () => {
     }
   };
   useEffect(() => {
-    const canvas = document.getElementById("gameCanvas");
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.error("Canvas element not found.");
+      return;
+    }
+
     const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      console.error("2D context not supported.");
+      return;
+    }
     canvas.width = window.innerWidth * 0.5;
     canvas.height = canvas.width * 0.5;
     let score = 0;
@@ -105,9 +120,19 @@ const FischGame = () => {
     playerRight.src = "/wodkafish-swim-right.png";
 
     class Player {
+      x: number;
+      y: number;
+      radius: number;
+      angle: number;
+      frameX: number;
+      frameY: number;
+      frame: number;
+      spriteWidth: number;
+      spriteHeight: number;
+      moving: boolean;
       constructor() {
-        this.x = canvas.width;
-        this.y = canvas.height / 2;
+        this.x = canvas?.width ? canvas?.width : 800;
+        this.y = canvas?.height ? canvas?.height / 2 : 400;
         this.radius = 50;
         //this.height = 20;
         this.angle = 0;
@@ -116,6 +141,7 @@ const FischGame = () => {
         this.frame = 0;
         this.spriteWidth = 160;
         this.spriteHeight = 127.3;
+        this.moving = false;
       }
       update() {
         const dx = this.x - mouse.x;
@@ -129,14 +155,16 @@ const FischGame = () => {
           this.moving = true;
         }
         if (this.x < 0) this.x = 0;
-        if (this.x > canvas.width) this.x = canvas.width;
+        if (this.x > (canvas?.width ? canvas?.width : 800))
+          this.x = canvas?.width ? canvas?.width : 800;
         if (this.y < 50) this.y = 50;
-        if (this.y > canvas.height) this.y = canvas.height;
+        if (this.y > (canvas?.height ? canvas?.height : 400))
+          this.y = canvas?.height ? canvas?.height : 400;
         let theta = Math.atan2(dy, dx);
         this.angle = theta;
       }
       draw() {
-        if (mouse.click) {
+        if (mouse.click && ctx) {
           ctx.lineWidth = 0.2;
           ctx.beginPath();
           ctx.moveTo(this.x, this.y);
@@ -158,55 +186,88 @@ const FischGame = () => {
           } else this.frameY = 0;
         }
 
-        ctx.fillStyle = "black";
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-        /*ctx.beginPath();
+        if (ctx) {
+          ctx.fillStyle = "black";
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+
+          /*ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 360);
         ctx.fill();*/
-        if (this.x >= mouse.x) {
-          ctx.drawImage(
-            playerLeft,
-            this.frameX * this.spriteWidth,
-            this.frameY * this.spriteHeight,
-            this.spriteWidth,
-            this.spriteHeight,
-            0 - 65,
-            0 - 55,
-            this.spriteWidth * 0.8,
-            this.spriteHeight * 0.8
-          );
-        } else {
-          ctx.drawImage(
-            playerRight,
-            this.frameX * this.spriteWidth,
-            this.frameY * this.spriteHeight,
-            this.spriteWidth,
-            this.spriteHeight,
-            0 - 65,
-            0 - 45,
-            this.spriteWidth * 0.8,
-            this.spriteHeight * 0.8
-          );
+          if (this.x >= mouse.x) {
+            ctx.drawImage(
+              playerLeft,
+              this.frameX * this.spriteWidth,
+              this.frameY * this.spriteHeight,
+              this.spriteWidth,
+              this.spriteHeight,
+              0 - 65,
+              0 - 55,
+              this.spriteWidth * 0.8,
+              this.spriteHeight * 0.8
+            );
+          } else {
+            ctx.drawImage(
+              playerRight,
+              this.frameX * this.spriteWidth,
+              this.frameY * this.spriteHeight,
+              this.spriteWidth,
+              this.spriteHeight,
+              0 - 65,
+              0 - 45,
+              this.spriteWidth * 0.8,
+              this.spriteHeight * 0.8
+            );
+          }
+          ctx.restore();
         }
-        ctx.restore();
       }
     }
     const player = new Player();
 
     // Bubbles
-    const bubblesArray = [];
+    interface Bubble {
+      x: number;
+      y: number;
+      radius: number;
+      angle: number;
+      speed: number;
+      distance: number;
+      sound: string;
+      frameX: number;
+      spriteWidth: number;
+      spriteHeight: number;
+      pop: boolean;
+      counted: boolean;
+    }
+    const bubblesArray: Bubble[] = [];
     const bubble = new Image();
     bubble.src = "/kalmar.png";
     class Bubble {
+      x: number;
+      y: number;
+      radius: number;
+      angle: number;
+      speed: number;
+      distance: number = 0;
+      sound: string;
+      frameX: number;
+      spriteWidth: number;
+      spriteHeight: number;
+      pop: boolean;
+      counted: boolean;
+
       constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = 0 - 50 - (Math.random() * canvas.height) / 2;
+        this.x = Math.random() * (canvas?.width ? canvas?.width : 800);
+        this.y =
+          0 -
+          50 -
+          (Math.random() * (canvas?.height ? canvas?.height : 400)) / 2;
         this.radius = 50;
         this.angle = 0.2; //(Math.random()-0.5)*0.1
         this.speed = Math.random() * 5 + 1;
-        this.distance;
+        // this.distance;
         this.sound = Math.random() <= 0.5 ? "sound1" : "sound2";
         this.frameX = 0;
         this.spriteWidth = 23.734;
@@ -231,24 +292,27 @@ const FischGame = () => {
         //ctx.translate(this.x, this.y);
         //ctx.translate(this.spriteWidth*0.5,this.spriteHeight*0.5)
         //ctx.rotate(this.angle);
-        ctx.drawImage(
-          bubble,
-          this.frameX * this.spriteWidth,
-          0,
-          this.spriteWidth,
-          this.spriteHeight,
-          this.x - 17,
-          this.y - 48,
-          this.spriteWidth * 1.5,
-          this.spriteHeight * 1.5
-        );
+        if (ctx) {
+          ctx.drawImage(
+            bubble,
+            this.frameX * this.spriteWidth,
+            0,
+            this.spriteWidth,
+            this.spriteHeight,
+            this.x - 17,
+            this.y - 48,
+            this.spriteWidth * 1.5,
+            this.spriteHeight * 1.5
+          );
+        }
         //ctx.translate(-this.spriteWidth*0.5,-this.spriteHeight*0.5)
         //ctx.restore();
       }
     }
+
     function handleBubbles() {
       for (let i = 0; i < bubblesArray.length; i++) {
-        if (bubblesArray[i].y > canvas.height * 2) {
+        if (bubblesArray[i].y > (canvas?.height ? canvas?.height : 400) * 2) {
           bubblesArray.splice(i, 1);
         }
       }
@@ -265,7 +329,7 @@ const FischGame = () => {
         bubblesArray.push(new Bubble());
       }
     }
-    function popAndRemove(i) {
+    function popAndRemove(i: number) {
       if (bubblesArray[i]) {
         if (!bubblesArray[i].counted) score++;
         bubblesArray[i].counted = true;
@@ -286,10 +350,33 @@ const FischGame = () => {
     const enemyRightJaw = new Image();
     enemyRightJaw.src = "/shark_swimming_right_jaw.png";
     class Enemy {
+      x: number;
+      y: number;
+      radius: number;
+      angle: number;
+      speed: number;
+      distance: number = 0;
+      direction_left: boolean;
+      frameX: number;
+      frameY: number;
+      frame: number;
+      spriteWidth: number;
+      spriteHeight: number;
+      scale: number;
+      width: number;
+      height: number;
+      sound: string;
+      d_ellipse: number;
+
       constructor() {
         this.direction_left = Math.random() < 0.5 ? true : false;
-        this.x = this.direction_left ? 200 + canvas.width : -200;
-        this.y = ((0.2 + 0.8 * Math.random()) * canvas.height) / 2;
+        this.x = this.direction_left
+          ? 200 + (canvas?.width ? canvas?.width : 800)
+          : -200;
+        this.y =
+          ((0.2 + 0.8 * Math.random()) *
+            (canvas?.height ? canvas?.height : 400)) /
+          2;
         this.radius = 50;
         this.speed = Math.random() * 2 + 2;
         this.angle = 0;
@@ -317,15 +404,25 @@ const FischGame = () => {
         if (this.direction_left) {
           if (this.x < -200) {
             this.direction_left = Math.random() < 0.5 ? true : false;
-            this.x = this.direction_left ? 200 + canvas.width : -200;
-            this.y = ((0.2 + 0.8 * Math.random()) * canvas.height) / 2;
+            this.x = this.direction_left
+              ? 200 + (canvas?.width ? canvas?.width : 800)
+              : -200;
+            this.y =
+              ((0.2 + 0.8 * Math.random()) *
+                (canvas?.height ? canvas?.height : 400)) /
+              2;
             this.speed = Math.random() * 2 + 2;
           }
         } else {
-          if (this.x > canvas.width + 200) {
+          if (this.x > (canvas?.width ? canvas?.width : 800) + 200) {
             this.direction_left = Math.random() < 0.5 ? true : false;
-            this.x = this.direction_left ? 200 + canvas.width : -200;
-            this.y = ((0.2 + 0.8 * Math.random()) * canvas.height) / 2;
+            this.x = this.direction_left
+              ? 200 + (canvas?.width ? canvas?.width : 800)
+              : -200;
+            this.y =
+              ((0.2 + 0.8 * Math.random()) *
+                (canvas?.height ? canvas?.height : 400)) /
+              2;
             this.speed = Math.random() * 2 + 2;
           }
         }
@@ -379,11 +476,12 @@ const FischGame = () => {
         }
       }
       draw() {
-        ctx.fillStyle = "black";
-        ctx.save();
-        //ctx.translate(this.x, this.y);
-        //ctx.rotate(this.angle);
-        /*ctx.beginPath();
+        if (ctx) {
+          ctx.fillStyle = "black";
+          ctx.save();
+          //ctx.translate(this.x, this.y);
+          //ctx.rotate(this.angle);
+          /*ctx.beginPath();
         //ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 360);
         ctx.rect(this.x-(this.width)/2, this.y-(this.height)/2, this.width, this.height)
         //ctx.fill();
@@ -392,59 +490,60 @@ const FischGame = () => {
         //drawEllipse(this.x, this.y, this.spriteWidth+10+player.radius, this.spriteHeight-20+player.radius,'blue')
         //drawEllipse(this.x, this.y, this.width, this.height, 'red')
         */
-        const offset_x = 81;
-        const offset_y = 48;
-        if (this.d_ellipse <= player.radius + 100) {
-          if (this.direction_left) {
-            ctx.drawImage(
-              enemyLeftJaw,
-              this.frameX * this.spriteWidth,
-              this.frameY * this.spriteHeight,
-              this.spriteWidth,
-              this.spriteHeight,
-              this.x - offset_x,
-              this.y - offset_y,
-              this.spriteWidth * this.scale,
-              this.spriteHeight * this.scale
-            );
+          const offset_x = 81;
+          const offset_y = 48;
+          if (this.d_ellipse <= player.radius + 100) {
+            if (this.direction_left) {
+              ctx.drawImage(
+                enemyLeftJaw,
+                this.frameX * this.spriteWidth,
+                this.frameY * this.spriteHeight,
+                this.spriteWidth,
+                this.spriteHeight,
+                this.x - offset_x,
+                this.y - offset_y,
+                this.spriteWidth * this.scale,
+                this.spriteHeight * this.scale
+              );
+            } else {
+              ctx.drawImage(
+                enemyRightJaw,
+                this.frameX * this.spriteWidth,
+                this.frameY * this.spriteHeight,
+                this.spriteWidth,
+                this.spriteHeight,
+                this.x - offset_x,
+                this.y - offset_y,
+                this.spriteWidth * this.scale,
+                this.spriteHeight * this.scale
+              );
+            }
           } else {
-            ctx.drawImage(
-              enemyRightJaw,
-              this.frameX * this.spriteWidth,
-              this.frameY * this.spriteHeight,
-              this.spriteWidth,
-              this.spriteHeight,
-              this.x - offset_x,
-              this.y - offset_y,
-              this.spriteWidth * this.scale,
-              this.spriteHeight * this.scale
-            );
-          }
-        } else {
-          if (this.direction_left) {
-            ctx.drawImage(
-              enemyLeft,
-              this.frameX * this.spriteWidth,
-              this.frameY * this.spriteHeight,
-              this.spriteWidth,
-              this.spriteHeight,
-              this.x - offset_x,
-              this.y - offset_y,
-              this.spriteWidth * this.scale,
-              this.spriteHeight * this.scale
-            );
-          } else {
-            ctx.drawImage(
-              enemyRight,
-              this.frameX * this.spriteWidth,
-              this.frameY * this.spriteHeight,
-              this.spriteWidth,
-              this.spriteHeight,
-              this.x - offset_x,
-              this.y - offset_y,
-              this.spriteWidth * this.scale,
-              this.spriteHeight * this.scale
-            );
+            if (this.direction_left) {
+              ctx.drawImage(
+                enemyLeft,
+                this.frameX * this.spriteWidth,
+                this.frameY * this.spriteHeight,
+                this.spriteWidth,
+                this.spriteHeight,
+                this.x - offset_x,
+                this.y - offset_y,
+                this.spriteWidth * this.scale,
+                this.spriteHeight * this.scale
+              );
+            } else {
+              ctx.drawImage(
+                enemyRight,
+                this.frameX * this.spriteWidth,
+                this.frameY * this.spriteHeight,
+                this.spriteWidth,
+                this.spriteHeight,
+                this.x - offset_x,
+                this.y - offset_y,
+                this.spriteWidth * this.scale,
+                this.spriteHeight * this.scale
+              );
+            }
           }
         }
         //ctx.restore();
@@ -473,35 +572,54 @@ const FischGame = () => {
       enemy1.update();
     }
 
-    function drawEllipse(centerX, centerY, width, height, color) {
-      ctx.beginPath();
+    function drawEllipse(
+      centerX: number,
+      centerY: number,
+      width: number,
+      height: number,
+      color: string
+    ) {
+      if (ctx) {
+        ctx.beginPath();
 
-      ctx.moveTo(centerX, centerY - height / 2); // A1
+        ctx.moveTo(centerX, centerY - height / 2); // A1
 
-      ctx.bezierCurveTo(
-        centerX + width / 2,
-        centerY - height / 2, // C1
-        centerX + width / 2,
-        centerY + height / 2, // C2
-        centerX,
-        centerY + height / 2
-      ); // A2
+        ctx.bezierCurveTo(
+          centerX + width / 2,
+          centerY - height / 2, // C1
+          centerX + width / 2,
+          centerY + height / 2, // C2
+          centerX,
+          centerY + height / 2
+        ); // A2
 
-      ctx.bezierCurveTo(
-        centerX - width / 2,
-        centerY + height / 2, // C3
-        centerX - width / 2,
-        centerY - height / 2, // C4
-        centerX,
-        centerY - height / 2
-      ); // A1
+        ctx.bezierCurveTo(
+          centerX - width / 2,
+          centerY + height / 2, // C3
+          centerX - width / 2,
+          centerY - height / 2, // C4
+          centerX,
+          centerY - height / 2
+        ); // A1
 
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.closePath();
+      }
     }
 
-    function RectCircleColliding(circle, rect) {
+    interface Circle {
+      x: number;
+      y: number;
+      r: number;
+    }
+    interface Rectangle {
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    }
+    function RectCircleColliding(circle: Circle, rect: Rectangle) {
       var distX = Math.abs(circle.x - rect.x - rect.w / 2);
       var distY = Math.abs(circle.y - rect.y - rect.h / 2);
 
@@ -539,58 +657,83 @@ const FischGame = () => {
       setStartGame(false);
     }
 
+    interface BubbleText {
+      x: number;
+      y: number;
+      size: number;
+      baseX: number;
+      baseY: number;
+      distance: number;
+      density: number;
+      draw: () => void;
+      update: () => void;
+    }
     /**** BUBBLE TEXT ***/
-    let bubbleTextArray = [];
+    let bubbleTextArray: BubbleText[] = [];
     let adjustX = -12;
     let adjustY = -3;
     ctx.fillStyle = "white";
     ctx.font = "13px Verdana";
-    ctx.fillText("Wodkafisch", canvas.width / 41, canvas.height / 12); //25, 42);
+    ctx.fillText(
+      "Wodkafisch",
+      (canvas?.width ? canvas?.width : 800) / 41,
+      canvas.height / 12
+    ); //25, 42);
     //ctx.font = '19px Verdana';
     //ctx.fillText('TEXT', 36, 49);
     const textCoordinates = ctx.getImageData(0, 0, 100, 100);
 
     class Particle2 {
-      constructor(x, y) {
+      x: number;
+      y: number;
+      size: number;
+      baseX: number;
+      baseY: number;
+      distance: number;
+      density: number;
+
+      constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
         this.size = 7;
         this.baseX = this.x;
         this.baseY = this.y;
         this.density = Math.random() * 15 + 1;
-        this.distance;
+        this.distance = 100;
       }
       draw() {
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "rgba(34,147,214,1)";
-        ctx.fillStyle = "rgba(255,255,255,1)";
-        ctx.beginPath();
-        if (this.distance < 50) {
-          this.size = 14;
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.closePath();
+        if (ctx) {
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = "rgba(34,147,214,1)";
+          ctx.fillStyle = "rgba(255,255,255,1)";
           ctx.beginPath();
-          ctx.arc(this.x + 4, this.y - 4, this.size / 3, 0, Math.PI * 2);
-          ctx.arc(this.x - 6, this.y - 6, this.size / 5, 0, Math.PI * 2);
-        } else if (this.distance <= 80) {
-          this.size = 8;
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.stroke();
+          if (this.distance < 50) {
+            this.size = 14;
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.closePath();
+            ctx.beginPath();
+            ctx.arc(this.x + 4, this.y - 4, this.size / 3, 0, Math.PI * 2);
+            ctx.arc(this.x - 6, this.y - 6, this.size / 5, 0, Math.PI * 2);
+          } else if (this.distance <= 80) {
+            this.size = 8;
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.closePath();
+            ctx.beginPath();
+            ctx.arc(this.x + 3, this.y - 3, this.size / 2.5, 0, Math.PI * 2);
+            ctx.arc(this.x - 4, this.y - 4, this.size / 4.5, 0, Math.PI * 2);
+          } else {
+            this.size = 5;
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.closePath();
+            ctx.beginPath();
+            ctx.arc(this.x + 1, this.y - 1, this.size / 3, 0, Math.PI * 2);
+          }
           ctx.closePath();
-          ctx.beginPath();
-          ctx.arc(this.x + 3, this.y - 3, this.size / 2.5, 0, Math.PI * 2);
-          ctx.arc(this.x - 4, this.y - 4, this.size / 4.5, 0, Math.PI * 2);
-        } else {
-          this.size = 5;
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.closePath();
-          ctx.beginPath();
-          ctx.arc(this.x + 1, this.y - 1, this.size / 3, 0, Math.PI * 2);
+          ctx.fill();
         }
-        ctx.closePath();
-        ctx.fill();
       }
       update() {
         let dx = player.x - this.x;
@@ -634,8 +777,16 @@ const FischGame = () => {
           }
         }
       }
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      if (ctx && canvas) {
+        ctx.clearRect(0, 0, canvas?.width ? canvas?.width : 800, canvas.height);
+        ctx.drawImage(
+          backgroundImage,
+          0,
+          0,
+          canvas?.width ? canvas?.width : 800,
+          canvas.height
+        );
+      }
       for (let i = 0; i < bubbleTextArray.length; i++) {
         bubbleTextArray[i].draw();
         bubbleTextArray[i].update();
@@ -646,8 +797,15 @@ const FischGame = () => {
 
     // animation loop
     function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas?.width ? canvas?.width : 800, canvas.height);
+      ctx.drawImage(
+        backgroundImage,
+        0,
+        0,
+        canvas?.width ? canvas?.width : 800,
+        canvas.height
+      );
       for (let i = 0; i < bubbleTextArray.length; i++) {
         bubbleTextArray[i].draw();
         bubbleTextArray[i].update();
@@ -676,7 +834,7 @@ const FischGame = () => {
     if (startGame) {
       animate();
     }
-  }, [startGame]);
+  }, [startGame, scoreData]);
 
   return (
     <>
@@ -690,6 +848,7 @@ const FischGame = () => {
         >
           <canvas
             id="gameCanvas"
+            ref={canvasRef}
             width={window.innerWidth * 0.5}
             height={window.innerWidth * 0.5}
             style={{ borderRadius: 10 }}
@@ -714,7 +873,7 @@ const FischGame = () => {
         <ColumnContainer>
           {highscores.map((highscore) => {
             return (
-              <RowContainer>
+              <RowContainer key={highscore.id}>
                 <Text
                   text={`${highscore.id}. ${highscore.name}:`}
                   fontSize={20}
@@ -754,7 +913,7 @@ const FischGame = () => {
             <>
               <Input
                 value={scoreData.name}
-                setValue={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setScoreData({ ...scoreData, name: e.target.value })
                 }
                 placeholder="Enter your name"

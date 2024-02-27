@@ -16,15 +16,16 @@ import { Button } from "../../../../components/buttons";
 import { useSelector } from "react-redux";
 import { AutocompleteInput, Input } from "../../../../components/input";
 import moment from "moment";
+import { RootState } from "@/lib/store";
 
 const AddBonus = () => {
-  const { router } = useRouter();
+  const router = useRouter();
 
   const [date, setDate] = useState("");
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState<number>();
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
-  const { isAdmin } = useSelector((state) => state.user);
+  const { isAdmin } = useSelector((state: RootState) => state.user);
 
   const addBonus = async () => {
     if (!value) {
@@ -57,7 +58,7 @@ const AddBonus = () => {
           )}`
         );
         setDate("");
-        setValue("");
+        setValue(undefined);
       } else {
         setError("An error occured while adding the bonus. Please try again.");
       }
@@ -94,17 +95,15 @@ const AddBonus = () => {
             />
 
             <Input
-              value={value}
-              setValue={(e) => {
-                setValue(e.target.value);
-              }}
+              value={value as number}
+              onChange={(e) => setValue(e.target.value as unknown as number)}
               placeholder="Bonus in %"
               type="number"
             />
             <Input
               value={date}
-              setValue={(e) => {
-                setDate(e.target.value);
+              onChange={(e) => {
+                setDate(e.target.value as string);
               }}
               placeholder="validity date"
               type="datetime-local"

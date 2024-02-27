@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 
-interface Input<T> {
-  value: T;
-  setValue: (v: T) => void;
+interface Input {
+  value: string | number | FileList;
+  onChange: (v: React.ChangeEvent<HTMLInputElement>) => void; //React.Dispatch<React.SetStateAction<string | number | FileList | null>>
   placeholder?: string;
   type?: string;
   accept?: string;
@@ -14,23 +14,31 @@ interface Input<T> {
   style?: React.CSSProperties;
 }
 
-interface AutocompleteInput extends Input<T> {
+interface TextInput {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  style?: React.CSSProperties;
+}
+
+interface AutocompleteInput extends TextInput {
   options: string[];
   allowEmpty?: boolean;
 }
-interface MultilineInput extends Input<T> {
+
+interface MultilineInput extends TextInput {
   rows?: number;
   cols?: number;
 }
 
-interface PasswordInput extends Input<T> {
+interface PasswordInput extends TextInput {
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
 }
 
 const Input = ({
   value,
-  setValue,
+  onChange,
   placeholder = "",
   type = "text",
   accept,
@@ -38,50 +46,73 @@ const Input = ({
   name,
   style,
 }: Input) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // if (type === "number") {
+    //   onChange(parseFloat(event.target.value));
+    // } else if (type === "file") {
+    //   if (event.target.files) {
+    //     onChange(event.target.files);
+    //   }
+    // } else {
+    //   onChange(event.target.value);
+    // }
+    onChange(event);
+  };
   return (
     <div style={style}>
-      <input
-        ref={inputFieldRef}
-        style={
-          type === "datetime-local"
-            ? {
-                color: value === "" ? "#a8afb9" : "black",
-                borderRadius: 3,
-                paddingLeft: 1,
-                width: "100%",
-                margin: 3,
-              }
-            : type === "file"
-            ? {
-                color: "white",
-                borderRadius: 3,
-                paddingLeft: 5,
-                width: "100%",
-                margin: 3,
-              }
-            : {
-                color: "black",
-                borderRadius: 3,
-                paddingLeft: 5,
-                width: "100%",
-                margin: 3,
-              }
-        }
-        type={type}
-        value={type === "file" ? undefined : value}
-        onChange={setValue}
-        placeholder={placeholder}
-        security=""
-        accept={accept}
-        name={name}
-      />
+      {type === "file" ? (
+        <input
+          ref={inputFieldRef}
+          style={{
+            color: "white",
+            borderRadius: 3,
+            paddingLeft: 5,
+            width: "100%",
+            margin: 3,
+          }}
+          type={type}
+          onChange={handleChange}
+          placeholder={placeholder}
+          security=""
+          accept={accept}
+          name={name}
+        />
+      ) : (
+        <input
+          ref={inputFieldRef}
+          style={
+            type === "datetime-local"
+              ? {
+                  color: value === "" ? "#a8afb9" : "black",
+                  borderRadius: 3,
+                  paddingLeft: 1,
+                  width: "100%",
+                  margin: 3,
+                }
+              : {
+                  color: "black",
+                  borderRadius: 3,
+                  paddingLeft: 5,
+                  width: "100%",
+                  margin: 3,
+                }
+          }
+          type={type}
+          value={value as string}
+          onChange={handleChange}
+          placeholder={placeholder}
+          security=""
+          accept={accept}
+          name={name}
+        />
+      )}
     </div>
   );
 };
 
 const MultilineInput = ({
   value,
-  setValue,
+  onChange,
   placeholder = "",
   rows = 5,
   cols = 50,
@@ -96,9 +127,9 @@ const MultilineInput = ({
           width: "100%",
           margin: 3,
         }}
-        value={value}
+        value={value as string}
         onChange={(e) => {
-          setValue(e.target.value);
+          onChange(e.target.value);
         }}
         placeholder={placeholder}
         security=""
@@ -111,17 +142,16 @@ const MultilineInput = ({
 
 const AutocompleteInput = ({
   value,
-  setValue,
+  onChange,
   placeholder = "",
-  type = "text",
   options,
   allowEmpty = false,
 }: AutocompleteInput) => {
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const handleInputChange = (event) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setValue(value);
+    onChange(value);
     const filteredSuggestions = options.filter((option) =>
       option.toLowerCase().startsWith(value.toLowerCase())
     );
@@ -132,12 +162,12 @@ const AutocompleteInput = ({
 
     setSelectedIndex(-1);
   };
-  const handleSuggestionClick = (option) => {
-    setValue(option);
+  const handleSuggestionClick = (option: string) => {
+    onChange(option);
     setSuggestions([]);
   };
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "ArrowUp") {
       event.preventDefault();
       setSelectedIndex((prevIndex) =>
@@ -158,9 +188,9 @@ const AutocompleteInput = ({
 
   useEffect(() => {
     if (selectedIndex > -1 && suggestions[selectedIndex]) {
-      setValue(suggestions[selectedIndex]);
+      onChange(suggestions[selectedIndex]);
     }
-  }, [selectedIndex, suggestions]);
+  }, [selectedIndex, suggestions, onChange]);
 
   return (
     <div>
@@ -172,8 +202,8 @@ const AutocompleteInput = ({
           width: "100%",
           margin: 3,
         }}
-        type={type}
-        value={value}
+        type={"text"}
+        value={value as string}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onFocus={allowEmpty ? handleInputFocus : undefined}
@@ -212,7 +242,7 @@ const AutocompleteInput = ({
 
 const PasswordInput = ({
   value,
-  setValue,
+  onChange,
   placeholder = "",
   style,
   isVisible,
@@ -229,8 +259,8 @@ const PasswordInput = ({
           margin: 3,
         }}
         type={isVisible ? "text" : "password"}
-        value={value}
-        onChange={setValue}
+        value={value as string}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
       />
       <div

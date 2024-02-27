@@ -10,12 +10,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { setUser } from "@/lib/reducers/userSlice";
 // import "../public/scss/styles.scss";
 import "./styles.css";
+import Image from "next/image";
+import { RootState } from "@/lib/store";
 
 const NavbarFisch = () => {
   const router = useRouter();
 
   const { username, accessToken, isSignedIn, isAdmin } = useSelector(
-    (state) => state.user
+    (state: RootState) => state.user
   );
   const dispatch = useDispatch();
 
@@ -31,7 +33,13 @@ const NavbarFisch = () => {
     >
       <Container>
         <Navbar.Brand href="/">
-          <img src="/fisch.svg" style={{ height: 30, margin: 10 }} />
+          <Image
+            src="/fisch.svg"
+            height={30}
+            width={37.5}
+            alt="Wodkafisch logo"
+            style={{ margin: 10 }}
+          />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse

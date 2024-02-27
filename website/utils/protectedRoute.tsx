@@ -5,13 +5,14 @@ import AuthService from "./auth";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
+import { RootState } from "@/lib/store";
 
 interface ProtectedRoute {
   router: AppRouterInstance;
   children: React.ReactNode;
 }
 const ProtectedRoute = ({ children }: ProtectedRoute) => {
-  const { isSignedIn } = useSelector((state) => state.user);
+  const { isSignedIn } = useSelector((state: RootState) => state.user);
   const router = useRouter();
   useEffect(() => {
     if (!isSignedIn) {
@@ -27,7 +28,7 @@ const ProtectedRoute = ({ children }: ProtectedRoute) => {
 };
 
 const ProtectedAdminRoute = ({ children }: ProtectedRoute) => {
-  const { isAdmin } = useSelector((state) => state.user);
+  const { isAdmin } = useSelector((state: RootState) => state.user);
   const router = useRouter();
   useEffect(() => {
     if (!isAdmin) {

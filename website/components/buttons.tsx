@@ -16,22 +16,22 @@ interface CustomButton extends Button {
   type?: string;
 }
 
-const brightenColor = (color: String, factor = 1.2) => {
-  // Convert hex to RGB
-  const hexToRgb = (hex) =>
-    hex
-      .replace(
-        /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
-        (m, r, g, b) => "#" + r + r + g + g + b + b
-      )
-      .substring(1)
-      .match(/.{2}/g)
-      .map((x) => parseInt(x, 16));
+const brightenColor = (color: string, factor = 1.2) => {
+  const hexToRgb = (hex: string): number[] => {
+    const hexMatch = hex.match(
+      /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i
+    );
+    if (!hexMatch) {
+      return [0, 0, 0];
+    }
+    const [, r, g, b] = hexMatch;
 
-  // Convert RGB to hex
-  const rgbToHex = (r, g, b) =>
-    "#" +
-    [r, g, b].map((x) => Math.round(x).toString(16).padStart(2, "0")).join("");
+    const rgbArray = [r, g, b].map((component) => parseInt(component, 16));
+    return rgbArray;
+  };
+
+  const rgbToHex = (...rgb: number[]) =>
+    "#" + rgb.map((x) => Math.round(x).toString(16).padStart(2, "0")).join("");
 
   const rgbColor = hexToRgb(color);
   const brightenedColor = rgbColor.map((channel) =>

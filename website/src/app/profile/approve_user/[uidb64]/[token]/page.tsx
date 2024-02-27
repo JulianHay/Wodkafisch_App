@@ -16,7 +16,7 @@ const ApproveUser = () => {
 
   useEffect(() => {
     approveUser(uidb64, token);
-  }, []);
+  }, [uidb64, token]);
 
   const approveUser = async (uidb64: string, token: string) => {
     const config = {

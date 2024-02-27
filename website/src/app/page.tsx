@@ -6,7 +6,7 @@ import {
   Section,
   TouchaleCard,
 } from "../../components/containers";
-import { Input } from "../../components/input";
+import { Input, PasswordInput } from "../../components/input";
 import { TextBlock, Text } from "../../components/text";
 import { Button } from "../../components/buttons";
 import { client } from "../../components/client";
@@ -20,21 +20,77 @@ import moment from "moment";
 import Modal from "../../components/modal";
 import { ProgressBar } from "./sponsors/utils";
 import { FischGame } from "../../components/fischGame";
+import Image from "next/image";
+import { RootState } from "@/lib/store";
+
+interface Sponsor {
+  id: number;
+  first_name: string;
+  last_name: string;
+  username: string;
+  bronze_sponsor: number;
+  silver_sponsor: number;
+  gold_sponsor: number;
+  black_sponsor: number;
+  diamond_sponsor: number;
+  sponsor_score: number;
+  season_score: number;
+  unlocked_items: number;
+  unlocked_items_animation: number;
+}
+
+interface Item {
+  price: number;
+  image: string;
+}
+
+interface Season {
+  id: number;
+  title: string;
+  max_donation: number;
+  image: string;
+  release_date: string;
+}
+
+interface Event {
+  lat: number;
+  long: number;
+  country: string;
+  title: string;
+  start: string;
+  image: string;
+  hello: string;
+  message: string;
+  additional_text: string;
+  bye: string;
+}
+interface Picture {
+  image: string;
+  description: string;
+}
+interface Data {
+  sponsor: Sponsor[];
+  season_items: Item[];
+  season: Season[];
+  upcoming_event: Event[];
+  picture: Picture[];
+}
 
 export default function Home() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({});
+  const [data, setData] = useState<Data>();
   const [isEventModalVisible, setIsEventModalVisible] = useState(false);
   const [progressBarValue, setProgressBarValue] = useState(0);
-  const { isSignedIn } = useSelector((state) => state.user);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const { isSignedIn } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const itemUlockAmount = loading
     ? 0
-    : data.season_items.find(
-        (item) => item.price > data.sponsor[0].season_score
+    : data!.season_items.find(
+        (item) => item.price > data!.sponsor[0].season_score
       );
   useEffect(() => {
     if (isSignedIn) {
@@ -45,7 +101,7 @@ export default function Home() {
         })
         .finally(() => setLoading(false));
     }
-  }, []);
+  }, [isSignedIn, setLoading, setData]);
 
   const login = async (username: string, password: string) => {
     const config = {
@@ -111,7 +167,13 @@ export default function Home() {
             />
             <RowContainer style={{ alignItems: "center" }}>
               <ColumnContainer style={{ width: "40%", alignItems: "center" }}>
-                <img src="/fisch.svg" />
+                <Image
+                  src="/fisch.svg"
+                  alt="Fisch Logo"
+                  width={1000}
+                  height={1000}
+                  style={{ width: "40%" }}
+                />
 
                 <Text
                   fontSize={14}
@@ -125,9 +187,11 @@ export default function Home() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <img
+                      <Image
                         alt="Download on the App Store"
                         src="AppStoreDownload.svg"
+                        width={180.883}
+                        height={70}
                         style={{ height: 70, padding: 12 }}
                       />
                     </a>
@@ -136,9 +200,11 @@ export default function Home() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <img
+                      <Image
                         alt="Get it on Google Play"
                         src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+                        width={180.883}
+                        height={70}
                         style={{ height: 70 }}
                       />
                     </a>
@@ -150,18 +216,19 @@ export default function Home() {
                   <Text fontSize={24} text={"Sign In"} />
                   <Input
                     value={username}
-                    setValue={(e) => {
+                    onChange={(e) => {
                       setUsername(e.target.value);
                     }}
                     placeholder="Username"
                   />
-                  <Input
+                  <PasswordInput
                     value={password}
-                    setValue={(e) => {
-                      setPassword(e.target.value);
+                    onChange={(e) => {
+                      setPassword(e);
                     }}
                     placeholder="Password"
-                    type="password"
+                    isVisible={isPasswordVisible}
+                    setIsVisible={setIsPasswordVisible}
                   />
                   <Button
                     text="Sign in"
@@ -198,7 +265,7 @@ export default function Home() {
               fontSize={32}
               fontWeight={"bold"}
               style={{ margin: 15 }}
-              text={`Welcome ${data.sponsor[0].username}!`}
+              text={`Welcome ${data!.sponsor[0].username}!`}
             />
             <RowContainer style={{ marginBottom: 40 }}>
               <TouchaleCard
@@ -207,7 +274,7 @@ export default function Home() {
                   setIsEventModalVisible(true);
                 }}
               >
-                {moment(data.upcoming_event[0].start, "YYYY-MM-DD") >
+                {moment(data!.upcoming_event[0].start, "YYYY-MM-DD") >
                 moment() ? (
                   <ColumnContainer
                     style={{
@@ -217,12 +284,16 @@ export default function Home() {
                       height: "100%",
                     }}
                   >
-                    <Text text={data.upcoming_event[0].title} fontSize={16} />
-                    <img
+                    <Text text={data!.upcoming_event[0].title} fontSize={16} />
+                    <Image
                       src={
                         "https://wodkafis.ch/media/" +
-                        data.upcoming_event[0].image
+                        data!.upcoming_event[0].image
                       }
+                      alt="Upcoming Event Fisch Logo"
+                      width={250}
+                      height={200}
+                      priority
                       style={{
                         width: 250,
                         height: 200,
@@ -232,7 +303,7 @@ export default function Home() {
                     />
                     <Text
                       text={moment(
-                        data.upcoming_event[0].start,
+                        data!.upcoming_event[0].start,
                         "YYYY-MM-DD"
                       ).format("DD.MM.YYYY")}
                       fontSize={16}
@@ -247,8 +318,11 @@ export default function Home() {
                       height: "100%",
                     }}
                   >
-                    <img
+                    <Image
                       src={"/upcoming_event_fisch.png"}
+                      alt="Upcoming Event Fisch Logo"
+                      width={250}
+                      height={200}
                       style={{
                         width: 250,
                         height: 200,
@@ -256,7 +330,7 @@ export default function Home() {
                         margin: 5,
                       }}
                     />
-                    <Text text="will be announced soon" fontSize={16} />
+                    <Text text="Will be announced soon" fontSize={16} />
                   </ColumnContainer>
                 )}
               </TouchaleCard>
@@ -279,28 +353,31 @@ export default function Home() {
                       alignItems: "center",
                     }}
                   >
-                    {data.sponsor[0].diamond_sponsor > 0 ||
-                    data.sponsor[0].black_sponsor > 0 ||
-                    data.sponsor[0].gold_sponsor > 0 ||
-                    data.sponsor[0].silver_sponsor > 0 ||
-                    data.sponsor[0].bronze_sponsor > 0 ? (
+                    {data!.sponsor[0].diamond_sponsor > 0 ||
+                    data!.sponsor[0].black_sponsor > 0 ||
+                    data!.sponsor[0].gold_sponsor > 0 ||
+                    data!.sponsor[0].silver_sponsor > 0 ||
+                    data!.sponsor[0].bronze_sponsor > 0 ? (
                       <>
                         <Text text="Your Sponsor Level:" />
 
-                        <img
+                        <Image
                           src={
-                            data.sponsor[0].diamond_sponsor > 0
+                            data!.sponsor[0].diamond_sponsor > 0
                               ? "/diamond_badge.png"
-                              : data.sponsor[0].black_sponsor > 0
+                              : data!.sponsor[0].black_sponsor > 0
                               ? "/black_badge.png"
-                              : data.sponsor[0].gold_sponsor > 0
+                              : data!.sponsor[0].gold_sponsor > 0
                               ? "/gold_badge.png"
-                              : data.sponsor[0].silver_sponsor > 0
+                              : data!.sponsor[0].silver_sponsor > 0
                               ? "/silver_badge.png"
-                              : data.sponsor[0].bronze_sponsor > 0
+                              : data!.sponsor[0].bronze_sponsor > 0
                               ? "/bronze_badge.png"
-                              : null
+                              : ""
                           }
+                          alt="Sponsor Badge"
+                          width={50}
+                          height={50}
                           style={{
                             width: 50,
                             height: 50,
@@ -322,8 +399,8 @@ export default function Home() {
 
                   <ProgressBar
                     percentage={
-                      (data.sponsor[0].season_score /
-                        data.season[0].max_donation) *
+                      (data!.sponsor[0].season_score /
+                        data!.season[0].max_donation) *
                       100
                     }
                     progress={progressBarValue}
@@ -333,7 +410,7 @@ export default function Home() {
                   />
 
                   <Text
-                    text={`${data.sponsor[0].season_score}`}
+                    text={`${data!.sponsor[0].season_score}`}
                     fontSize={14}
                     style={{
                       position: "relative",
@@ -351,12 +428,16 @@ export default function Home() {
                       <RowContainer style={{ alignItems: "center" }}>
                         <Text
                           text={`Only ${
-                            itemUlockAmount.price - data.sponsor[0].season_score
+                            itemUlockAmount.price -
+                            data!.sponsor[0].season_score
                           }`}
                         />
 
-                        <img
+                        <Image
                           src={"/fisch_flakes.png"}
+                          alt="Fisch Flakes"
+                          width={15}
+                          height={15}
                           style={{
                             width: 15,
                             height: 15,
@@ -366,12 +447,16 @@ export default function Home() {
                         />
                         <Text text="left to unlock:" />
                       </RowContainer>
-                      <img
-                        src={`https://wodkafis.ch/media/${
-                          data.season_items.filter(
-                            (item) => item.price > data.sponsor[0].season_score
+                      <Image
+                        src={`https://www.wodkafis.ch/media/${
+                          data!.season_items.filter(
+                            (item) => item.price > data!.sponsor[0].season_score
                           )[0].image
                         }`}
+                        alt="Next Item to Unlock"
+                        width={60}
+                        height={60}
+                        priority
                         style={{
                           width: 60,
                           height: 60,
@@ -403,8 +488,12 @@ export default function Home() {
                     height: "100%",
                   }}
                 >
-                  <img
-                    src={`https://wodkafis.ch/${data.picture[0].image}`}
+                  <Image
+                    src={`https://www.wodkafis.ch${data!.picture[0].image}`}
+                    alt="Fisch Picture of the Day"
+                    width={2000}
+                    height={2000}
+                    priority
                     style={{
                       width: "90%",
                       height: "80%",
@@ -414,7 +503,7 @@ export default function Home() {
                       margin: 5,
                     }}
                   />
-                  <Text text={data.picture[0].description} />
+                  <Text text={data!.picture[0].description} />
                 </ColumnContainer>
               </TouchaleCard>
             </RowContainer>
@@ -426,22 +515,22 @@ export default function Home() {
           >
             <ColumnContainer>
               <Text
-                text={data.upcoming_event[0].hello}
+                text={data!.upcoming_event[0].hello}
                 style={{ marginBottom: 8 }}
               />
               <Text
-                text={data.upcoming_event[0].message}
+                text={data!.upcoming_event[0].message}
                 style={{ marginBottom: 8 }}
               />
               <Text
-                text={data.upcoming_event[0].additional_text}
+                text={data!.upcoming_event[0].additional_text}
                 // .replace(
                 //   /\s\s+/g,
                 //   "\n"
                 // )
                 style={{ marginBottom: 8 }}
               />
-              <Text text={data.upcoming_event[0].bye} />
+              <Text text={data!.upcoming_event[0].bye} />
               <Text text="Fisch" />
             </ColumnContainer>
           </Modal>

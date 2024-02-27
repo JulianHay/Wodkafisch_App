@@ -19,7 +19,7 @@ const Contact = () => {
   const [notification, setNotification] = useState("");
 
   const sendMail = async () => {
-    const isValidEmail = (email) => {
+    const isValidEmail = (email: string) => {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailPattern.test(email);
     };
@@ -102,21 +102,21 @@ const Contact = () => {
 
             <Input
               value={name}
-              setValue={(e) => {
+              onChange={(e) => {
                 setName(e.target.value);
               }}
               placeholder="Please enter your name"
             />
             <Input
               value={email}
-              setValue={(e) => {
+              onChange={(e) => {
                 setEmail(e.target.value);
               }}
               placeholder="Please enter your email address"
             />
             <MultilineInput
               value={message}
-              setValue={setMessage}
+              onChange={setMessage}
               placeholder="Please enter your message"
             />
             <Button text="Send" onPress={sendMail} />

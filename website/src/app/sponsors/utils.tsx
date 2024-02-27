@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Text } from "../../../components/text";
+import Image from "next/image";
 
 interface ProgressBar {
   percentage: number;
@@ -8,14 +9,51 @@ interface ProgressBar {
   onAnimationStart?: () => void;
   onAnimationEnd?: () => void;
   startAnimation?: boolean;
-  progress?: number;
-  setProgress?: (progress: number) => void;
+  progress: number;
+  setProgress: (progress: number) => void;
 }
 
-const Battlepass = ({ seasonData, sponsorData, itemData }) => {
-  const ProgressBarRef = useRef(null);
+interface seasonData {
+  title: string;
+  max_donation: number;
+  image: string;
+  release_date: string;
+}
+
+interface sponsorData {
+  first_name: string;
+  last_name: string;
+  username: string;
+  sponsor_score: number;
+  season_score: number;
+  bronze_sponsor: number;
+  silver_sponsor: number;
+  gold_sponsor: number;
+  black_sponsor: number;
+  diamond_sponsor: number;
+  unlocked_items: number;
+  unlocked_items_animation: number;
+  season_badges: string[];
+}
+
+interface itemData {
+  price: number;
+  image: string;
+}
+
+interface Battlepass {
+  seasonData: seasonData[];
+  sponsorData: sponsorData[];
+  itemData: itemData[];
+}
+
+const Battlepass = ({ seasonData, sponsorData, itemData }: Battlepass) => {
+  const ProgressBarRef = useRef<HTMLDivElement>(null);
   const [progressBarValue, setProgressBarValue] = useState(0);
   const [progressBarWidth, setProgressBarWidth] = useState(0);
+  const [itemProgesses, setItemProgesses] = useState(
+    new Array(itemData.length).fill(0)
+  );
   const itemSize = 30;
 
   const [imagePaths, setImagePaths] = useState(
@@ -32,7 +70,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
   useEffect(() => {
     const updateWidth = () => {
       if (ProgressBarRef.current) {
-        const width = ProgressBarRef.current.offsetWidth;
+        const width = ProgressBarRef.current?.offsetWidth;
         setProgressBarWidth(width);
       }
     };
@@ -45,9 +83,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
       window.removeEventListener("resize", updateWidth);
     };
   }, []);
-
   const animatedItems = itemData.map((item, index) => {
-    const [progress, setProgress] = useState(0);
     const percentage =
       (sponsorData[0].season_score / seasonData[0].max_donation) * 100;
     const itemStartPercentage =
@@ -78,9 +114,12 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
             justifyContent: "center",
           }}
         >
-          <Text fontSize={8} text={itemData[index].price} />
-          <img
+          <Text fontSize={8} text={itemData[index].price.toString()} />
+          <Image
             src="/fisch_flakes.png"
+            alt="fisch flakes"
+            width={8}
+            height={8}
             style={{ width: 8, height: 8, marginLeft: 3, marginTop: 1.5 }}
           />
         </div>
@@ -96,8 +135,14 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
               : 100
           }
           startAnimation={progressBarValue >= itemStartPercentage}
-          progress={progress}
-          setProgress={setProgress}
+          progress={itemProgesses[index]}
+          setProgress={(newProgress) => {
+            setItemProgesses((prevItemProgresses) => {
+              const updatedItemProgesses = [...prevItemProgresses];
+              updatedItemProgesses[index] = newProgress;
+              return updatedItemProgesses;
+            });
+          }}
           onAnimationStart={() => {
             // unlockAudio.play();
 
@@ -114,13 +159,19 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
           }}
         />
 
-        <img
+        <Image
           src={imagePaths[index]}
+          alt={`chest ${index + 1}`}
+          width={28}
+          height={28}
           style={{ width: 28, height: 28, top: 2, position: "absolute" }}
         />
 
-        <img
-          src={"https://wodkafis.ch/media/" + itemData[index].image}
+        <Image
+          src={"https://www.wodkafis.ch/media/" + itemData[index].image}
+          alt={`item ${index + 1}`}
+          width={28}
+          height={30}
           style={{
             width: 28,
             height: 30,
@@ -150,7 +201,7 @@ const Battlepass = ({ seasonData, sponsorData, itemData }) => {
         setProgress={setProgressBarValue}
       />
       <Text
-        text={sponsorData[0].season_score}
+        text={sponsorData[0].season_score.toString()}
         style={{
           fontSize: 12,
           transform: "translateY(-19px) translateX(8px)",
@@ -183,31 +234,29 @@ const ProgressBar = ({
 }: ProgressBar) => {
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const containerWidth = containerRef.current.offsetWidth;
+    const containerWidth = containerRef.current?.offsetWidth || 300;
     const interval = 2;
-    const increment = (1 / containerWidth) * 100;
+    const increment = (1 / containerWidth) * 300;
     let timer: NodeJS.Timeout;
     if (startAnimation && progress <= percentage) {
       timer = setInterval(() => {
-        setProgress((prevProgress) => {
-          const newProgress = prevProgress + increment;
-          if (newProgress >= percentage) {
-            if (onAnimationEnd) {
-              onAnimationEnd();
-            }
-            clearInterval(timer);
-            return percentage;
-          } else {
-            return newProgress;
+        const newProgress = progress + increment;
+        if (newProgress >= percentage) {
+          if (onAnimationEnd) {
+            onAnimationEnd();
           }
-        });
+          clearInterval(timer);
+          setProgress(percentage);
+        } else {
+          setProgress(newProgress);
+        }
       }, interval);
     }
 
     return () => {
       clearInterval(timer);
     };
-  }, [progress, percentage, onAnimationStart, startAnimation]);
+  }, [progress, startAnimation]);
 
   useEffect(() => {
     if (onAnimationStart && startAnimation) {

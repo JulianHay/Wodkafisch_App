@@ -1,7 +1,7 @@
 "use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface UserState {
+export interface UserState {
   username: string | null;
   accessToken: string | null;
   isSignedIn: boolean;

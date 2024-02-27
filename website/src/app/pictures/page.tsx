@@ -6,8 +6,6 @@ import {
   RowContainer,
   Section,
 } from "../../../components/containers";
-import { FixedSizeGrid as Grid } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { Text } from "../../../components/text";
 import { Button } from "../../../components/buttons";
 import Modal from "../../../components/modal";
@@ -25,40 +23,50 @@ import mapStyle from "../../../utils/mapStyle";
 import { Input } from "../../../components/input";
 import { ErrorMessage, Notification } from "../../../components/messages";
 import { useSelector } from "react-redux";
+import Image from "next/image";
+import { RootState } from "@/lib/store";
+import { FixedSizeGrid as Grid } from "react-window";
 
-interface Item {
-  data: Array<Object>;
-  columnIndex: number;
-  rowIndex: number;
-  style?: React.CSSProperties;
+interface Picture {
+  id: number;
+  lat: number;
+  long: number;
+  description: string;
+  username: string;
+  date: string;
+  user_like: boolean;
+  likes: number;
+  image: string;
+}
+
+interface LatLng {
+  lat: number;
+  lng: number;
 }
 
 const Pictures = () => {
-  const [pictures, setPictures] = useState([]);
+  const [pictures, setPictures] = useState<Picture[]>([]);
   const [loading, setLoading] = useState(true);
-  const [rowCount, setRowCount] = useState(50);
-  const [columnCount, setColmunCount] = useState(50);
   const [isPictureDetailModalVisible, setIsPictureDetailModalVisible] =
     useState(false);
   const [isPictureUploadModalVisible, setIsPictureUploadModalVisible] =
     useState(false);
   const [selectedPictureIndex, setSelectedPictureIndex] = useState(0);
-  const ImageUpload = useRef(null);
+  const ImageUpload = useRef<HTMLInputElement>(null);
   const [selectedPictureForUpload, setSelectedPictureForUpload] =
-    useState(null);
-  const [description, setDescription] = useState(null);
-  const [imagePosition, setImagePosition] = useState({
+    useState<FileList>();
+  const [description, setDescription] = useState<string>();
+  const [imagePosition, setImagePosition] = useState<LatLng>({
     lat: 48.746417,
     lng: 9.105801,
   });
-  const [selectedPicture, setSelectedPicture] = useState(null);
+  const [selectedPicture, setSelectedPicture] = useState<Picture>();
   const [isPictureEditModalVisible, setIsPictureEditModalVisible] =
     useState(false);
   const [notification, setNotification] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-  const { isSignedIn } = useSelector((state) => state.user);
-  const gridRef = useRef(null);
+  const { isSignedIn } = useSelector((state: RootState) => state.user);
   const params = useSearchParams();
   const scrollToIndex = params.get("index");
   const [location, setLocation] = useState({ lat: 0, lng: 0 });
@@ -66,12 +74,99 @@ const Pictures = () => {
   const [sortBy, setSortBy] = useState("date");
   const [isSortOptionModalVisible, setIsSortOptionModalVisible] =
     useState(false);
-  const sortButtonRef = useRef(null);
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
+  const [columnCount, setColumnCount] = useState<number>(3);
+  const [rowCount, setRowCount] = useState<number>(50);
+
+  const itemWidth = 380;
+  const itemHeight = 404;
+
+  useEffect(() => {
+    const getColumnCount = () => {
+      setColumnCount(Math.floor(window.innerWidth / itemWidth));
+      setRowCount(
+        pictures.length === 0
+          ? 50
+          : Math.ceil(
+              pictures.length / Math.floor(window.innerWidth / itemWidth)
+            )
+      );
+    };
+    window.addEventListener("resize", () => {
+      getColumnCount();
+    });
+    return () => {
+      window.removeEventListener("resize", () => {
+        getColumnCount();
+      });
+    };
+  }, []);
+
   const refresh = () => {
     client
       .get("/pictures")
       .then((res) => {
-        setPictures(res.data.pictures);
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              setLocation({ lat: latitude, lng: longitude });
+
+              const haversine = (
+                lat1: number,
+                lon1: number,
+                lat2: number,
+                lon2: number
+              ) => {
+                const r = 6371; // km
+                const p = Math.PI / 180;
+
+                const a =
+                  0.5 -
+                  Math.cos((lat2 - lat1) * p) / 2 +
+                  (Math.cos(lat1 * p) *
+                    Math.cos(lat2 * p) *
+                    (1 - Math.cos((lon2 - lon1) * p))) /
+                    2;
+
+                const distance = 2 * r * Math.asin(Math.sqrt(a));
+                return distance;
+              };
+
+              const addDistance = (data: Picture[]) => {
+                const pictureDataWithDistance = data.map((picture) => {
+                  const distance = haversine(
+                    location.lat,
+                    location.lng,
+                    picture.lat,
+                    picture.long
+                  );
+                  return {
+                    ...picture,
+                    distance: distance,
+                  };
+                });
+                return pictureDataWithDistance;
+              };
+              const pictureDataWithDistance = addDistance(res.data.pictures);
+              setPictures(pictureDataWithDistance);
+              setIsLocationAvailable(true);
+            },
+            (error) => {
+              console.error("Error getting geolocation:", error);
+              setPictures(res.data.pictures);
+            }
+          );
+        } else {
+          console.error("Geolocation is not supported by this browser.");
+          setPictures(res.data.pictures);
+        }
+        setColumnCount(Math.floor(window.innerWidth / itemWidth));
+        setRowCount(
+          Math.ceil(
+            res.data.pictures.length / Math.floor(window.innerWidth / itemWidth)
+          )
+        );
       })
       .finally(() => setLoading(false));
   };
@@ -80,97 +175,36 @@ const Pictures = () => {
     if (isSignedIn) {
       refresh();
     }
-  }, []);
+  }, [isSignedIn]);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ lat: latitude, lng: longitude });
-          const pictureDataWithDistance = addDistance(pictures);
-          setPictures(pictureDataWithDistance);
-          setIsLocationAvailable(true);
-        },
-        (error) => {
-          console.error("Error getting geolocation:", error);
-        }
+    const sortPictures = (type: string) => {
+      const key =
+        type === "date" ? "id" : type === "likes" ? "likes" : "distance";
+      const sortedData = [...pictures].sort(
+        (a: any, b: any) => b[key] - a[key]
       );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-    }
+      setPictures(sortedData);
+      setIsSortOptionModalVisible(false);
+    };
     sortPictures(sortBy);
-  }, [loading]);
+  }, [sortBy]);
 
   useEffect(() => {
+    const scrollTo = (index: number) => {
+      const columnCount = Math.floor(window.innerWidth / itemWidth);
+      const positionToScroll =
+        265 + Math.floor(index / columnCount) * itemHeight;
+      window.scrollTo({
+        top: positionToScroll,
+        behavior: "smooth",
+      });
+    };
+
     scrollToIndex && !loading && scrollTo(parseInt(scrollToIndex));
-  }, [scrollToIndex, loading, columnCount]);
+  }, [scrollToIndex, loading]);
 
-  const scrollTo = (index: number) => {
-    const positionToScroll = 265 + Math.floor(index / columnCount) * itemHeight;
-    window.scrollTo({
-      top: positionToScroll,
-      behavior: "smooth",
-    });
-  };
-
-  const sortPictures = (type: string) => {
-    const key =
-      type === "date" ? "id" : type === "likes" ? "likes" : "distance";
-    const sortedData = [...pictures].sort((a, b) => b[key] - a[key]);
-    setPictures(sortedData);
-    setSortBy(type);
-    setIsSortOptionModalVisible(false);
-  };
-
-  const haversine = (lat1, lon1, lat2, lon2) => {
-    const r = 6371; // km
-    const p = Math.PI / 180;
-
-    const a =
-      0.5 -
-      Math.cos((lat2 - lat1) * p) / 2 +
-      (Math.cos(lat1 * p) *
-        Math.cos(lat2 * p) *
-        (1 - Math.cos((lon2 - lon1) * p))) /
-        2;
-
-    const distance = 2 * r * Math.asin(Math.sqrt(a));
-    return distance;
-  };
-
-  const addDistance = (data) => {
-    const pictureDataWithDistance = data.map((picture) => {
-      const distance = haversine(
-        location.lat,
-        location.lng,
-        picture.lat,
-        picture.long
-      );
-      return {
-        ...picture,
-        distance: distance,
-      };
-    });
-    return pictureDataWithDistance;
-  };
-
-  const itemWidth = 380;
-  const itemHeight = 404;
-
-  const calculateColumnCount = (width: number) => {
-    const colummCount = Math.floor(width / itemWidth);
-    setColmunCount(colummCount);
-    return colummCount;
-  };
-
-  const calculateRowCount = (width: number) => {
-    const rowCount = Math.ceil(pictures.length / Math.floor(width / itemWidth));
-    setRowCount(rowCount);
-    return rowCount;
-  };
-
-  const renderItem = ({ data, columnIndex, rowIndex, style }: Item) => {
+  const renderPicture = ({ data, columnIndex, rowIndex, style }: any) => {
     const index = rowIndex * columnCount + columnIndex;
     return (
       <div style={style}>
@@ -195,7 +229,7 @@ const Pictures = () => {
     );
   };
 
-  const pictureLikePressed = (picture_id, like) => {
+  const pictureLikePressed = (picture_id: number, like: boolean) => {
     const itemIndex = pictures.findIndex((item) => item.id === picture_id);
     if (itemIndex !== -1) {
       const updatedData = [...pictures];
@@ -217,32 +251,43 @@ const Pictures = () => {
   };
 
   const onUploadPicturePressed = () => {
-    ImageUpload.current.click();
+    ImageUpload.current?.click();
     setIsPictureUploadModalVisible(true);
   };
 
   const uploadPicture = async () => {
+    if (!selectedPictureForUpload) {
+      setError("Please select a picture to upload");
+      return;
+    } else if (!description) {
+      setError("Please add a description");
+      return;
+    } else if (!imagePosition) {
+      setError("Please select a location");
+      return;
+    }
+
     const config = {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     };
     const body = new FormData();
-    body.append("image", ImageUpload.current.files[0], description + ".jpeg");
-    body.append("lat", imagePosition.lat);
-    body.append("long", imagePosition.lng);
+    body.append("image", selectedPictureForUpload[0], description + ".jpeg");
+    body.append("lat", imagePosition.lat.toString());
+    body.append("long", imagePosition.lng.toString());
     body.append("description", description);
     try {
       const res = await client.post("/upload_picture", body, config);
       if (res.data.success) {
         setIsPictureUploadModalVisible(false);
         setNotification("Successfully uploaded picture");
-        setDescription(null);
+        setDescription(undefined);
         setImagePosition({
           lat: 48.746417,
           lng: 9.105801,
         });
-        setSelectedPictureForUpload(null);
+        setSelectedPictureForUpload(undefined);
         refresh();
       } else {
         setError(
@@ -264,7 +309,7 @@ const Pictures = () => {
       },
     };
     const body = {
-      id: selectedPicture.id,
+      id: selectedPicture && selectedPicture.id,
       lat: imagePosition.lat,
       long: imagePosition.lng,
       description: description,
@@ -274,12 +319,12 @@ const Pictures = () => {
       if (res.data.success) {
         setIsPictureEditModalVisible(false);
         setNotification("Successfully updated picture");
-        setDescription(null);
+        setDescription(undefined);
         setImagePosition({
           lat: 48.746417,
           lng: 9.105801,
         });
-        setSelectedPicture(null);
+        setSelectedPicture(undefined);
         refresh();
       } else {
         setError(
@@ -328,151 +373,135 @@ const Pictures = () => {
               />
             </RowContainer>
 
-            <input
+            <Input
               type="file"
-              id="file"
-              ref={ImageUpload}
-              onChange={() => {
-                const file = ImageUpload.current.files[0];
-
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setSelectedPictureForUpload(reader.result);
-                  };
-                  reader.readAsDataURL(file);
-                }
+              accept="image/*"
+              value={selectedPictureForUpload as FileList}
+              inputFieldRef={ImageUpload}
+              onChange={(e) => {
+                setSelectedPictureForUpload(
+                  (e as React.ChangeEvent<HTMLInputElement>).target
+                    .files as FileList
+                );
               }}
               style={{ display: "none" }}
             />
           </Section>
 
-          <div style={{ padding: 10 }}>
-            <div
-              style={{
-                flex: "1 1 auto",
-                height: rowCount * itemHeight,
-              }}
+          <Section>
+            <Grid
+              columnCount={columnCount}
+              columnWidth={itemWidth}
+              height={itemHeight * rowCount}
+              rowCount={rowCount}
+              rowHeight={itemHeight}
+              width={itemWidth * columnCount}
+              style={{ overflowY: "hidden" }}
+              itemData={pictures}
             >
-              <AutoSizer>
-                {({ height, width }) => (
-                  <div
-                    style={{
-                      width: width,
-                      height: height,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Grid
-                      columnCount={calculateColumnCount(width)}
-                      columnWidth={itemWidth}
-                      height={itemHeight * rowCount}
-                      rowCount={calculateRowCount(width)}
-                      rowHeight={itemHeight}
-                      width={itemWidth * columnCount}
-                      style={{ overflowY: "hidden" }}
-                      itemData={pictures}
-                      ref={gridRef}
-                    >
-                      {renderItem}
-                    </Grid>
-                  </div>
-                )}
-              </AutoSizer>
-            </div>
-          </div>
+              {renderPicture}
+            </Grid>
+          </Section>
 
-          <Modal
-            isVisible={isPictureDetailModalVisible}
-            onClose={() => setIsPictureDetailModalVisible(false)}
-            style={{ width: "60%", height: "90%" }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                height: "100%",
-              }}
+          {selectedPicture && (
+            <Modal
+              isVisible={isPictureDetailModalVisible}
+              onClose={() => setIsPictureDetailModalVisible(false)}
+              style={{ width: "60%", height: "90%" }}
             >
-              {selectedPictureIndex > 0 ? (
-                <FontAwesomeIcon
-                  icon={faAngleLeft}
-                  onClick={() => {
-                    setSelectedPictureIndex(selectedPictureIndex - 1);
-                  }}
-                  style={{ fontSize: 24, margin: 10, cursor: "pointer" }}
-                />
-              ) : null}
               <div
                 style={{
-                  width: "90%",
-                  height: "90%",
                   display: "flex",
-                  justifyContent: "center",
+                  flexDirection: "row",
                   alignItems: "center",
-                  flexDirection: "column",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: "100%",
                 }}
               >
-                <div style={{ margin: 5 }}>
-                  <Text
-                    text={`${pictures[selectedPictureIndex].description}`}
-                    fontWeight="bold"
+                {selectedPictureIndex > 0 ? (
+                  <FontAwesomeIcon
+                    icon={faAngleLeft}
+                    onClick={() => {
+                      setSelectedPictureIndex(selectedPictureIndex - 1);
+                    }}
+                    style={{ fontSize: 24, margin: 10, cursor: "pointer" }}
                   />
-                </div>
+                ) : null}
                 <div
                   style={{
-                    width: "100%",
-                    height: "100%",
+                    width: "90%",
+                    height: "90%",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    cursor: "pointer",
+                    flexDirection: "column",
                   }}
                 >
-                  <img
-                    src={`https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`}
-                    alt={`${pictures[selectedPictureIndex].description}`}
+                  <div style={{ margin: 5 }}>
+                    <Text
+                      text={`${pictures[selectedPictureIndex].description}`}
+                      fontWeight="bold"
+                    />
+                  </div>
+                  )
+                  <div
                     style={{
-                      maxWidth: "100%",
-                      maxHeight: "100%",
-                      width: "auto",
-                      height: "auto",
-                      borderRadius: 10,
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
                     }}
+                  >
+                    <Image
+                      src={`https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`}
+                      alt={`${pictures[selectedPictureIndex].description}`}
+                      width={500}
+                      height={500}
+                      priority
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        width: "auto",
+                        height: "auto",
+                        borderRadius: 10,
+                        objectFit: "contain",
+                      }}
+                      onClick={() => {
+                        window.open(
+                          `https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`,
+                          "_blank"
+                        );
+                      }}
+                    />
+                  </div>
+                  <div style={{ margin: 5 }}>
+                    <Text
+                      text={`by ${pictures[selectedPictureIndex].username}`}
+                      fontWeight="bold"
+                    />
+                  </div>
+                </div>
+                {selectedPictureIndex + 1 < pictures.length ? (
+                  <FontAwesomeIcon
+                    icon={faAngleRight}
                     onClick={() => {
-                      window.open(
-                        `https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`,
-                        "_blank"
-                      );
+                      setSelectedPictureIndex(selectedPictureIndex + 1);
                     }}
+                    style={{ fontSize: 24, margin: 10, cursor: "pointer" }}
                   />
-                </div>
-                <div style={{ margin: 5 }}>
-                  <Text
-                    text={`by ${pictures[selectedPictureIndex].username}`}
-                    fontWeight="bold"
-                  />
-                </div>
+                ) : null}
               </div>
-              {selectedPictureIndex + 1 < pictures.length ? (
-                <FontAwesomeIcon
-                  icon={faAngleRight}
-                  onClick={() => {
-                    setSelectedPictureIndex(selectedPictureIndex + 1);
-                  }}
-                  style={{ fontSize: 24, margin: 10, cursor: "pointer" }}
-                />
-              ) : null}
-            </div>
-          </Modal>
+            </Modal>
+          )}
 
           <Modal
-            isVisible={isPictureUploadModalVisible && selectedPictureForUpload}
+            isVisible={
+              isPictureUploadModalVisible &&
+              selectedPictureForUpload != undefined
+            }
             onClose={() => setIsPictureUploadModalVisible(false)}
             style={{ width: "40vw" }}
           >
@@ -486,21 +515,28 @@ const Pictures = () => {
                 alignItems: "center",
               }}
             >
-              <img
-                src={selectedPictureForUpload}
-                style={{
-                  height: "30vh",
-                  width: "30vw",
-                  borderRadius: 10,
-                  objectFit: "fill",
-                }}
-              />
+              {selectedPictureForUpload && (
+                <Image
+                  src={URL.createObjectURL(selectedPictureForUpload[0])}
+                  alt="selected picture"
+                  width={300}
+                  height={300}
+                  priority
+                  style={{
+                    height: "30vh",
+                    width: "30vw",
+                    borderRadius: 10,
+                    objectFit: "fill",
+                  }}
+                />
+              )}
               {isLoaded ? (
                 <GoogleMap
                   mapContainerStyle={{
                     height: "30vh",
                     width: "30vw",
                     margin: 10,
+                    borderRadius: 10,
                   }}
                   zoom={4}
                   onLoad={(map) => {
@@ -521,8 +557,8 @@ const Pictures = () => {
                     draggable={true}
                     onDragEnd={(event) => {
                       setImagePosition({
-                        lat: event.latLng.lat(),
-                        lng: event.latLng.lng(),
+                        lat: (event && event.latLng && event.latLng.lat()) || 0,
+                        lng: (event && event.latLng && event.latLng.lng()) || 0,
                       });
                     }}
                     cursor="move"
@@ -531,9 +567,9 @@ const Pictures = () => {
               ) : null}
               <div style={{ width: "30vw" }}>
                 <Input
-                  value={description}
-                  setValue={(e) => {
-                    setDescription(e.target.value);
+                  value={description as string}
+                  onChange={(e) => {
+                    setDescription(e.target.value as string);
                   }}
                   placeholder="Description"
                 />
@@ -549,7 +585,7 @@ const Pictures = () => {
 
           {selectedPicture && (
             <Modal
-              isVisible={isPictureEditModalVisible && selectedPicture}
+              isVisible={isPictureEditModalVisible && selectedPicture !== null}
               onClose={() => setIsPictureEditModalVisible(false)}
               style={{ width: "40vw" }}
             >
@@ -563,8 +599,12 @@ const Pictures = () => {
                   alignItems: "center",
                 }}
               >
-                <img
+                <Image
                   src={`https://www.wodkafis.ch/media/${selectedPicture.image}`}
+                  alt="selected picture"
+                  width={300}
+                  height={300}
+                  priority
                   style={{
                     height: "30vh",
                     width: "30vw",
@@ -578,6 +618,7 @@ const Pictures = () => {
                       height: "30vh",
                       width: "30vw",
                       margin: 10,
+                      borderRadius: 10,
                     }}
                     zoom={4}
                     onLoad={(map) => {
@@ -598,8 +639,10 @@ const Pictures = () => {
                       draggable={true}
                       onDragEnd={(event) => {
                         setImagePosition({
-                          lat: event.latLng.lat(),
-                          lng: event.latLng.lng(),
+                          lat:
+                            (event && event.latLng && event.latLng.lat()) || 0,
+                          lng:
+                            (event && event.latLng && event.latLng.lng()) || 0,
                         });
                       }}
                       cursor="move"
@@ -608,9 +651,9 @@ const Pictures = () => {
                 ) : null}
                 <div style={{ width: "30vw" }}>
                   <Input
-                    value={description}
-                    setValue={(e) => {
-                      setDescription(e.target.value);
+                    value={description as string}
+                    onChange={(e) => {
+                      setDescription(e.target.value as string);
                     }}
                     placeholder="Description"
                   />
@@ -641,7 +684,10 @@ const Pictures = () => {
               <div
                 style={{
                   position: "absolute",
-                  top: sortButtonRef.current?.offsetTop + 40 || 0,
+                  top:
+                    (sortButtonRef.current &&
+                      sortButtonRef.current?.offsetTop + 40) ||
+                    0,
                   left: sortButtonRef.current?.offsetLeft || 0,
                   backgroundColor: "#20213c",
                   borderRadius: 10,
@@ -658,7 +704,6 @@ const Pictures = () => {
                   }}
                   onClick={() => {
                     setSortBy("date");
-                    sortPictures("date");
                     setIsSortOptionModalVisible(false);
                   }}
                 >
@@ -676,7 +721,6 @@ const Pictures = () => {
                   }}
                   onClick={() => {
                     setSortBy("likes");
-                    sortPictures("likes");
                     setIsSortOptionModalVisible(false);
                   }}
                 >
@@ -695,7 +739,6 @@ const Pictures = () => {
                     }}
                     onClick={() => {
                       setSortBy("distance");
-                      sortPictures("distance");
                       setIsSortOptionModalVisible(false);
                     }}
                   >

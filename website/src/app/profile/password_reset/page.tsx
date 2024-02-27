@@ -36,7 +36,7 @@ const PasswordReset = () => {
   const [notification, setNotification] = useState("");
 
   const resetPasswordConfirmation = async () => {
-    const isValidEmail = (email) => {
+    const isValidEmail = (email: string) => {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailPattern.test(email);
     };
@@ -65,8 +65,14 @@ const PasswordReset = () => {
         );
         setConfirmation(true);
       }
-    } catch (err) {
-      setError(Object.values(err.response.data)[0][0]);
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        const errorData: Record<string, any> = err.response.data;
+        const firstError: string = Object.values(errorData)[0][0];
+        setError(firstError);
+      } else {
+        setError("An unknown error occurred.");
+      }
     }
   };
 
@@ -109,12 +115,15 @@ const PasswordReset = () => {
         setPasswordRepeat("");
         router.push("/");
       }
-    } catch (err) {
-      console.log(err.response.data.detail);
-      if (err.response.data.detail) {
+    } catch (err: any) {
+      if (err.response && err.response.data && err.response.data.detail) {
         setError("Token is invalid.");
+      } else if (err.response && err.response.data) {
+        const errorData: Record<string, any> = err.response.data;
+        const firstError: string = Object.values(errorData)[0];
+        setError(firstError);
       } else {
-        setError(Object.values(err.response.data)[0]);
+        setError("An unknown error occurred.");
       }
     }
   };
@@ -146,14 +155,14 @@ const PasswordReset = () => {
               <>
                 <PasswordInput
                   value={password}
-                  setValue={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e)}
                   placeholder="Password"
                   isVisible={isPasswordVisible}
                   setIsVisible={setIsPasswordVisible}
                 />
                 <PasswordInput
                   value={passwordRepeat}
-                  setValue={(e) => setPasswordRepeat(e.target.value)}
+                  onChange={(e) => setPasswordRepeat(e)}
                   placeholder="Repeat Password"
                   isVisible={isPasswordRepeatVisible}
                   setIsVisible={setIsPasswordRepeatVisible}
@@ -161,7 +170,7 @@ const PasswordReset = () => {
 
                 <Input
                   value={token}
-                  setValue={(e) => setToken(e.target.value)}
+                  onChange={(e) => setToken(e.target.value as string)}
                   placeholder="Confirmation Code"
                 />
                 <Button text="Submit" onPress={resetPassword} />
@@ -170,7 +179,7 @@ const PasswordReset = () => {
               <>
                 <Input
                   value={email}
-                  setValue={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value as string)}
                   placeholder="Email"
                 />
 

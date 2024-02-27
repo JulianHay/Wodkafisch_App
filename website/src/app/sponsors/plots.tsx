@@ -28,7 +28,7 @@ interface Item {
 }
 interface Season {
   title: string;
-  maxDonationAmount: number;
+  max_donation: number;
   image: string;
   release_date: string;
 }
@@ -46,7 +46,7 @@ interface SponsorDonationChartProps {
 
 class DonationChartYAxisTick extends PureComponent {
   render() {
-    const { x, y, stroke, payload } = this.props;
+    const { x, y, stroke, payload }: any = this.props;
 
     return (
       <g transform={`translate(${x},${y})`}>
@@ -118,7 +118,9 @@ const CumulativeDonationChart: React.FC<CumulativeDonationChartProps> = ({
                 }}
               >
                 <p>{`Date: ${label}`}</p>
-                <p>{`Amount: ${Math.round(payload[0].value / 1000)}k`}</p>
+                <p>{`Amount: ${Math.round(
+                  (payload[0].value as number) / 1000
+                )}k`}</p>
               </div>
             );
           }
@@ -174,7 +176,6 @@ const SponsorDonationChart: React.FC<SponsorDonationChartProps> = ({
         (cumulativeDonationsMap[date] || 0) + donation.value;
     });
     cumulativeDonationsMap[moment().valueOf()] = 0;
-    console.log(cumulativeDonationsMap);
     const cumulativeDonations: { date: number; cumulativeAmount: number }[] =
       [];
     let cumulativeSum = 0;
@@ -227,7 +228,11 @@ const SponsorDonationChart: React.FC<SponsorDonationChartProps> = ({
     { stroke: "#9370DB", strokeWidth: 2, strokeDasharray: "5 5" }, // Medium purple with dashed stroke
   ];
 
-  function datesBetween(startDate, endDate, numDates) {
+  function datesBetween(
+    startDate: string,
+    endDate: moment.Moment,
+    numDates: number
+  ) {
     const interval = endDate.diff(startDate) / (numDates - 1);
     const dates = [];
 
@@ -290,7 +295,7 @@ const SponsorDonationChart: React.FC<SponsorDonationChartProps> = ({
             <Label
               value={`${index}`}
               content={({ value, viewBox }) => {
-                const { x, y, height, width } = viewBox;
+                const { x, y, height, width }: any = viewBox;
                 return (
                   <image
                     href={"https://wodkafis.ch/media/" + item.image}

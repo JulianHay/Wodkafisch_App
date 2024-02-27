@@ -25,11 +25,40 @@ import { Button, CloseButton } from "../../../components/buttons";
 import "./style.css";
 import { Arrow, calculateRotation } from "./utils";
 import { useSelector } from "react-redux";
+import Image from "next/image";
+import { RootState } from "@/lib/store";
+
+interface LatLngLiteral {
+  lat: number;
+  lng: number;
+}
+interface Picture {
+  id: number;
+  lat: number;
+  long: number;
+  distance: number;
+  description: string;
+  username: string;
+  date: string;
+  user_like: boolean;
+  likes: number;
+  image: string;
+}
+
+interface Event {
+  id: number;
+  lat: number;
+  long: number;
+  country: string;
+  title: string;
+  start: string;
+  image: string;
+}
 
 const MapPage = () => {
   const [loading, setLoading] = useState(true);
-  const [pictureData, setPictureData] = useState([]);
-  const [eventData, setEventData] = useState([]);
+  const [pictureData, setPictureData] = useState<Picture[]>([]);
+  const [eventData, setEventData] = useState<Event[]>([]);
   const [selectedMarker, setSelectedMarker] = useState(-1);
   const [selectedEvent, setSelectedEvent] = useState(-1);
   const [showRoute, setShowRoute] = useState(false);
@@ -38,7 +67,7 @@ const MapPage = () => {
   const lat = params.get("lat");
   const lng = params.get("lng");
   const zoom = params.get("zoom");
-  const { isSignedIn } = useSelector((state) => state.user);
+  const { isSignedIn } = useSelector((state: RootState) => state.user);
   useEffect(() => {
     if (isSignedIn) {
       client
@@ -49,7 +78,7 @@ const MapPage = () => {
         })
         .finally(() => setLoading(false));
     }
-  }, []);
+  }, [isSignedIn]);
 
   const countries = eventData
     .map((event) => {
@@ -61,7 +90,7 @@ const MapPage = () => {
 
   const fischRoute = eventData
     .map((event) => ({ lat: event.lat, lng: event.long }))
-    .filter((data) => data && data.latitude !== null);
+    .filter((data) => data && data.lat !== null);
   const RouteMarkerData = fischRoute
     .map((coord, index) =>
       calculateRotation(coord, fischRoute[index - 1], true, 0)
@@ -87,17 +116,17 @@ const MapPage = () => {
             <OverlayViewF
               mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
               position={{
-                lat: markerProps?.coordinate.lat,
-                lng: markerProps?.coordinate.lng,
+                lat: markerProps?.coordinate.lat || 0,
+                lng: markerProps?.coordinate.lng || 0,
               }}
               key={eventData[index].title}
-              clickable={false}
+              // clickable={false}
             >
               <Arrow
                 color={"#2121b4"}
                 size={20}
                 index={index + 1}
-                rotation={markerProps?.rotation}
+                rotation={markerProps?.rotation || 0}
               />
             </OverlayViewF>
           );
@@ -177,9 +206,12 @@ const MapPage = () => {
                     router.push(`/pictures?index=${index}`);
                   }}
                 >
-                  <img
+                  <Image
                     src={`https://www.wodkafis.ch/media/${pictureData[index].image}`}
                     alt={`${pictureData[index].description}`}
+                    width={250}
+                    height={185}
+                    priority
                     style={{
                       maxWidth: 250,
                       maxHeight: 185,
@@ -206,19 +238,19 @@ const MapPage = () => {
       const coordinates =
         country?.geometry.type === "MultiPolygon"
           ? country.geometry.coordinates.map((coord) =>
-              coord[0].map((c) => ({
-                lat: c[1],
-                lng: c[0],
+              coord[0].map((c: number | number[]) => ({
+                lat: Array.isArray(c) ? c[1] : c,
+                lng: Array.isArray(c) ? c[0] : c,
               }))
             )
-          : country.geometry.coordinates[0].map((coord) => ({
+          : country?.geometry.coordinates[0].map((coord) => ({
               lat: coord[1],
               lng: coord[0],
             }));
       return (
         <Fragment key={`${country?.properties.name}-${index}`}>
           <Polygon
-            paths={coordinates}
+            paths={coordinates as LatLngLiteral[][]}
             options={polygonOptions}
             onClick={() => {
               setSelectedEvent(index);
@@ -246,9 +278,12 @@ const MapPage = () => {
                 >
                   <Text text={eventData[index].title} />
                   <div style={{ margin: 10 }}>
-                    <img
+                    <Image
                       src={`https://www.wodkafis.ch/media/${eventData[index].image}`}
                       alt={`${pictureData[index].description}`}
+                      width={150}
+                      height={150}
+                      priority
                       style={{
                         maxWidth: "150px",
                         maxHeight: "150px",
@@ -285,11 +320,11 @@ const MapPage = () => {
                 width: "80vw",
                 borderRadius: 10,
               }}
-              zoom={parseFloat(zoom) || 4}
+              zoom={(zoom && parseFloat(zoom)) || 4}
               onLoad={(map) => {
                 map.panTo({
-                  lat: parseFloat(lat) || 48.746417,
-                  lng: parseFloat(lng) || 9.105801,
+                  lat: (lat && parseFloat(lat)) || 48.746417,
+                  lng: (lng && parseFloat(lng)) || 9.105801,
                 });
               }}
               options={{

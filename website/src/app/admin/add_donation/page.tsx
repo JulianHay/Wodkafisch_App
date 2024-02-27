@@ -15,72 +15,85 @@ import { ErrorMessage, Notification } from "../../../../components/messages";
 import { Button } from "../../../../components/buttons";
 import { useSelector } from "react-redux";
 import { AutocompleteInput, Input } from "../../../../components/input";
+import { RootState } from "@/lib/store";
+
+interface User {
+  first_name: string;
+  last_name: string;
+}
+
+interface Donation extends User {
+  donation: number;
+}
+
+interface UserList {
+  firstName: string;
+  lastName: string;
+}
 
 const AddDonation = () => {
-  const { router } = useRouter();
+  const router = useRouter();
 
-  const [firstName, setFirstName] = useState("");
+  const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState("");
   const [donation, setDonation] = useState<number>();
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
-  const [addedDonations, setAddedDonations] = useState([]);
+  const [addedDonations, setAddedDonations] = useState<Donation[]>([]);
 
-  const [userFirstNames, setUserFirstNames] = useState([]);
-  const [userLastNames, setUserLastNames] = useState([]);
-  const [users, setUsers] = useState([]);
-  const { isAdmin } = useSelector((state) => state.user);
+  const [userFirstNames, setUserFirstNames] = useState<string[]>([]);
+  const [userLastNames, setUserLastNames] = useState<string[]>([]);
+  const [users, setUsers] = useState<UserList[]>([]);
+  const { isAdmin } = useSelector((state: RootState) => state.user);
   useEffect(() => {
     if (isAdmin) {
       client.get("/admin/user_list").then((res) => {
         setUsers(
-          res.data.map((user) => {
+          res.data.map((user: User) => {
             return { firstName: user.first_name, lastName: user.last_name };
           })
         );
-        setUserFirstNames(res.data.map((user) => user.first_name));
-        setUserLastNames(res.data.map((user) => user.last_name));
+        setUserFirstNames(res.data.map((user: User) => user.first_name));
+        setUserLastNames(res.data.map((user: User) => user.last_name));
       });
     }
-  }, []);
-
-  const handleFirstNameChange = (firstName: string) => {
-    if (firstName === "") {
-      setLastName("");
-      setUserFirstNames(users ? users.map((user) => user.firstName) : []);
-      setUserLastNames(users ? users.map((user) => user.lastName) : []);
-    } else {
-      const filteredSuggestions = users.filter((user) =>
-        user.firstName.toLowerCase().startsWith(firstName.toLowerCase())
-      );
-      setUserLastNames(filteredSuggestions.map((user) => user.lastName));
-      if (filteredSuggestions.length === 1) {
-        setLastName(filteredSuggestions[0].lastName);
-      }
-    }
-  };
+  }, [isAdmin, setUsers, setUserFirstNames, setUserLastNames]);
 
   useEffect(() => {
+    const handleFirstNameChange = (firstName: string) => {
+      if (firstName === "") {
+        setLastName("");
+        setUserFirstNames(users ? users.map((user) => user.firstName) : []);
+        setUserLastNames(users ? users.map((user) => user.lastName) : []);
+      } else {
+        const filteredSuggestions = users.filter((user) =>
+          user.firstName.toLowerCase().startsWith(firstName.toLowerCase())
+        );
+        setUserLastNames(filteredSuggestions.map((user) => user.lastName));
+        if (filteredSuggestions.length === 1) {
+          setLastName(filteredSuggestions[0].lastName);
+        }
+      }
+    };
     handleFirstNameChange(firstName);
   }, [firstName]);
 
-  const handleLastNameChange = (lastName: string) => {
-    if (lastName === "" && firstName !== "") {
-      setUserLastNames(users ? users.map((user) => user.lastName) : []);
-    } else {
-      const filteredSuggestions = users.filter((user) =>
-        user.lastName.toLowerCase().startsWith(lastName.toLowerCase())
-      );
-      if (firstName === "") {
-        setUserFirstNames(filteredSuggestions.map((user) => user.firstName));
-      }
-      if (filteredSuggestions.length === 1) {
-        setFirstName(filteredSuggestions[0].firstName);
-      }
-    }
-  };
-
   useEffect(() => {
+    const handleLastNameChange = (lastName: string) => {
+      if (lastName === "" && firstName !== "") {
+        setUserLastNames(users ? users.map((user) => user.lastName) : []);
+      } else {
+        const filteredSuggestions = users.filter((user) =>
+          user.lastName.toLowerCase().startsWith(lastName.toLowerCase())
+        );
+        if (firstName === "") {
+          setUserFirstNames(filteredSuggestions.map((user) => user.firstName));
+        }
+        if (filteredSuggestions.length === 1) {
+          setFirstName(filteredSuggestions[0].firstName);
+        }
+      }
+    };
     handleLastNameChange(lastName);
   }, [lastName]);
 
@@ -170,13 +183,13 @@ const AddDonation = () => {
             <Text text="Add Donation" fontWeight="bold" fontSize={30} />
             <AutocompleteInput
               value={firstName}
-              setValue={setFirstName}
+              onChange={(e) => setFirstName(e as string)}
               placeholder="First Name"
               options={userFirstNames}
             />
             <AutocompleteInput
               value={lastName}
-              setValue={setLastName}
+              onChange={(e) => setLastName(e as string)}
               placeholder="Last Name"
               options={userLastNames}
               allowEmpty={
@@ -184,9 +197,9 @@ const AddDonation = () => {
               }
             />
             <Input
-              value={donation}
-              setValue={(e) => {
-                setDonation(parseFloat(e.target.value));
+              value={donation as number}
+              onChange={(e) => {
+                setDonation(e.target.value as unknown as number);
               }}
               placeholder="Donation Amount in €"
               type="number"
@@ -194,7 +207,7 @@ const AddDonation = () => {
             <Button
               text="Submit"
               onPress={() => {
-                addDonation(firstName, lastName, donation);
+                addDonation(firstName, lastName, donation as number);
               }}
             />
 

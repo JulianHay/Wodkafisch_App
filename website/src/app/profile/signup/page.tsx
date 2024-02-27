@@ -23,7 +23,7 @@ import {
 } from "../../../../components/input";
 
 const SignUp = () => {
-  const { router } = useRouter();
+  const router = useRouter();
 
   const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -37,7 +37,7 @@ const SignUp = () => {
   const [notification, setNotification] = useState("");
 
   const signUp = async () => {
-    const isValidEmail = (email) => {
+    const isValidEmail = (email: string) => {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailPattern.test(email);
     };
@@ -129,39 +129,37 @@ const SignUp = () => {
             <Text text="Sign Up" fontWeight="bold" fontSize={30} />
             <Input
               value={firstName}
-              setValue={(e) => setFirstName(e.target.value)}
+              onChange={(e) => setFirstName(e.target.value)}
               placeholder="First Name"
             />
             <Input
               value={lastName}
-              setValue={(e) => setLastName(e.target.value)}
+              onChange={(e) => setLastName(e.target.value)}
               placeholder="Last Name"
             />
             <Input
               value={email}
-              setValue={(e) => {
+              onChange={(e) => {
                 setEmail(e.target.value);
               }}
               placeholder="Email"
             />
             <Input
               value={username}
-              setValue={(e) => setUsername(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
               placeholder="Username"
             />
             <PasswordInput
               value={password}
-              setValue={(e) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e)}
               placeholder="Old Password"
-              type="password"
               isVisible={isPasswordVisible}
               setIsVisible={setIsPasswordVisible}
             />
             <PasswordInput
               value={passwordRepeat}
-              setValue={(e) => setPasswordRepeat(e.target.value)}
+              onChange={(e) => setPasswordRepeat(e)}
               placeholder="Repeat New Password"
-              type="password"
               isVisible={isPasswordRepeatVisible}
               setIsVisible={setIsPasswordRepeatVisible}
             />

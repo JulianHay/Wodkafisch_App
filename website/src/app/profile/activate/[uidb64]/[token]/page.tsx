@@ -15,7 +15,7 @@ const ActivateAccount = () => {
 
   useEffect(() => {
     activateAccount(uidb64, token);
-  }, []);
+  }, [uidb64, token]);
 
   const activateAccount = async (uidb64: string, token: string) => {
     const config = {

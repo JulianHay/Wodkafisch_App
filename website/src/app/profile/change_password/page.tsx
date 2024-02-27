@@ -23,7 +23,7 @@ import {
 } from "../../../../components/input";
 
 const PasswordReset = () => {
-  const { router } = useRouter();
+  const router = useRouter();
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -109,25 +109,22 @@ const PasswordReset = () => {
             <Text text="Password Reset" fontWeight="bold" fontSize={30} />
             <PasswordInput
               value={oldPassword}
-              setValue={(e) => setOldPassword(e.target.value)}
+              onChange={(e) => setOldPassword(e)}
               placeholder="Old Password"
-              type="password"
               isVisible={isOldPasswordVisible}
               setIsVisible={setIsOldPasswordVisible}
             />
             <PasswordInput
               value={newPassword}
-              setValue={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => setNewPassword(e)}
               placeholder="New Password"
-              type="password"
               isVisible={isNewPasswordVisible}
               setIsVisible={setIsNewPasswordVisible}
             />
             <PasswordInput
               value={newPasswordRepeat}
-              setValue={(e) => setNewPasswordRepeat(e.target.value)}
+              onChange={(e) => setNewPasswordRepeat(e)}
               placeholder="Repeat New Password"
-              type="password"
               isVisible={isNewPasswordRepeatVisible}
               setIsVisible={setIsNewPasswordRepeatVisible}
             />
