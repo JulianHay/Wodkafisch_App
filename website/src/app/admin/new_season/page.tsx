@@ -479,7 +479,7 @@ const NewSeason = () => {
                                   }}
                                 />
                                 <Image
-                                  src={"/Chest_open.png"}
+                                  src={"/chest_open.png"}
                                   alt="Chest Open"
                                   width={28}
                                   height={28}

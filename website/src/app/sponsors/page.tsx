@@ -97,6 +97,9 @@ const Sponsors = () => {
   });
   const [loading, setLoading] = useState(true);
   const sponsorListRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState<string | number>(
+    "100%"
+  );
   const router = useRouter();
   const { isSignedIn } = useSelector((state: RootState) => state.user);
   const refresh = () => {
@@ -108,6 +111,10 @@ const Sponsors = () => {
       })
       .finally(() => setLoading(false));
   };
+  console.log(data);
+  useEffect(() => {
+    setContainerHeight(sponsorListRef.current?.offsetHeight || "100%");
+  }, [sponsorListRef.current]);
 
   useEffect(() => {
     if (isSignedIn) {
@@ -508,7 +515,8 @@ const Sponsors = () => {
 
               <ColumnContainer
                 style={{
-                  height: sponsorListRef.current?.offsetHeight || "100%",
+                  height: containerHeight, //sponsorListRef.current?.offsetHeight || "100%",
+                  minHeight: 1006.6,
                   width: 375,
                   margin: 15,
                   display: "flex",
