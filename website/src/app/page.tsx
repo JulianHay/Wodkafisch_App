@@ -287,7 +287,7 @@ export default function Home() {
                     <Text text={data!.upcoming_event[0].title} fontSize={16} />
                     <Image
                       src={
-                        "https://wodkafis.ch/media/" +
+                        "https://www.wodkafis.ch/media/" +
                         data!.upcoming_event[0].image
                       }
                       alt="Upcoming Event Fisch Logo"
