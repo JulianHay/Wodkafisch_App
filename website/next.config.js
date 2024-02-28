@@ -15,6 +15,12 @@ const nextConfig = {
         port: '',
         pathname: '/intl/en_us/badges/static/images/badges/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.websitepolicies.io',
+        port: '',
+        pathname: '/img/**',
+      },
     ],
   },
 }

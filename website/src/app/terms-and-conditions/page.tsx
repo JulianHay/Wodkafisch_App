@@ -5,6 +5,7 @@ import {
   Section,
 } from "../../../components/containers";
 import { Text } from "../../../components/text";
+import Image from "next/image";
 
 const TermsAndConditions = () => {
   return (
@@ -12,7 +13,7 @@ const TermsAndConditions = () => {
       <RowContainer>
         <ColumnContainer style={{ width: "60%", alignItems: "center" }}>
           <Text
-            text="About the Wodkafisch"
+            text="Terms and Conditions"
             fontSize={30}
             fontWeight="bold"
             style={{ margin: 40 }}
@@ -337,12 +338,13 @@ const TermsAndConditions = () => {
                 target="_blank"
                 rel="nofollow"
               >
-                <img
+                <Image
                   width="200"
                   height="25"
+                  quality={100}
                   alt="Made with WebsitePolicies"
                   src="https://cdn.websitepolicies.io/img/badge.png"
-                  srcSet="https://cdn.websitepolicies.io/img/badge_2x.png 2x"
+                  // srcSet="https://cdn.websitepolicies.io/img/badge_2x.png 2x"
                 />
               </a>
             </p>
