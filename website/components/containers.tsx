@@ -326,6 +326,7 @@ const Section = ({ style, type = "dark", children }: Section) => {
         alignItems: "center",
         backgroundColor:
           type === "light" ? "#000022ff" : type === "dark" ? "#000022ff" : "",
+        color: type === "light" ? "white" : type === "dark" ? "white" : "",
         ...style,
       }}
     >
