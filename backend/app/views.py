@@ -268,7 +268,7 @@ class LoginView(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
-        is_admin = User.objects.get(username=user).is_superuser
+        is_admin = User.objects.get(username=user).is_staff
         return Response({
             'success': 'token generated',
             'token': token.key,
