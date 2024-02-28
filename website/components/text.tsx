@@ -5,9 +5,10 @@ interface Text {
   fontWeight?: string;
   fontSize?: number;
   style?: React.CSSProperties;
+  id?: string;
 }
 
-const Text = ({ text, fontSize, fontWeight, style }: Text) => {
+const Text = ({ text, fontSize, fontWeight, style, id }: Text) => {
   return (
     <p
       style={{
@@ -15,6 +16,7 @@ const Text = ({ text, fontSize, fontWeight, style }: Text) => {
         fontWeight: fontWeight ? fontWeight : "normal",
         ...style,
       }}
+      id={id}
     >
       {text}
     </p>
