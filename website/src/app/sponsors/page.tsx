@@ -543,7 +543,7 @@ const Sponsors = () => {
                 </FlexCard>
 
                 <FlexCard
-                  title="Fisch Balance"
+                  title="Accumulated Donations"
                   style={{
                     width: "100%",
                     minWidth: 195,
