@@ -111,7 +111,6 @@ const Sponsors = () => {
       })
       .finally(() => setLoading(false));
   };
-  console.log(data);
   useEffect(() => {
     setContainerHeight(sponsorListRef.current?.offsetHeight || "100%");
   }, [sponsorListRef.current]);

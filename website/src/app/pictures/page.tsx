@@ -403,99 +403,99 @@ const Pictures = () => {
             </Grid>
           </Section>
 
-          {/* {selectedPicture && ( */}
-          <Modal
-            isVisible={isPictureDetailModalVisible}
-            onClose={() => setIsPictureDetailModalVisible(false)}
-            style={{ width: "60%", height: "90%" }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                height: "100%",
-              }}
+          {pictures[selectedPictureIndex] && (
+            <Modal
+              isVisible={isPictureDetailModalVisible}
+              onClose={() => setIsPictureDetailModalVisible(false)}
+              style={{ width: "60%", height: "90%" }}
             >
-              {selectedPictureIndex > 0 ? (
-                <FontAwesomeIcon
-                  icon={faAngleLeft}
-                  onClick={() => {
-                    setSelectedPictureIndex(selectedPictureIndex - 1);
-                  }}
-                  style={{ fontSize: 24, margin: 10, cursor: "pointer" }}
-                />
-              ) : null}
               <div
                 style={{
-                  width: "90%",
-                  height: "90%",
                   display: "flex",
-                  justifyContent: "center",
+                  flexDirection: "row",
                   alignItems: "center",
-                  flexDirection: "column",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: "100%",
                 }}
               >
-                <div style={{ margin: 5 }}>
-                  <Text
-                    text={`${pictures[selectedPictureIndex].description}`}
-                    fontWeight="bold"
+                {selectedPictureIndex > 0 ? (
+                  <FontAwesomeIcon
+                    icon={faAngleLeft}
+                    onClick={() => {
+                      setSelectedPictureIndex(selectedPictureIndex - 1);
+                    }}
+                    style={{ fontSize: 24, margin: 10, cursor: "pointer" }}
                   />
-                </div>
-
+                ) : null}
                 <div
                   style={{
-                    width: "100%",
-                    height: "100%",
+                    width: "90%",
+                    height: "90%",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    cursor: "pointer",
+                    flexDirection: "column",
                   }}
                 >
-                  <Image
-                    src={`https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`}
-                    alt={`${pictures[selectedPictureIndex].description}`}
-                    width={500}
-                    height={500}
-                    priority
+                  <div style={{ margin: 5 }}>
+                    <Text
+                      text={`${pictures[selectedPictureIndex].description}`}
+                      fontWeight="bold"
+                    />
+                  </div>
+
+                  <div
                     style={{
-                      maxWidth: "100%",
-                      maxHeight: "100%",
-                      width: "auto",
-                      height: "auto",
-                      borderRadius: 10,
-                      objectFit: "contain",
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
                     }}
+                  >
+                    <Image
+                      src={`https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`}
+                      alt={`${pictures[selectedPictureIndex].description}`}
+                      width={500}
+                      height={500}
+                      priority
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        width: "auto",
+                        height: "auto",
+                        borderRadius: 10,
+                        objectFit: "contain",
+                      }}
+                      onClick={() => {
+                        window.open(
+                          `https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`,
+                          "_blank"
+                        );
+                      }}
+                    />
+                  </div>
+                  <div style={{ margin: 5 }}>
+                    <Text
+                      text={`by ${pictures[selectedPictureIndex].username}`}
+                      fontWeight="bold"
+                    />
+                  </div>
+                </div>
+                {selectedPictureIndex + 1 < pictures.length ? (
+                  <FontAwesomeIcon
+                    icon={faAngleRight}
                     onClick={() => {
-                      window.open(
-                        `https://www.wodkafis.ch/media/${pictures[selectedPictureIndex].image}`,
-                        "_blank"
-                      );
+                      setSelectedPictureIndex(selectedPictureIndex + 1);
                     }}
+                    style={{ fontSize: 24, margin: 10, cursor: "pointer" }}
                   />
-                </div>
-                <div style={{ margin: 5 }}>
-                  <Text
-                    text={`by ${pictures[selectedPictureIndex].username}`}
-                    fontWeight="bold"
-                  />
-                </div>
+                ) : null}
               </div>
-              {selectedPictureIndex + 1 < pictures.length ? (
-                <FontAwesomeIcon
-                  icon={faAngleRight}
-                  onClick={() => {
-                    setSelectedPictureIndex(selectedPictureIndex + 1);
-                  }}
-                  style={{ fontSize: 24, margin: 10, cursor: "pointer" }}
-                />
-              ) : null}
-            </div>
-          </Modal>
-          {/* )} */}
+            </Modal>
+          )}
 
           <Modal
             isVisible={
