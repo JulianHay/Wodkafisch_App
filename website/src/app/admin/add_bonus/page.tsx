@@ -58,7 +58,7 @@ const AddBonus = () => {
           )}`
         );
         setDate("");
-        setValue(undefined);
+        setValue(NaN);
       } else {
         setError("An error occured while adding the bonus. Please try again.");
       }
@@ -96,7 +96,7 @@ const AddBonus = () => {
 
             <Input
               value={value as number}
-              onChange={(e) => setValue(e.target.value as unknown as number)}
+              onChange={(e) => setValue(parseFloat(e.target.value))}
               placeholder="Bonus in %"
               type="number"
             />

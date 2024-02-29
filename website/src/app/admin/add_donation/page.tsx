@@ -199,7 +199,7 @@ const AddDonation = () => {
             <Input
               value={donation as number}
               onChange={(e) => {
-                setDonation(e.target.value as unknown as number);
+                setDonation(parseFloat(e.target.value));
               }}
               placeholder="Donation Amount in €"
               type="number"
