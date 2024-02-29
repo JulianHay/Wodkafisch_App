@@ -39,6 +39,7 @@ const PictureDetailModal = ({
                       latitude: pictureData[index].lat,
                       longitude: pictureData[index].long,
                     };
+                    setVisible(false);
                     navigation.navigate("Map", { coords: coords });
                   }}
                 >
