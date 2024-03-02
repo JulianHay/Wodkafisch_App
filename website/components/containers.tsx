@@ -335,6 +335,34 @@ const Section = ({ style, type = "dark", children }: Section) => {
   );
 };
 
+const ChatContainer = ({ title, children, ContainerRef }: Card) => {
+  return (
+    <div ref={ContainerRef} style={{ marginBottom: 10, width: "100%" }}>
+      <h2
+        style={{
+          color: "white",
+          fontWeight: "bold",
+          fontSize: 18,
+          marginLeft: 5,
+          marginBottom: 3,
+        }}
+      >
+        {title}
+      </h2>
+      <div
+        style={{
+          backgroundColor: "#20213cff",
+          borderRadius: 10,
+          padding: 5,
+          width: "100%",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
 export {
   Card,
   TouchaleCard,
@@ -343,4 +371,5 @@ export {
   ColumnContainer,
   Section,
   ImageCard,
+  ChatContainer,
 };

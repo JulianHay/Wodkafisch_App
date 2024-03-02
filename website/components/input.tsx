@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 
@@ -302,4 +302,92 @@ const PasswordInput = ({
   );
 };
 
-export { Input, AutocompleteInput, MultilineInput, PasswordInput };
+interface ExpandingGPTInput {
+  value: string;
+  onChange: (
+    event:
+      | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLInputElement>
+  ) => void;
+  onEnter?: () => void;
+}
+function ExpandingGPTInput({ value, onChange, onEnter }: ExpandingGPTInput) {
+  const [height, setHeight] = useState("auto");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleChange = (
+    event:
+      | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLInputElement>
+  ) => {
+    onChange(event);
+    adjustHeight();
+  };
+
+  // const adjustHeight = (element: HTMLTextAreaElement) => {
+  //   // setHeight("auto");
+  //   setHeight(`${element.scrollHeight}px`);
+  // };
+
+  const adjustHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && event.shiftKey) {
+      event.preventDefault();
+      const textarea = event.currentTarget as HTMLTextAreaElement;
+      const selectionStart = textarea.selectionStart;
+      const selectionEnd = textarea.selectionEnd;
+      const value = textarea.value;
+
+      textarea.value =
+        value.substring(0, selectionStart) +
+        "\n" +
+        value.substring(selectionEnd);
+
+      textarea.selectionStart = textarea.selectionEnd = selectionStart + 1;
+
+      const changeEvent = new Event("input", { bubbles: true });
+      textarea.dispatchEvent(changeEvent);
+      adjustHeight();
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      onEnter && onEnter();
+      return;
+    }
+  };
+
+  return (
+    <textarea
+      id="expanding-text-input"
+      ref={textareaRef}
+      value={value}
+      onChange={handleChange}
+      onKeyDown={handleKeyDown}
+      placeholder="Type a message..."
+      style={{
+        height,
+        color: "black",
+        borderRadius: 3,
+        paddingLeft: 5,
+        paddingRight: 40,
+        width: "100%",
+        margin: 3,
+        resize: "none",
+      }}
+    />
+  );
+}
+
+export {
+  Input,
+  AutocompleteInput,
+  MultilineInput,
+  PasswordInput,
+  ExpandingGPTInput,
+};
