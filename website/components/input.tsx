@@ -1,7 +1,12 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
+import {
+  faEye,
+  faEyeSlash,
+  faSquare,
+  faSquareCheck,
+} from "@fortawesome/free-regular-svg-icons";
 
 interface Input {
   value: string | number | FileList;
@@ -384,10 +389,122 @@ function ExpandingGPTInput({ value, onChange, onEnter }: ExpandingGPTInput) {
   );
 }
 
+interface Option {
+  value: string;
+  text: string;
+}
+
+interface SelectDropdown {
+  options: Option[];
+  onChange: (value: string) => void;
+  placeholder: string;
+  style?: React.CSSProperties;
+}
+
+function SelectDropdown({
+  options,
+  onChange,
+  placeholder,
+  style,
+}: SelectDropdown) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string>();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const handleOptionClick = (option: Option) => {
+    setSelectedValue(option.text);
+    onChange(option.value);
+    setIsOpen(false);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="custom-dropdown" ref={dropdownRef} style={style}>
+      <div
+        className="custom-dropdown-toggle"
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          backgroundColor: selectedValue?.startsWith("#")
+            ? selectedValue
+            : undefined,
+        }}
+      >
+        {selectedValue
+          ? selectedValue.startsWith("#")
+            ? null
+            : selectedValue
+          : placeholder}
+      </div>
+      {isOpen && (
+        <div className="custom-dropdown-options">
+          {options.map((option, index) => (
+            <div
+              key={index}
+              className="custom-dropdown-option"
+              onClick={() => handleOptionClick(option)}
+              style={{
+                backgroundColor: option.text.startsWith("#")
+                  ? option.text
+                  : undefined,
+              }}
+            >
+              {option.text.startsWith("#") ? null : option.text}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface CheckBoxProps {
+  onChange: (isChecked: boolean) => void;
+  style: React.CSSProperties;
+  // value: string;
+}
+const CheckBox: React.FC<CheckBoxProps> = ({ onChange, style }) => {
+  const [isChecked, setIsChecked] = useState(false);
+  return isChecked ? (
+    <FontAwesomeIcon
+      icon={faSquareCheck}
+      onClick={() => {
+        onChange(!isChecked);
+        setIsChecked(false);
+      }}
+      style={{ cursor: "pointer", ...style }}
+    />
+  ) : (
+    <FontAwesomeIcon
+      icon={faSquare}
+      onClick={() => {
+        onChange(!isChecked);
+        setIsChecked(true);
+      }}
+      style={{ cursor: "pointer", ...style }}
+    />
+  );
+};
+
 export {
   Input,
   AutocompleteInput,
   MultilineInput,
   PasswordInput,
   ExpandingGPTInput,
+  SelectDropdown,
+  CheckBox,
 };
