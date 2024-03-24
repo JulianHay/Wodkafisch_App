@@ -25,6 +25,10 @@ interface Card extends Container {
   title: string;
 }
 
+interface FlexCard extends Card {
+  innerStyle: React.CSSProperties;
+}
+
 interface TouchaleCard extends Card {
   onPress: () => void;
 }
@@ -77,7 +81,13 @@ const Card = ({ title, children, ContainerRef }: Card) => {
   );
 };
 
-const FlexCard = ({ title, children, style, ContainerRef }: Card) => {
+const FlexCard = ({
+  title,
+  children,
+  style,
+  ContainerRef,
+  innerStyle,
+}: FlexCard) => {
   return (
     <div ref={ContainerRef} style={{ margin: 15, ...style }}>
       <h2
@@ -96,6 +106,7 @@ const FlexCard = ({ title, children, style, ContainerRef }: Card) => {
           backgroundColor: "#20213cff",
           borderRadius: 10,
           padding: 5,
+          ...innerStyle,
         }}
       >
         {children}
