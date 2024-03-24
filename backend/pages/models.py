@@ -125,3 +125,14 @@ class ExpoToken(models.Model):
 class AppInfo(models.Model):
     version = models.CharField(max_length=50)
     update = models.BooleanField(default=False)
+
+class Merch(models.Model):
+    item = models.ForeignKey('SeasonItem', on_delete=models.CASCADE)
+    color = models.CharField(max_length=10, blank=True)
+    size = models.CharField(max_length=5, blank=True)
+    stock_amount = models.PositiveIntegerField(default=0)
+
+class UnlockedItems(models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    item = models.ForeignKey('SeasonItem', on_delete=models.CASCADE)
+    distributed = models.BooleanField(default=False)
