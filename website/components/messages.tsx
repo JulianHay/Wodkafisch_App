@@ -74,6 +74,12 @@ const Notification = ({
     }, 3000);
     return () => clearTimeout(timer);
   }, [message, onClose]);
+  const formattedMessage = message.split("\n").map((line, index) => (
+    <React.Fragment key={index}>
+      {line}
+      <br />
+    </React.Fragment>
+  ));
   return (
     <div
       style={{
@@ -103,7 +109,7 @@ const Notification = ({
       >
         <FontAwesomeIcon icon={faClose} />
       </button>
-      <p>{message}</p>
+      <p>{formattedMessage}</p>
     </div>
   );
 };
