@@ -7,7 +7,7 @@ from django.conf import settings
 import re
 #from django.core.mail import send_mail
 from django.contrib.auth.models import User
-from pages.models import SeasonItem,Season, Profile, Sponsor, ExpoToken, SeasonBadge
+from pages.models import SeasonItem,Season, Profile, Sponsor, ExpoToken, SeasonBadge, UnlockedItems
 from .models import Donation, Promo
 from datetime import datetime, timedelta
 import pytz
@@ -58,6 +58,9 @@ def add_donation(first_name,last_name,donation):
     notification_token = ExpoToken.objects.get(id=user.expo_token_id)
     for i, item in enumerate(items):
         if sponsor.season_score >= item.price and sponsor.unlocked_items < i + 1:
+
+            UnlockedItems.objects.create(user=user, item=item, distributed=False)
+
             if notification_token:
                 send_push_notifications([notification_token.token],
                                         'New Item Unlocked!',
@@ -94,7 +97,6 @@ def add_donation(first_name,last_name,donation):
                       subject=subject,
                       body=message,
                       to=['spenden@wodkafis.ch'])
-            #send_mail(subject, message, 'spenden@wodkafis.ch', ['spenden@wodkafis.ch'])
 
             sponsor.unlocked_items += 1
             sponsor.save()
