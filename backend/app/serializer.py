@@ -91,3 +91,8 @@ class AppInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppInfo
         fields = '__all__'
+
+class MerchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Merch
+        fields = '__all__'
