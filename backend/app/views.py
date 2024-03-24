@@ -436,7 +436,7 @@ class ReportUser(APIView):
                   body=message,
                   to=['reported_content@wodkafis.ch'])
         #send_mail(subject, message, 'reported_content@wodkafis.ch', ['reported_content@wodkafis.ch'])
-        return Response({'success: User / Content has been reported'})
+        return Response({'success': 'User / Content has been reported'})
 
 class PushNotificationTokenView(APIView):
     def post(self,request):
@@ -783,3 +783,136 @@ class AddDonaitionMailView(APIView):
         except:
             return Response({'error': 'something went wrong'})
 
+class MerchViewSet(APIView):
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        seasons = Season.objects.all().order_by('-id')
+        data = []
+
+        for season in seasons:
+            season_items = season.seasonitem_set.all()
+            season_data = []
+            unique_season_items = []
+            for season_item in season_items:
+                # handle duplicate items in one season
+                item_image = re.findall('(?<=/media/battlepass/)(.*?)(?:_|\.png$)', season_item.image.url)[0]
+                if item_image not in unique_season_items:
+                    unique_season_items.append(item_image)
+                    merchs = season_item.merch_set.all()
+                    merch_data = []
+
+                    for merch in merchs:
+                        merch_data.append({
+                            'id': merch.id,
+                            'color': merch.color,
+                            'size': merch.size,
+                            'stock_amount': merch.stock_amount
+                        })
+
+                    season_data.append( {
+                        'item_image': season_item.image.url,
+                        'item_id': season_item.id,
+                        'merch_id': season_item.id,
+                        'merch': merch_data
+                    })
+
+            data.append({
+                "season_title": season.title,
+                'season_id': season.id,
+                'season_image': season.image.url,
+                'season_items': season_data})
+
+        unlocked_items = []
+        for item in UnlockedItems.objects.filter(distributed=False).values():
+            user = Profile.objects.get(id=item['user_id'])
+            season_item = SeasonItem.objects.get(id=item['item_id'])
+            id = season_item.id
+            # handle duplicate items in one season
+            item_image = re.findall('(?<=/media/battlepass/)(.*?)(?:_|\.png$)', season_item.image.url)[0]
+            for item in SeasonItem.objects.filter(season_id=season_item.season_id):
+                if item_image == re.findall('(?<=/media/battlepass/)(.*?)(?:_|\.png$)', item.image.url)[0]:
+                    season_item = item
+                    break
+
+            merch = season_item.merch_set.all()
+            available_merch = []
+            for m in merch:
+                if m.stock_amount>0:
+                    if m.size != "":
+                        available_merch.append(m.size)
+                    elif m.color != "":
+                        available_merch.append(m.color)
+                    else:
+                        available_merch.append("uni-size")
+                else:
+                    available_merch.append("NA")
+
+            season_item.merch_id = season_item.id
+            season_item.id = id
+            unlocked_items.append({
+                'user': {'first_name': user.first_name, 'last_name': user.last_name},
+                'item': {'id': season_item.id,
+                         'merch_id':season_item.merch_id,
+                         'image': season_item.image.url,
+                         "available_merch": available_merch}
+            })
+
+
+        return Response({'merch_data':data,
+                         'unlocked_items': unlocked_items
+                         })
+    def post(self, request):
+        try:
+            season = request.data['merch']
+            for season_item in season['season_items']:
+                merch_id = season_item['merch_id']
+                print(merch_id)
+                for merch_to_add in season_item['merch']:
+                    if merch_to_add['stock_amount'] != 0:
+                        merch,_ = Merch.objects.get_or_create(item_id=merch_id,color=merch_to_add['color'], size=merch_to_add['size'])
+                        merch.stock_amount += merch_to_add['stock_amount']
+                        merch.save()
+
+            return Response({'success': 'Merch has been added'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+
+class DistributeMerchViewSet(APIView):
+    permission_classes = [IsAdminUser]
+    def post(self, request):
+        try:
+            for distributed_mearch in request.data['merch']:
+                item = distributed_mearch['item']
+                item_id = item['item_id']
+                merch_id = item['merch_id']
+                merch_to_add = item['merch'][0]
+                if merch_to_add['stock_amount'] == -1:
+                    merch = Merch.objects.get(item_id=merch_id,
+                                              color=merch_to_add['color'],
+                                              size=merch_to_add['size'])
+                    merch.stock_amount += merch_to_add['stock_amount']
+                    merch.save()
+
+                    user_data = distributed_mearch['user']
+                    user = Profile.objects.get(first_name=user_data['first_name'],
+                                               last_name=user_data['last_name'])
+
+                    unlocked_item = UnlockedItems.objects.get(user_id=user.id, item_id=item_id)
+                    unlocked_item.distributed = True
+                    unlocked_item.save()
+
+            return Response({'success': 'Merch has been subtracted'})
+        except:
+            return Response({'error': 'something went wrong'})
+
+
+class RemoveAccountView(APIView):
+
+    def post(self,request):
+        try:
+            user = User.objects.get(username=request.data['username'])
+            user.delete()
+            return Response({'success': 'Account has been deleted'})
+        except:
+            return Response({'error': 'something went wrong'})

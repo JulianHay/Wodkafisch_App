@@ -37,6 +37,7 @@ urlpatterns = [
     path(r'contact', ContactView.as_view(), name='contact'),
     path(r'highscore', HighscoreView.as_view(), name='set_highscore'),
     path(r'donation-mail', AddDonaitionMailView.as_view(), name='donation-mail'),
+    path(r'remove-account', RemoveAccountView.as_view(), name='remove-account'),
 
     path(r'admin/new_season', NewSeasonView.as_view(), name='new_season'),
     path(r'admin/new_event', NewEventView.as_view(), name='new_event'),
@@ -44,6 +45,8 @@ urlpatterns = [
     path(r'admin/add_bonus', AddFischFlockenBonusView.as_view(), name='add_bonus'),
     path(r'admin/add_app_release', AddAppRelease.as_view(), name='add_app_release'),
     path(r'admin/user_list', UserViewSet.as_view({'get': 'list'}), name='user_list'),
+    path(r'admin/merch', MerchViewSet.as_view(), name='merch'),
+    path(r'admin/distribute_merch', DistributeMerchViewSet.as_view(), name='distribute_merch'),
 
     path(r'like_picture', PictureLikeView.as_view(), name='picture_like'),
     path(r'report_content', ReportUser.as_view(), name='report_content'),
