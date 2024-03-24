@@ -322,7 +322,7 @@ const MerchTableInput: React.FC<Props> = ({ season, onSave }) => {
           <table>
             <tbody>
               {seasonMerch.map((item, item_index) => (
-                <tr>
+                <tr key={item.item_id}>
                   <ColumnContainer
                     style={{
                       height: 52,
