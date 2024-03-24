@@ -26,7 +26,7 @@ interface Card extends Container {
 }
 
 interface FlexCard extends Card {
-  innerStyle: React.CSSProperties;
+  innerStyle?: React.CSSProperties;
 }
 
 interface TouchaleCard extends Card {
