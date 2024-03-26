@@ -26,11 +26,6 @@ const NavbarFisch = () => {
     (state: RootState) => state.user
   );
   const dispatch = useDispatch();
-  const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
-    useState(false);
-
-  const [error, setError] = useState("");
-  const [notification, setNotification] = useState("");
 
   return (
     <>
@@ -100,11 +95,7 @@ const NavbarFisch = () => {
                     Change Password
                   </NavDropdown.Item>
 
-                  <NavDropdown.Item
-                    onClick={() => {
-                      setIsDeleteAccountModalVisible(true);
-                    }}
-                  >
+                  <NavDropdown.Item href="/profile/delete-account">
                     Remove Account
                   </NavDropdown.Item>
                   <NavDropdown.Item
@@ -131,66 +122,6 @@ const NavbarFisch = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <Modal
-        isVisible={isDeleteAccountModalVisible}
-        onClose={() => {
-          setIsDeleteAccountModalVisible(false);
-        }}
-        style={{ width: "40%" }}
-      >
-        <Text text="Do you really want to delete your account?" />
-        <Button
-          text="Confirm"
-          type="secondary"
-          onPress={async () => {
-            const config = {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-            };
-            const body = {
-              username: username,
-            };
-            const res = await client.post("/remove-account", body, config);
-            if (res.data.success) {
-              setNotification("Successfully deleted your account.");
-              dispatch(
-                setUser({
-                  username: null,
-                  accessToken: null,
-                  isSignedIn: false,
-                  isAdmin: false,
-                })
-              );
-              setIsDeleteAccountModalVisible(false);
-              router.push("/");
-              router.refresh();
-            } else {
-              setError(
-                "An error occured while deleting your account. Please try again."
-              );
-            }
-          }}
-          style={{ borderColor: "white", color: "white", marginTop: 15 }}
-        />
-      </Modal>
-      {error && (
-        <ErrorMessage
-          message={error}
-          onClose={() => {
-            setError("");
-          }}
-        />
-      )}
-      {notification && (
-        <Notification
-          message={notification}
-          onClose={() => {
-            setNotification("");
-          }}
-        />
-      )}
     </>
   );
 };
