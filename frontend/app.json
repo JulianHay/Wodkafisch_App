@@ -42,7 +42,10 @@
         "googleMaps": {
           "apiKey": "AIzaSyDdecQFweuYKopW_i5U5QwoVstW-GPZqk4"
           }
-        }
+        },
+      "blockedPermissions": [
+        "FOREGROUND_SERVICE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/fisch.png"
